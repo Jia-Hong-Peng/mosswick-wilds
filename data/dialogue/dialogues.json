@@ -1,18 +1,18 @@
 {
 	"sign_town": {
 		"pages": [
-			{ "speaker": "Sign", "text": "Welcome to Mosswick — the little town where moss keeps time." }
+			{ "speaker": "告示牌", "text": "歡迎來到苔木鎮——青苔替時間打拍子的小鎮。" }
 		]
 	},
 	"sign_route": {
 		"pages": [
-			{ "speaker": "Sign", "text": "Fernway Path. Wild creatures live in the tall grass. Carry Snare Orbs!" }
+			{ "speaker": "告示牌", "text": "蕨徑。高草叢裡住著野生怪獸，記得帶上藤縛球！" }
 		]
 	},
 	"npc_bram": {
 		"pages": [
-			{ "speaker": "Bram", "text": "Mosswick sits right at the edge of the Fernway wilds." },
-			{ "speaker": "Bram", "text": "Folk here befriend wild creatures instead of fencing them out. Odd? Maybe. Cozy? Definitely." }
+			{ "speaker": "布蘭", "text": "苔木鎮就守在蕨徑荒野的邊上。" },
+			{ "speaker": "布蘭", "text": "這裡的人不築牆擋怪獸，反而跟牠們交朋友。奇怪嗎？也許吧。溫馨嗎？那當然。" }
 		]
 	},
 	"npc_alder": {
@@ -22,37 +22,37 @@
 				"set_flag": "met_alder",
 				"grant_items": { "snare_orb": 5 },
 				"pages": [
-					{ "speaker": "Dr. Alder", "text": "Ah, a new face! I study the wild creatures of Fernway Path." },
-					{ "speaker": "Dr. Alder", "text": "Step into tall grass and you may meet one. Weaken it in battle, then throw a Snare Orb to befriend it." },
-					{ "speaker": "Dr. Alder", "text": "Take these five Snare Orbs. Remember: your party holds three creatures at most." },
-					{ "speaker": "Dr. Alder", "text": "Press M any time to check your party, use items, or record your progress." }
+					{ "speaker": "艾德研究員", "text": "喔，生面孔！我在研究蕨徑的野生怪獸。" },
+					{ "speaker": "艾德研究員", "text": "走進高草叢就有機會遇到牠們。先在戰鬥中削弱對方，再丟出藤縛球就能收服。" },
+					{ "speaker": "艾德研究員", "text": "這五顆藤縛球送你。記住：隊伍最多只能帶三隻怪獸。" },
+					{ "speaker": "艾德研究員", "text": "隨時按 M 可以查看隊伍、使用道具，或記錄你的冒險進度。" }
 				]
 			},
 			{
 				"pages": [
-					{ "speaker": "Dr. Alder", "text": "Weaken a creature before you throw a Snare Orb. And rest at Ida's cottage when your team is tired." }
+					{ "speaker": "艾德研究員", "text": "丟藤縛球前先削弱對方。隊伍累了就去伊妲的小屋休息吧。" }
 				]
 			}
 		]
 	},
 	"npc_ida": {
 		"pages": [
-			{ "speaker": "Keeper Ida", "text": "Hello dear. Your creatures look a little weary." }
+			{ "speaker": "守屋人伊妲", "text": "哎呀，親愛的。你的夥伴們看起來有點疲憊呢。" }
 		],
 		"choice": {
-			"prompt": "Rest your party?",
+			"prompt": "要讓隊伍休息嗎？",
 			"options": [
 				{
-					"text": "Yes",
+					"text": "好",
 					"action": "heal_party",
 					"pages_after": [
-						{ "speaker": "Keeper Ida", "text": "There. Fresh as morning moss. Off you go!" }
+						{ "speaker": "守屋人伊妲", "text": "好了，像清晨的青苔一樣有精神。去吧！" }
 					]
 				},
 				{
-					"text": "No",
+					"text": "不用",
 					"pages_after": [
-						{ "speaker": "Keeper Ida", "text": "Suit yourself, dear. The kettle stays warm." }
+						{ "speaker": "守屋人伊妲", "text": "隨你囉，親愛的。茶壺會一直溫著的。" }
 					]
 				}
 			]

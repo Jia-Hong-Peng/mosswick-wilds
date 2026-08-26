@@ -1,18 +1,18 @@
 {
 	"berry_tonic": {
-		"display_name": "Berry Tonic",
+		"display_name": "莓果補劑",
 		"kind": "heal",
 		"amount": 25,
 		"usable_in_battle": true,
 		"usable_in_field": true,
-		"description": "A sweet tonic brewed from hedge berries. Restores 25 HP."
+		"description": "用籬邊莓果熬成的甜甜補劑，恢復 25 點 HP。"
 	},
 	"snare_orb": {
-		"display_name": "Snare Orb",
+		"display_name": "藤縛球",
 		"kind": "capture",
 		"amount": 0,
 		"usable_in_battle": true,
 		"usable_in_field": false,
-		"description": "A woven orb of springy vines. Throw it to befriend a weakened wild creature."
+		"description": "以有彈性的藤蔓編成的圓球，丟向虛弱的野生怪獸就能收服牠。"
 	}
 }

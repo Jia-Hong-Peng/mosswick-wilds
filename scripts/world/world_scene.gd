@@ -136,7 +136,7 @@ func _show_map_name(ui_layer: CanvasLayer) -> void:
 	var label := Label.new()
 	label.text = _map.display_name
 	label.position = Vector2(4, 3)
-	label.add_theme_font_size_override("font_size", 8)
+	label.add_theme_font_size_override("font_size", 10)
 	label.add_theme_color_override("font_color", Color.WHITE)
 	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 	label.add_theme_constant_override("shadow_offset_x", 1)

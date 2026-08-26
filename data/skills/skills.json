@@ -1,51 +1,51 @@
 {
 	"pounce": {
-		"display_name": "Pounce",
+		"display_name": "猛撲",
 		"element": "neutral",
 		"power": 35,
 		"accuracy": 1.0,
-		"description": "A quick leaping tackle. Reliable and simple."
+		"description": "迅速躍起撲向對手，簡單而可靠。"
 	},
 	"leaf_toss": {
-		"display_name": "Leaf Toss",
+		"display_name": "落葉飛擲",
 		"element": "bloom",
 		"power": 45,
 		"accuracy": 0.95,
-		"description": "Hurls a whirl of sharp leaves."
+		"description": "捲起銳利的落葉砸向對手。"
 	},
 	"spore_puff": {
-		"display_name": "Spore Puff",
+		"display_name": "孢子噴發",
 		"element": "bloom",
 		"power": 40,
 		"accuracy": 1.0,
-		"description": "A burst of stinging moss spores."
+		"description": "噴出一團刺癢的苔蘚孢子。"
 	},
 	"ash_flurry": {
-		"display_name": "Ash Flurry",
+		"display_name": "飛灰亂舞",
 		"element": "flame",
 		"power": 45,
 		"accuracy": 0.95,
-		"description": "Beats hot ash off its wings."
+		"description": "拍動翅膀灑下滾燙的灰燼。"
 	},
 	"wing_spark": {
-		"display_name": "Wing Spark",
+		"display_name": "翼尖火花",
 		"element": "flame",
 		"power": 40,
 		"accuracy": 1.0,
-		"description": "A glancing strike with glowing wingtips."
+		"description": "用發亮的翼尖擦出火花突襲。"
 	},
 	"bubble_jet": {
-		"display_name": "Bubble Jet",
+		"display_name": "泡沫噴流",
 		"element": "tide",
 		"power": 45,
 		"accuracy": 0.95,
-		"description": "A pressurized stream of pond water."
+		"description": "噴出一道高壓的池水泡沫。"
 	},
 	"tail_slap": {
-		"display_name": "Tail Slap",
+		"display_name": "尾鰭拍擊",
 		"element": "neutral",
 		"power": 40,
 		"accuracy": 1.0,
-		"description": "A springy slap with its tail fin."
+		"description": "用富有彈性的尾鰭用力拍打。"
 	}
 }

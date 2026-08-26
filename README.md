@@ -1,6 +1,6 @@
-# Mosswick Wilds
+# 苔木野林 Mosswick Wilds
 
-原創 2D 像素俯視角怪獸探索 RPG 的 **Vertical Slice（MVP）**。
+原創 2D 像素俯視角怪獸探索 RPG 的 **Vertical Slice（MVP）**，遊戲內文字為繁體中文。
 玩法借鑑 1990 年代掌機怪獸收集 RPG 的抽象機制（格狀移動、草叢遭遇、回合制戰鬥、
 捕捉、隊伍與道具、存檔），但世界觀、怪獸、地圖、對話、素材全部原創，
 不含任何受著作權保護的第三方內容。
@@ -121,14 +121,15 @@ res://
 
 - 無經驗值／升級／進化，無屬性相剋（僅同屬性技能加成）。
 - 無戰鬥動畫、無背景音樂（SFX 為程序化 beep）。
-- 遊戲文字為英文（Godot 預設字型不含 CJK；中文化需引入 OFL 字型如 Noto Sans TC）。
+- 中文字型內嵌 Noto Sans TC（SIL OFL 授權，`assets/fonts/`，約 12MB，Web 包體因此變大）；
+  像素風中文字型可後續替換。
 - 敵方 AI 為隨機選招；只有單一存檔欄位。
-- Windows Export Preset 已建立但未實測。
+- Windows Export Preset 已建立但未實測（本機僅安裝 Web export templates）。
 
 ## Roadmap（建議下一階段）
 
 1. 經驗值／升級與技能成長；戰鬥切換上場怪獸。
 2. 屬性相剋表（資料驅動）＋戰鬥動畫與音樂。
 3. 第四張地圖＋首領戰，串起最小劇情線。
-4. CJK 字型與 i18n（Godot translation csv）。
+4. i18n（Godot translation csv）與英文語系；像素風 CJK 字型。
 5. 存檔多欄位＋雲端（localStorage 之外的）備援。

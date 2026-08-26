@@ -1,8 +1,8 @@
 {
 	"peatpaw": {
 		"id": "peatpaw",
-		"display_name": "Peatpaw",
-		"description": "A moss-backed badger cub that naps in soft peat. Its claws always smell of fresh rain.",
+		"display_name": "苔掌獾",
+		"description": "背上長滿青苔的小獾，最愛窩在鬆軟的泥炭裡打盹，爪子總帶著雨後的青草味。",
 		"element": "bloom",
 		"base_stats": { "max_hp": 44, "attack": 11, "defense": 12, "speed": 9 },
 		"skills": ["pounce", "leaf_toss", "spore_puff"],
@@ -11,8 +11,8 @@
 	},
 	"cindermoth": {
 		"id": "cindermoth",
-		"display_name": "Cindermoth",
-		"description": "A dusk moth whose wings glow like embers. It circles chimneys on cold evenings.",
+		"display_name": "燼翅蛾",
+		"description": "翅膀如餘燼般發亮的暮色飛蛾，寒冷的夜晚會繞著煙囪打轉取暖。",
 		"element": "flame",
 		"base_stats": { "max_hp": 38, "attack": 13, "defense": 9, "speed": 13 },
 		"skills": ["pounce", "ash_flurry", "wing_spark"],
@@ -21,8 +21,8 @@
 	},
 	"drippole": {
 		"id": "drippole",
-		"display_name": "Drippole",
-		"description": "A cheerful pond-dweller shaped like a raindrop. It hums when the weather turns wet.",
+		"display_name": "露滴蝌",
+		"description": "外形像一顆大雨滴的開朗池塘住民，天氣轉濕時會開心地哼歌。",
 		"element": "tide",
 		"base_stats": { "max_hp": 42, "attack": 10, "defense": 11, "speed": 11 },
 		"skills": ["pounce", "bubble_jet", "tail_slap"],

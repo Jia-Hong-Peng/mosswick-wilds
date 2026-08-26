@@ -48,7 +48,8 @@ window/stretch/scale_mode="integer"
 
 [gui]
 
-theme/default_font_size=8
+theme/custom_font="res://assets/fonts/NotoSansTC.ttf"
+theme/default_font_size=10
 
 [input]
 

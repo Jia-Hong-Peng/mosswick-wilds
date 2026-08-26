@@ -21,7 +21,7 @@ func _rng(seed_value: int) -> RandomNumberGenerator:
 
 func _first_attack_message(events: Array[BattleService.BattleEvent]) -> String:
 	for event in events:
-		if event.kind == BattleService.EVENT_MESSAGE and event.text.contains(" used "):
+		if event.kind == BattleService.EVENT_MESSAGE and event.text.contains("使用了"):
 			return event.text
 	return ""
 

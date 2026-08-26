@@ -48,8 +48,8 @@ func _init(player_creature: CreatureInstance, enemy_creature: CreatureInstance, 
 
 func intro_events() -> Array[BattleEvent]:
 	var events: Array[BattleEvent] = []
-	events.append(BattleEvent.make(EVENT_MESSAGE, "A wild %s appeared!" % enemy.display_name))
-	events.append(BattleEvent.make(EVENT_MESSAGE, "Go, %s!" % player.display_name))
+	events.append(BattleEvent.make(EVENT_MESSAGE, "野生的%s出現了！" % enemy.display_name))
+	events.append(BattleEvent.make(EVENT_MESSAGE, "上吧，%s！" % player.display_name))
 	return events
 
 
@@ -87,7 +87,7 @@ static func capture_chance(rate: float, hp_ratio: float) -> float:
 
 func _resolve_combat_round(player_skill: SkillDef, events: Array[BattleEvent]) -> void:
 	if player_skill == null:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "%s hesitated!" % player.display_name))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "%s猶豫了！" % player.display_name))
 		_enemy_attack(events)
 		return
 	if player.speed >= enemy.speed:
@@ -105,34 +105,34 @@ func _resolve_combat_round(player_skill: SkillDef, events: Array[BattleEvent]) -
 
 func _resolve_item(item: ItemDef, events: Array[BattleEvent]) -> void:
 	if item == null or item.kind != ItemDef.KIND_HEAL:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "Nothing happened."))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "什麼都沒有發生。"))
 		return
 	events.append(BattleEvent.make(EVENT_CONSUME_ITEM, "", {"item_id": item.id}))
 	var healed := player.heal(item.amount)
 	events.append(_hp_event(EVENT_PLAYER_HP, player))
 	if healed > 0:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "%s restored %d HP with the %s!" % [player.display_name, healed, item.display_name]))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "%s用%s恢復了 %d HP！" % [player.display_name, item.display_name, healed]))
 	else:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "It had no effect..."))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "沒有效果……"))
 	_enemy_attack(events)
 	_check_knockouts(events)
 
 
 func _resolve_capture(item: ItemDef, party_full: bool, events: Array[BattleEvent]) -> void:
 	if item == null or item.kind != ItemDef.KIND_CAPTURE:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "Nothing happened."))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "什麼都沒有發生。"))
 		return
 	if party_full:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "Your party is full! The %s stays in your bag." % item.display_name))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "隊伍已滿！%s收回了背包。" % item.display_name))
 		return
 	events.append(BattleEvent.make(EVENT_CONSUME_ITEM, "", {"item_id": item.id}))
-	events.append(BattleEvent.make(EVENT_MESSAGE, "You threw a %s at %s!" % [item.display_name, enemy.display_name]))
+	events.append(BattleEvent.make(EVENT_MESSAGE, "你朝%s丟出了%s！" % [enemy.display_name, item.display_name]))
 	var chance := capture_chance(enemy.capture_rate, enemy.hp_ratio())
 	if _rng.randf() < chance:
 		outcome = Outcome.CAPTURED
-		events.append(BattleEvent.make(EVENT_CAPTURED, "%s was caught! It joined your party." % enemy.display_name))
+		events.append(BattleEvent.make(EVENT_CAPTURED, "收服了%s！牠加入了你的隊伍。" % enemy.display_name))
 	else:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "Oh no! %s broke free!" % enemy.display_name))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "哎呀！%s掙脫了！" % enemy.display_name))
 		_enemy_attack(events)
 		_check_knockouts(events)
 
@@ -142,9 +142,9 @@ func _resolve_flee(events: Array[BattleEvent]) -> void:
 	_flee_attempts += 1
 	if _rng.randf() < chance:
 		outcome = Outcome.FLED
-		events.append(BattleEvent.make(EVENT_MESSAGE, "You got away safely!"))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "成功逃走了！"))
 	else:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "You couldn't escape!"))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "沒能逃掉！"))
 		_enemy_attack(events)
 		_check_knockouts(events)
 
@@ -153,7 +153,7 @@ func _enemy_attack(events: Array[BattleEvent]) -> void:
 	if outcome != Outcome.ONGOING or enemy.is_fainted():
 		return
 	if _enemy_skills.is_empty():
-		events.append(BattleEvent.make(EVENT_MESSAGE, "%s is watching carefully." % enemy.display_name))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "%s警戒地觀察著。" % enemy.display_name))
 		return
 	var skill := _enemy_skills[_rng.randi_range(0, _enemy_skills.size() - 1)]
 	_perform_attack(enemy, player, skill, events)
@@ -161,14 +161,14 @@ func _enemy_attack(events: Array[BattleEvent]) -> void:
 
 
 func _perform_attack(attacker: CreatureInstance, defender: CreatureInstance, skill: SkillDef, events: Array[BattleEvent]) -> void:
-	events.append(BattleEvent.make(EVENT_MESSAGE, "%s used %s!" % [attacker.display_name, skill.display_name]))
+	events.append(BattleEvent.make(EVENT_MESSAGE, "%s使用了%s！" % [attacker.display_name, skill.display_name]))
 	if _rng.randf() > skill.accuracy:
-		events.append(BattleEvent.make(EVENT_MESSAGE, "But it missed!"))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "但是沒有命中！"))
 		return
 	var damage := DamageCalculator.compute(attacker, defender, skill, _rng)
 	defender.apply_damage(damage)
 	events.append(_hp_event(EVENT_ENEMY_HP if defender == enemy else EVENT_PLAYER_HP, defender))
-	events.append(BattleEvent.make(EVENT_MESSAGE, "It dealt %d damage!" % damage))
+	events.append(BattleEvent.make(EVENT_MESSAGE, "造成了 %d 點傷害！" % damage))
 
 
 ## Returns true when the battle just ended due to a knockout.
@@ -177,11 +177,11 @@ func _check_knockouts(events: Array[BattleEvent]) -> bool:
 		return true
 	if enemy.is_fainted():
 		outcome = Outcome.VICTORY
-		events.append(BattleEvent.make(EVENT_MESSAGE, "The wild %s fainted. You won!" % enemy.display_name))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "野生的%s倒下了。你贏了！" % enemy.display_name))
 		return true
 	if player.is_fainted():
 		outcome = Outcome.DEFEAT
-		events.append(BattleEvent.make(EVENT_MESSAGE, "%s fainted... You blacked out!" % player.display_name))
+		events.append(BattleEvent.make(EVENT_MESSAGE, "%s倒下了……你眼前一黑！" % player.display_name))
 		return true
 	return false
 

@@ -43,6 +43,8 @@
   新素材維持 16x16 tile 密度與一致色盤）。
 - Placeholder 由 `tools/generate_placeholders.gd` 產生；替換素材時保持
   相同路徑與尺寸即可，不要改程式。
+- 中文字型為 Noto Sans TC（SIL OFL 授權，授權檔 `assets/fonts/OFL.txt`）；
+  只能替換為同樣可自由散布授權的字型。
 
 ## 依賴與版控
 

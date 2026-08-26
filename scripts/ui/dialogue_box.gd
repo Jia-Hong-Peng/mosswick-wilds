@@ -48,6 +48,7 @@ func _process(_delta: float) -> void:
 func _on_page_shown(speaker: String, text: String) -> void:
 	_panel.visible = true
 	_choice_panel.visible = false
+	_more_label.visible = true
 	_name_label.visible = not speaker.is_empty()
 	_name_label.text = speaker
 	_text_label.text = text
@@ -55,6 +56,7 @@ func _on_page_shown(speaker: String, text: String) -> void:
 
 func _on_choice_shown(prompt: String, options: PackedStringArray) -> void:
 	_panel.visible = true
+	_more_label.visible = false
 	if not prompt.is_empty():
 		_text_label.text = prompt
 	for child in _choice_box.get_children():
@@ -63,7 +65,7 @@ func _on_choice_shown(prompt: String, options: PackedStringArray) -> void:
 	for option in options:
 		var label := Label.new()
 		label.text = option
-		label.add_theme_font_size_override("font_size", 8)
+		label.add_theme_font_size_override("font_size", 10)
 		_choice_box.add_child(label)
 	_choice_index = 0
 	_choice_panel.visible = true
@@ -73,6 +75,7 @@ func _on_choice_shown(prompt: String, options: PackedStringArray) -> void:
 func _on_finished() -> void:
 	_panel.visible = false
 	_choice_panel.visible = false
+	_more_label.visible = false
 
 
 func _refresh_choice_cursor() -> void:
@@ -87,8 +90,8 @@ func _refresh_choice_cursor() -> void:
 
 func _build_ui() -> void:
 	_panel = PanelContainer.new()
-	_panel.position = Vector2(4, 130)
-	_panel.size = Vector2(312, 46)
+	_panel.position = Vector2(4, 122)
+	_panel.size = Vector2(312, 54)
 	_panel.add_theme_stylebox_override("panel", make_box_style())
 	_panel.visible = false
 	add_child(_panel)
@@ -96,24 +99,25 @@ func _build_ui() -> void:
 	vbox.add_theme_constant_override("separation", 1)
 	_panel.add_child(vbox)
 	_name_label = Label.new()
-	_name_label.add_theme_font_size_override("font_size", 8)
+	_name_label.add_theme_font_size_override("font_size", 10)
 	_name_label.add_theme_color_override("font_color", Color("f2d27a"))
 	vbox.add_child(_name_label)
 	_text_label = Label.new()
-	_text_label.add_theme_font_size_override("font_size", 8)
+	_text_label.add_theme_font_size_override("font_size", 10)
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(_text_label)
 	_more_label = Label.new()
 	_more_label.text = "Z/Enter"
+	_more_label.position = Vector2(276, 166)
 	_more_label.add_theme_font_size_override("font_size", 8)
 	_more_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.45))
-	_more_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	vbox.add_child(_more_label)
+	add_child(_more_label)
+	_more_label.visible = false
 
 	_choice_panel = PanelContainer.new()
-	_choice_panel.position = Vector2(226, 88)
-	_choice_panel.size = Vector2(90, 38)
+	_choice_panel.position = Vector2(222, 78)
+	_choice_panel.size = Vector2(94, 42)
 	_choice_panel.add_theme_stylebox_override("panel", make_box_style())
 	_choice_panel.visible = false
 	add_child(_choice_panel)

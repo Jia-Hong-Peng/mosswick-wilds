@@ -73,7 +73,7 @@ func _current_rows() -> PackedStringArray:
 		View.BAG:
 			return _bag_rows()
 		_:
-			return PackedStringArray(["Party", "Bag", "Save", "Close"])
+			return PackedStringArray(["隊伍", "背包", "存檔", "關閉"])
 
 
 func _party_rows() -> PackedStringArray:
@@ -81,7 +81,7 @@ func _party_rows() -> PackedStringArray:
 	for member in PartyService.members:
 		rows.append("%s Lv%d  %d/%d" % [member.display_name, member.level, member.hp, member.max_hp])
 	if rows.is_empty():
-		rows.append("(no creatures)")
+		rows.append("（沒有夥伴）")
 	return rows
 
 
@@ -92,7 +92,7 @@ func _bag_rows() -> PackedStringArray:
 		var item_name := item.display_name if item != null else item_id
 		rows.append("%s x%d" % [item_name, InventoryService.count(item_id)])
 	if rows.is_empty():
-		rows.append("(empty)")
+		rows.append("（空空如也）")
 	return rows
 
 
@@ -130,19 +130,19 @@ func _use_bag_item() -> void:
 	if item == null:
 		return
 	if not item.usable_in_field:
-		_message_label.text = "%s can only be used in battle." % item.display_name
+		_message_label.text = "%s只能在戰鬥中使用。" % item.display_name
 		AudioManager.play_bump()
 		_refresh()
 		return
 	if PartyService.members.is_empty():
-		_message_label.text = "No creatures in your party."
+		_message_label.text = "隊伍中沒有夥伴。"
 		AudioManager.play_bump()
 		_refresh()
 		return
 	_selected_item_id = item.id
 	_view = View.TARGET
 	_cursor = 0
-	_message_label.text = "Use %s on which creature?" % item.display_name
+	_message_label.text = "要對哪隻夥伴使用%s？" % item.display_name
 	AudioManager.play_confirm()
 	_refresh()
 
@@ -156,14 +156,14 @@ func _apply_item_to_target() -> void:
 		_back()
 		return
 	if member.hp >= member.max_hp:
-		_message_label.text = "%s's HP is already full." % member.display_name
+		_message_label.text = "%s的 HP 已經全滿。" % member.display_name
 		AudioManager.play_bump()
 		_refresh()
 		return
 	var healed := member.heal(item.amount)
 	InventoryService.use_item(item.id)
 	AudioManager.play_fanfare()
-	_message_label.text = "%s restored %d HP." % [member.display_name, healed]
+	_message_label.text = "%s恢復了 %d HP。" % [member.display_name, healed]
 	if InventoryService.count(item.id) <= 0:
 		_view = View.BAG
 		_cursor = 0
@@ -172,10 +172,10 @@ func _apply_item_to_target() -> void:
 
 func _do_save() -> void:
 	if SaveService.save_game():
-		_message_label.text = "Progress saved."
+		_message_label.text = "已記錄冒險進度。"
 		AudioManager.play_fanfare()
 	else:
-		_message_label.text = "Save failed!"
+		_message_label.text = "存檔失敗！"
 		AudioManager.play_bump()
 	_refresh()
 
@@ -201,20 +201,20 @@ func _back() -> void:
 func _refresh() -> void:
 	match _view:
 		View.PARTY:
-			_title_label.text = "PARTY"
+			_title_label.text = "隊伍"
 		View.BAG:
-			_title_label.text = "BAG"
+			_title_label.text = "背包"
 		View.TARGET:
-			_title_label.text = "CHOOSE TARGET"
+			_title_label.text = "選擇對象"
 		_:
-			_title_label.text = "MENU"
+			_title_label.text = "選單"
 	for child in _rows_box.get_children():
 		child.queue_free()
 	var rows := _current_rows()
 	for i in range(rows.size()):
 		var label := Label.new()
 		label.text = ("> " if i == _cursor else "  ") + rows[i]
-		label.add_theme_font_size_override("font_size", 8)
+		label.add_theme_font_size_override("font_size", 10)
 		_rows_box.add_child(label)
 
 
@@ -228,7 +228,7 @@ func _build_ui() -> void:
 	vbox.add_theme_constant_override("separation", 2)
 	_panel.add_child(vbox)
 	_title_label = Label.new()
-	_title_label.add_theme_font_size_override("font_size", 8)
+	_title_label.add_theme_font_size_override("font_size", 10)
 	_title_label.add_theme_color_override("font_color", Color("f2d27a"))
 	vbox.add_child(_title_label)
 	_rows_box = VBoxContainer.new()
@@ -236,7 +236,7 @@ func _build_ui() -> void:
 	_rows_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(_rows_box)
 	_message_label = Label.new()
-	_message_label.add_theme_font_size_override("font_size", 8)
+	_message_label.add_theme_font_size_override("font_size", 10)
 	_message_label.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
 	_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(_message_label)

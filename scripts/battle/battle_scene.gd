@@ -95,7 +95,7 @@ func _menu_rows() -> PackedStringArray:
 				rows.append("%s x%d" % [item.display_name, InventoryService.count(item.id)])
 			return rows
 		_:
-			return PackedStringArray(["Fight", "Bag", "Catch", "Run"])
+			return PackedStringArray(["戰鬥", "背包", "捕捉", "逃跑"])
 
 
 func _battle_items() -> Array[ItemDef]:
@@ -118,7 +118,7 @@ func _activate() -> void:
 					_refresh_menu()
 				1:
 					if _battle_items().is_empty():
-						_flash_message("No usable items!")
+						_flash_message("沒有可用的道具！")
 					else:
 						AudioManager.play_confirm()
 						_view = View.ITEMS
@@ -147,7 +147,7 @@ func _activate() -> void:
 func _try_capture() -> void:
 	var orb := DataRegistry.get_item("snare_orb")
 	if orb == null or InventoryService.count(orb.id) <= 0:
-		_flash_message("No Snare Orbs left!")
+		_flash_message("藤縛球用完了！")
 		return
 	_do_capture_with(orb)
 
@@ -197,7 +197,7 @@ func _pump() -> void:
 		_view = View.COMMAND
 		_cursor = 0
 		_menu_panel.visible = true
-		_message_label.text = "What will %s do?" % _player.display_name
+		_message_label.text = "%s要做什麼？" % _player.display_name
 		_refresh_menu()
 	else:
 		_finish_battle()
@@ -219,7 +219,7 @@ func _refresh_menu() -> void:
 	for i in range(rows.size()):
 		var label := Label.new()
 		label.text = ("> " if i == _cursor else "  ") + rows[i]
-		label.add_theme_font_size_override("font_size", 8)
+		label.add_theme_font_size_override("font_size", 10)
 		_menu_box.add_child(label)
 
 
@@ -281,27 +281,27 @@ func _build_ui() -> void:
 	add_child(_player_hp_text)
 
 	var message_panel := PanelContainer.new()
-	message_panel.position = Vector2(4, 130)
-	message_panel.size = Vector2(312, 46)
+	message_panel.position = Vector2(4, 126)
+	message_panel.size = Vector2(312, 50)
 	message_panel.add_theme_stylebox_override("panel", DialogueBoxScript.make_box_style())
 	add_child(message_panel)
 	var message_box := VBoxContainer.new()
 	message_panel.add_child(message_box)
 	_message_label = Label.new()
-	_message_label.add_theme_font_size_override("font_size", 8)
+	_message_label.add_theme_font_size_override("font_size", 10)
 	_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_message_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	message_box.add_child(_message_label)
 	_more_label = Label.new()
 	_more_label.text = "Z/Enter"
+	_more_label.position = Vector2(276, 166)
 	_more_label.add_theme_font_size_override("font_size", 8)
 	_more_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.45))
-	_more_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	message_box.add_child(_more_label)
+	add_child(_more_label)
 
 	_menu_panel = PanelContainer.new()
-	_menu_panel.position = Vector2(212, 74)
-	_menu_panel.size = Vector2(104, 52)
+	_menu_panel.position = Vector2(204, 56)
+	_menu_panel.size = Vector2(112, 66)
 	_menu_panel.add_theme_stylebox_override("panel", DialogueBoxScript.make_box_style())
 	_menu_panel.visible = false
 	add_child(_menu_panel)
@@ -317,7 +317,7 @@ func _info_panel(at: Vector2) -> Label:
 	panel.add_theme_stylebox_override("panel", DialogueBoxScript.make_box_style())
 	add_child(panel)
 	var label := Label.new()
-	label.add_theme_font_size_override("font_size", 8)
+	label.add_theme_font_size_override("font_size", 10)
 	panel.add_child(label)
 	return label
 
