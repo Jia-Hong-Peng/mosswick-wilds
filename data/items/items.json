@@ -1,0 +1,18 @@
+{
+	"berry_tonic": {
+		"display_name": "Berry Tonic",
+		"kind": "heal",
+		"amount": 25,
+		"usable_in_battle": true,
+		"usable_in_field": true,
+		"description": "A sweet tonic brewed from hedge berries. Restores 25 HP."
+	},
+	"snare_orb": {
+		"display_name": "Snare Orb",
+		"kind": "capture",
+		"amount": 0,
+		"usable_in_battle": true,
+		"usable_in_field": false,
+		"description": "A woven orb of springy vines. Throw it to befriend a weakened wild creature."
+	}
+}

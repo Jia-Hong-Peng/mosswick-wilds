@@ -1,0 +1,21 @@
+{
+	"display_name": "Keeper's Cottage",
+	"grid": [
+		"IIIIIIIII",
+		"IFFFFFFFI",
+		"IFFFFFFFI",
+		"IFFFFFFFI",
+		"IFFFFFFFI",
+		"IFFFMFFFI",
+		"IIIIIIIII"
+	],
+	"spawn": { "x": 4, "y": 4, "facing": "up" },
+	"warps": [
+		{ "x": 4, "y": 5, "target_map": "town", "target_x": 4, "target_y": 5, "facing": "down" }
+	],
+	"signs": [],
+	"npcs": [
+		{ "id": "ida", "x": 4, "y": 2, "sprite": "res://assets/characters/npc_ida.png", "facing": "down", "dialogue_id": "npc_ida" }
+	],
+	"encounter_key": ""
+}

@@ -1,0 +1,8 @@
+# Godot internal cache — never commit
+.godot/
+
+# Build output
+build/
+
+# Temporary files
+*.tmp

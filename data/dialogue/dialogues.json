@@ -1,0 +1,61 @@
+{
+	"sign_town": {
+		"pages": [
+			{ "speaker": "Sign", "text": "Welcome to Mosswick — the little town where moss keeps time." }
+		]
+	},
+	"sign_route": {
+		"pages": [
+			{ "speaker": "Sign", "text": "Fernway Path. Wild creatures live in the tall grass. Carry Snare Orbs!" }
+		]
+	},
+	"npc_bram": {
+		"pages": [
+			{ "speaker": "Bram", "text": "Mosswick sits right at the edge of the Fernway wilds." },
+			{ "speaker": "Bram", "text": "Folk here befriend wild creatures instead of fencing them out. Odd? Maybe. Cozy? Definitely." }
+		]
+	},
+	"npc_alder": {
+		"variants": [
+			{
+				"if_flag_not": "met_alder",
+				"set_flag": "met_alder",
+				"grant_items": { "snare_orb": 5 },
+				"pages": [
+					{ "speaker": "Dr. Alder", "text": "Ah, a new face! I study the wild creatures of Fernway Path." },
+					{ "speaker": "Dr. Alder", "text": "Step into tall grass and you may meet one. Weaken it in battle, then throw a Snare Orb to befriend it." },
+					{ "speaker": "Dr. Alder", "text": "Take these five Snare Orbs. Remember: your party holds three creatures at most." },
+					{ "speaker": "Dr. Alder", "text": "Press M any time to check your party, use items, or record your progress." }
+				]
+			},
+			{
+				"pages": [
+					{ "speaker": "Dr. Alder", "text": "Weaken a creature before you throw a Snare Orb. And rest at Ida's cottage when your team is tired." }
+				]
+			}
+		]
+	},
+	"npc_ida": {
+		"pages": [
+			{ "speaker": "Keeper Ida", "text": "Hello dear. Your creatures look a little weary." }
+		],
+		"choice": {
+			"prompt": "Rest your party?",
+			"options": [
+				{
+					"text": "Yes",
+					"action": "heal_party",
+					"pages_after": [
+						{ "speaker": "Keeper Ida", "text": "There. Fresh as morning moss. Off you go!" }
+					]
+				},
+				{
+					"text": "No",
+					"pages_after": [
+						{ "speaker": "Keeper Ida", "text": "Suit yourself, dear. The kettle stays warm." }
+					]
+				}
+			]
+		}
+	}
+}

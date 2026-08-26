@@ -1,0 +1,10 @@
+{
+	"fernway": {
+		"rate": 0.14,
+		"entries": [
+			{ "creature_id": "cindermoth", "weight": 40, "min_level": 3, "max_level": 5 },
+			{ "creature_id": "drippole", "weight": 40, "min_level": 3, "max_level": 5 },
+			{ "creature_id": "peatpaw", "weight": 20, "min_level": 4, "max_level": 6 }
+		]
+	}
+}

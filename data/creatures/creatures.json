@@ -1,0 +1,32 @@
+{
+	"peatpaw": {
+		"id": "peatpaw",
+		"display_name": "Peatpaw",
+		"description": "A moss-backed badger cub that naps in soft peat. Its claws always smell of fresh rain.",
+		"element": "bloom",
+		"base_stats": { "max_hp": 44, "attack": 11, "defense": 12, "speed": 9 },
+		"skills": ["pounce", "leaf_toss", "spore_puff"],
+		"capture_rate": 0.45,
+		"sprite_path": "res://assets/creatures/peatpaw.png"
+	},
+	"cindermoth": {
+		"id": "cindermoth",
+		"display_name": "Cindermoth",
+		"description": "A dusk moth whose wings glow like embers. It circles chimneys on cold evenings.",
+		"element": "flame",
+		"base_stats": { "max_hp": 38, "attack": 13, "defense": 9, "speed": 13 },
+		"skills": ["pounce", "ash_flurry", "wing_spark"],
+		"capture_rate": 0.4,
+		"sprite_path": "res://assets/creatures/cindermoth.png"
+	},
+	"drippole": {
+		"id": "drippole",
+		"display_name": "Drippole",
+		"description": "A cheerful pond-dweller shaped like a raindrop. It hums when the weather turns wet.",
+		"element": "tide",
+		"base_stats": { "max_hp": 42, "attack": 10, "defense": 11, "speed": 11 },
+		"skills": ["pounce", "bubble_jet", "tail_slap"],
+		"capture_rate": 0.5,
+		"sprite_path": "res://assets/creatures/drippole.png"
+	}
+}

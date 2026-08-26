@@ -1,0 +1,51 @@
+{
+	"pounce": {
+		"display_name": "Pounce",
+		"element": "neutral",
+		"power": 35,
+		"accuracy": 1.0,
+		"description": "A quick leaping tackle. Reliable and simple."
+	},
+	"leaf_toss": {
+		"display_name": "Leaf Toss",
+		"element": "bloom",
+		"power": 45,
+		"accuracy": 0.95,
+		"description": "Hurls a whirl of sharp leaves."
+	},
+	"spore_puff": {
+		"display_name": "Spore Puff",
+		"element": "bloom",
+		"power": 40,
+		"accuracy": 1.0,
+		"description": "A burst of stinging moss spores."
+	},
+	"ash_flurry": {
+		"display_name": "Ash Flurry",
+		"element": "flame",
+		"power": 45,
+		"accuracy": 0.95,
+		"description": "Beats hot ash off its wings."
+	},
+	"wing_spark": {
+		"display_name": "Wing Spark",
+		"element": "flame",
+		"power": 40,
+		"accuracy": 1.0,
+		"description": "A glancing strike with glowing wingtips."
+	},
+	"bubble_jet": {
+		"display_name": "Bubble Jet",
+		"element": "tide",
+		"power": 45,
+		"accuracy": 0.95,
+		"description": "A pressurized stream of pond water."
+	},
+	"tail_slap": {
+		"display_name": "Tail Slap",
+		"element": "neutral",
+		"power": 40,
+		"accuracy": 1.0,
+		"description": "A springy slap with its tail fin."
+	}
+}
