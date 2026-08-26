@@ -1,6 +1,8 @@
-# AGENTS.md — Mosswick Wilds
+# AGENTS.md — 潮霧群島 Tidemist Isles
 
 給所有 AI coding agent 與貢獻者的固定規則。修改本專案前先讀完。
+世界觀與美術的最終依據：`docs/world-bible.md`、`docs/art-bible.md`、
+`docs/palette.md`、`docs/ui-system.md`——內容衝突時以文件為準，要改先改文件。
 
 ## 引擎與語言
 
@@ -39,12 +41,13 @@
 
 - **不使用受著作權保護的第三方遊戲素材**（名稱、圖像、音樂、資料皆同）。
   尤其不得引用任何 Pokémon／寶可夢內容。
-- 所有像素素材關閉 Filtering（專案已設 default_texture_filter=Nearest，
-  新素材維持 16x16 tile 密度與一致色盤）。
-- Placeholder 由 `tools/generate_placeholders.gd` 產生；替換素材時保持
-  相同路徑與尺寸即可，不要改程式。
-- 中文字型為 Noto Sans TC（SIL OFL 授權，授權檔 `assets/fonts/OFL.txt`）；
-  只能替換為同樣可自由散布授權的字型。
+- 所有像素素材關閉 Filtering（default_texture_filter=Nearest、無 mipmaps），
+  16px tile 密度、**全域 40 色色盤**（docs/palette.md）以外的顏色禁止使用。
+- 素材由 `tools/generate_assets.gd`＋`tools/pixgen/*` 產生；狀態與替換規則
+  見 `docs/asset-manifest.md`（同路徑同尺寸覆蓋即生效，不改程式）。
+- 圖集佈局唯一依據：`scripts/world/tile_catalog.gd`；改佈局要同步產生器與目錄。
+- 中文字型為 Fusion Pixel 12px（SIL OFL，授權檔 `assets/fonts/OFL-fusion-pixel.txt`）；
+  只能替換為同樣可自由散布授權的字型；UI 字型關閉 AA 與 subpixel。
 
 ## 依賴與版控
 

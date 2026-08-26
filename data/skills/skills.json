@@ -1,51 +1,51 @@
 {
-	"pounce": {
-		"display_name": "猛撲",
+	"tackle": {
+		"display_name": "衝撞",
 		"element": "neutral",
 		"power": 35,
 		"accuracy": 1.0,
-		"description": "迅速躍起撲向對手，簡單而可靠。"
+		"description": "壓低重心撞上去，樸實可靠。"
 	},
-	"leaf_toss": {
-		"display_name": "落葉飛擲",
-		"element": "bloom",
+	"moss_burst": {
+		"display_name": "苔絮爆",
+		"element": "forest",
 		"power": 45,
 		"accuracy": 0.95,
-		"description": "捲起銳利的落葉砸向對手。"
+		"description": "抖開背上的厚苔，炸出一團帶雨氣的孢絮。"
 	},
-	"spore_puff": {
-		"display_name": "孢子噴發",
-		"element": "bloom",
-		"power": 40,
-		"accuracy": 1.0,
-		"description": "噴出一團刺癢的苔蘚孢子。"
-	},
-	"ash_flurry": {
-		"display_name": "飛灰亂舞",
-		"element": "flame",
-		"power": 45,
-		"accuracy": 0.95,
-		"description": "拍動翅膀灑下滾燙的灰燼。"
-	},
-	"wing_spark": {
-		"display_name": "翼尖火花",
-		"element": "flame",
-		"power": 40,
-		"accuracy": 1.0,
-		"description": "用發亮的翼尖擦出火花突襲。"
-	},
-	"bubble_jet": {
-		"display_name": "泡沫噴流",
-		"element": "tide",
-		"power": 45,
-		"accuracy": 0.95,
-		"description": "噴出一道高壓的池水泡沫。"
-	},
-	"tail_slap": {
-		"display_name": "尾鰭拍擊",
+	"horn_jab": {
+		"display_name": "幼角突刺",
 		"element": "neutral",
 		"power": 40,
 		"accuracy": 1.0,
-		"description": "用富有彈性的尾鰭用力拍打。"
+		"description": "用蕨芽般的幼角迅速一挑。"
+	},
+	"tide_dive": {
+		"display_name": "潮汐俯衝",
+		"element": "tide",
+		"power": 45,
+		"accuracy": 0.95,
+		"description": "貼著浪線俯衝，翼緣捲起一道水沫。"
+	},
+	"wing_snap": {
+		"display_name": "翼擊",
+		"element": "neutral",
+		"power": 40,
+		"accuracy": 1.0,
+		"description": "側身用翼骨俐落地拍打。"
+	},
+	"static_pulse": {
+		"display_name": "靜電脈衝",
+		"element": "signal",
+		"power": 45,
+		"accuracy": 0.95,
+		"description": "天線鬚放出一圈細碎的靜電雜訊。"
+	},
+	"shell_ram": {
+		"display_name": "殼衝",
+		"element": "neutral",
+		"power": 40,
+		"accuracy": 1.0,
+		"description": "縮進殼裡整顆撞過去。"
 	}
 }

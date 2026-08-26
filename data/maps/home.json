@@ -1,0 +1,47 @@
+{
+	"display_name": "玩家住所",
+	"battle_bg": "village",
+	"encounter_key": "",
+	"fog": false,
+	"legend_ground": {
+		"k": "wall_plank_top", "W": "wall_plank", "N": "window_in",
+		"u": "wood_floor_a", "U": "wood_floor_b",
+		"R": "rug", "m": "rug_border"
+	},
+	"legend_deco": {
+		"H": "bed_head", "h": "bed_foot", "t": "table", "C": "chair",
+		"B": "bookshelf", "K": "counter", "S": "stove",
+		"L": "lamp_floor", "o": "plant_pot"
+	},
+	"legend_overhead": {},
+	"ground": [
+		"kkkkkkkkkkk",
+		"kWNWWNWWWWk",
+		"kuUuuUuuUuk",
+		"kUuuuuUuuuk",
+		"kuuRRuuUuuk",
+		"kUuuuuuuUuk",
+		"kuuuumuuUuk",
+		"kkkkkkkkkkk"
+	],
+	"deco": [
+		"...........",
+		"...........",
+		".H..B..KSo.",
+		".h...tC....",
+		"...........",
+		".........L.",
+		"...........",
+		"..........."
+	],
+	"overhead": [],
+	"spawn": { "x": 5, "y": 5, "facing": "up" },
+	"warps": [
+		{ "x": 5, "y": 6, "target_map": "harbor", "target_x": 3, "target_y": 6, "facing": "down" }
+	],
+	"signs": [
+		{ "x": 1, "y": 2, "dialogue_id": "point_bed" },
+		{ "x": 4, "y": 2, "dialogue_id": "point_books" }
+	],
+	"npcs": []
+}

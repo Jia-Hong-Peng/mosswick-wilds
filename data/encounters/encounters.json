@@ -1,10 +1,10 @@
 {
-	"fernway": {
+	"trail_wilds": {
 		"rate": 0.14,
 		"entries": [
-			{ "creature_id": "cindermoth", "weight": 40, "min_level": 3, "max_level": 5 },
-			{ "creature_id": "drippole", "weight": 40, "min_level": 3, "max_level": 5 },
-			{ "creature_id": "peatpaw", "weight": 20, "min_level": 4, "max_level": 6 }
+			{ "creature_id": "tidewing", "weight": 40, "min_level": 3, "max_level": 5 },
+			{ "creature_id": "mosshorn", "weight": 35, "min_level": 3, "max_level": 5 },
+			{ "creature_id": "magshell", "weight": 25, "min_level": 4, "max_level": 6 }
 		]
 	}
 }

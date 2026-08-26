@@ -1,8 +1,6 @@
 extends Control
-## Title screen: New Game / Continue (only with an existing save) / volume
-## setting, plus keyboard and touch control hints.
-
-const DialogueBoxScript := preload("res://scripts/ui/dialogue_box.gd")
+## 標題畫面：分層港村黃昏背景＋手冊風選單。
+## 新的觀測／繼續觀測（無存檔時停用）／音量。
 
 const MENU_NEW_GAME := 0
 const MENU_CONTINUE := 1
@@ -11,7 +9,7 @@ const MENU_COUNT := 3
 
 var _cursor := 0
 var _has_save := false
-var _menu_labels: Array[Label] = []
+var _rows: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -26,9 +24,11 @@ func _process(_delta: float) -> void:
 		return
 	if Input.is_action_just_pressed("move_up"):
 		_cursor = (_cursor - 1 + MENU_COUNT) % MENU_COUNT
+		AudioManager.play_talk()
 		_refresh()
 	elif Input.is_action_just_pressed("move_down"):
 		_cursor = (_cursor + 1) % MENU_COUNT
+		AudioManager.play_talk()
 		_refresh()
 	elif Input.is_action_just_pressed("move_left") and _cursor == MENU_VOLUME:
 		AudioManager.set_master_volume(AudioManager.master_volume - 0.1)
@@ -61,87 +61,83 @@ func _activate() -> void:
 func _refresh() -> void:
 	var volume_percent := int(roundf(AudioManager.master_volume * 100.0))
 	var texts: Array[String] = [
-		"新遊戲",
-		"繼續冒險",
-		"音量  < %d%% >" % volume_percent,
+		"新的觀測",
+		"繼續觀測",
+		"音量　◂ %d%% ▸" % volume_percent,
 	]
-	for i in range(_menu_labels.size()):
-		var prefix := "> " if i == _cursor else "  "
-		_menu_labels[i].text = prefix + texts[i]
-		var color := Color.WHITE
+	for i in range(_rows.size()):
+		var row := _rows[i]
+		(row["label"] as Label).text = texts[i]
 		if i == MENU_CONTINUE and not _has_save:
-			color = Color(1, 1, 1, 0.35)
-		elif i != _cursor:
-			color = Color(1, 1, 1, 0.75)
-		_menu_labels[i].add_theme_color_override("font_color", color)
+			UiTheme.set_row_state(row, "disabled")
+		else:
+			UiTheme.set_row_state(row, "focus" if i == _cursor else "normal")
 
 
 func _build_ui() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
-	var bg := ColorRect.new()
-	bg.color = Color(0.09, 0.14, 0.11)
+	var bg := TextureRect.new()
+	bg.texture = load("res://assets/ui/title_bg.png")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 
+	# 標題：靠左置於海霧上方，避開右側村落剪影
 	var title := Label.new()
-	title.text = "苔木野林"
-	title.position = Vector2(0, 18)
-	title.size = Vector2(320, 24)
+	title.text = "潮 霧 群 島"
+	title.position = Vector2(0, 20)
+	title.size = Vector2(220, 26)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 18)
-	title.add_theme_color_override("font_color", Color("bfe3a8"))
+	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", Pal.NIGHT)
+	title.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.FOG, 0.9))
+	title.add_theme_constant_override("shadow_offset_x", 1)
+	title.add_theme_constant_override("shadow_offset_y", 1)
 	add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "Mosswick Wilds · 迷你怪獸收服冒險"
-	subtitle.position = Vector2(0, 42)
-	subtitle.size = Vector2(320, 12)
+	subtitle.text = "TIDEMIST ISLES ── 霧港村的回聲觀測"
+	subtitle.position = Vector2(0, 46)
+	subtitle.size = Vector2(220, 14)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 10)
-	subtitle.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
+	subtitle.add_theme_font_size_override("font_size", 12)
+	subtitle.add_theme_color_override("font_color", Pal.SLATE)
+	subtitle.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.FOG, 0.85))
+	subtitle.add_theme_constant_override("shadow_offset_x", 1)
+	subtitle.add_theme_constant_override("shadow_offset_y", 1)
 	add_child(subtitle)
 
-	var creature_paths: Array[String] = [
-		"res://assets/creatures/peatpaw.png",
-		"res://assets/creatures/cindermoth.png",
-		"res://assets/creatures/drippole.png",
-	]
-	for i in range(creature_paths.size()):
-		var portrait := TextureRect.new()
-		portrait.texture = load(creature_paths[i])
-		portrait.position = Vector2(112 + i * 34, 58)
-		portrait.size = Vector2(32, 32)
-		add_child(portrait)
-
+	# 選單：手冊面板（左下，避開右側村落剪影）
+	var panel := PanelContainer.new()
+	panel.position = Vector2(20, 88)
+	panel.custom_minimum_size = Vector2(128, 0)
+	panel.add_theme_stylebox_override("panel", UiTheme.panel_style())
+	add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	panel.add_child(box)
 	for i in range(MENU_COUNT):
-		var label := Label.new()
-		label.position = Vector2(118, 100 + i * 14)
-		label.size = Vector2(200, 12)
-		label.add_theme_font_size_override("font_size", 10)
-		add_child(label)
-		_menu_labels.append(label)
+		var row := UiTheme.make_row("", null)
+		box.add_child(row["panel"])
+		_rows.append(row)
 
+	# 操作提示（底部儀器色帶）
+	var hint_panel := PanelContainer.new()
+	hint_panel.position = Vector2(0, 162)
+	hint_panel.size = Vector2(320, 18)
+	var hint_style := UiTheme.dark_panel_style()
+	hint_style.set_content_margin_all(2)
+	hint_panel.add_theme_stylebox_override("panel", hint_style)
+	add_child(hint_panel)
 	var hints := Label.new()
-	hints.text = "方向鍵/WASD 移動 · Z/Enter 確認 · X/Esc 取消 · M 選單"
-	hints.position = Vector2(0, 154)
-	hints.size = Vector2(320, 12)
+	hints.text = "方向鍵/WASD 移動　Z/Enter 確認　X/Esc 取消　M 選單"
 	hints.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hints.add_theme_font_size_override("font_size", 9)
-	hints.add_theme_color_override("font_color", Color(1, 1, 1, 0.5))
-	add_child(hints)
-
-	var hints2 := Label.new()
-	hints2.text = "觸控裝置：螢幕方向鍵＋按鈕"
-	hints2.position = Vector2(0, 166)
-	hints2.size = Vector2(320, 12)
-	hints2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hints2.add_theme_font_size_override("font_size", 9)
-	hints2.add_theme_color_override("font_color", Color(1, 1, 1, 0.35))
-	add_child(hints2)
+	hints.add_theme_font_size_override("font_size", 12)
+	hints.add_theme_color_override("font_color", Pal.MIST_LT)
+	hint_panel.add_child(hints)
 
 	var version := Label.new()
-	version.text = "v%s" % String(ProjectSettings.get_setting("application/config/version", "0.1.0"))
-	version.position = Vector2(288, 4)
-	version.add_theme_font_size_override("font_size", 8)
-	version.add_theme_color_override("font_color", Color(1, 1, 1, 0.3))
+	version.text = "v%s" % String(ProjectSettings.get_setting("application/config/version", "0.2.0"))
+	version.position = Vector2(284, 4)
+	version.add_theme_font_size_override("font_size", 12)
+	version.add_theme_color_override("font_color", Pal.alpha(Pal.NIGHT, 0.6))
 	add_child(version)

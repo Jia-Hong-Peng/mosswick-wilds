@@ -109,7 +109,9 @@ func _resolve_item(item: ItemDef, events: Array[BattleEvent]) -> void:
 		return
 	events.append(BattleEvent.make(EVENT_CONSUME_ITEM, "", {"item_id": item.id}))
 	var healed := player.heal(item.amount)
-	events.append(_hp_event(EVENT_PLAYER_HP, player))
+	var hp_event := _hp_event(EVENT_PLAYER_HP, player)
+	hp_event.data["healed"] = healed
+	events.append(hp_event)
 	if healed > 0:
 		events.append(BattleEvent.make(EVENT_MESSAGE, "%s用%s恢復了 %d HP！" % [player.display_name, item.display_name, healed]))
 	else:
@@ -161,13 +163,16 @@ func _enemy_attack(events: Array[BattleEvent]) -> void:
 
 
 func _perform_attack(attacker: CreatureInstance, defender: CreatureInstance, skill: SkillDef, events: Array[BattleEvent]) -> void:
-	events.append(BattleEvent.make(EVENT_MESSAGE, "%s使用了%s！" % [attacker.display_name, skill.display_name]))
+	var attacker_side := "player" if attacker == player else "enemy"
+	events.append(BattleEvent.make(EVENT_MESSAGE, "%s使用了%s！" % [attacker.display_name, skill.display_name], {"attacker": attacker_side}))
 	if _rng.randf() > skill.accuracy:
 		events.append(BattleEvent.make(EVENT_MESSAGE, "但是沒有命中！"))
 		return
 	var damage := DamageCalculator.compute(attacker, defender, skill, _rng)
 	defender.apply_damage(damage)
-	events.append(_hp_event(EVENT_ENEMY_HP if defender == enemy else EVENT_PLAYER_HP, defender))
+	var hp_event := _hp_event(EVENT_ENEMY_HP if defender == enemy else EVENT_PLAYER_HP, defender)
+	hp_event.data["damage"] = damage
+	events.append(hp_event)
 	events.append(BattleEvent.make(EVENT_MESSAGE, "造成了 %d 點傷害！" % damage))
 
 

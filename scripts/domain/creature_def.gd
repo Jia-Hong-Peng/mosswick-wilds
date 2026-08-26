@@ -10,6 +10,9 @@ var base_stats: Dictionary = {}
 var skill_ids: Array[String] = []
 var capture_rate: float = 0.3
 var sprite_path: String = ""
+var back_path: String = ""
+var hit_path: String = ""
+var icon_path: String = ""
 
 
 static func from_dict(data: Dictionary) -> CreatureDef:
@@ -23,6 +26,9 @@ static func from_dict(data: Dictionary) -> CreatureDef:
 		def.skill_ids.append(String(skill_id))
 	def.capture_rate = float(data.get("capture_rate", 0.3))
 	def.sprite_path = String(data.get("sprite_path", ""))
+	def.back_path = String(data.get("back_path", def.sprite_path))
+	def.hit_path = String(data.get("hit_path", def.sprite_path))
+	def.icon_path = String(data.get("icon_path", def.sprite_path))
 	return def
 
 

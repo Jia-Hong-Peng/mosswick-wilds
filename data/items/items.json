@@ -1,18 +1,20 @@
 {
-	"berry_tonic": {
-		"display_name": "莓果補劑",
+	"herbal_balm": {
+		"display_name": "青草膏",
 		"kind": "heal",
 		"amount": 25,
 		"usable_in_battle": true,
 		"usable_in_field": true,
-		"description": "用籬邊莓果熬成的甜甜補劑，恢復 25 點 HP。"
+		"description": "阿海伯店裡的萬用青草膏，島上人家一罐傳三代。恢復 25 點 HP。",
+		"icon_path": "res://assets/ui/item_herbal_balm.png"
 	},
-	"snare_orb": {
-		"display_name": "藤縛球",
+	"echo_box": {
+		"display_name": "共鳴匣",
 		"kind": "capture",
 		"amount": 0,
 		"usable_in_battle": true,
 		"usable_in_field": false,
-		"description": "以有彈性的藤蔓編成的圓球，丟向虛弱的野生怪獸就能收服牠。"
+		"description": "觀測所配發的黃銅錄音匣。對放下戒心的迴靈錄下牠的回聲，牠會跟著回聲同行。",
+		"icon_path": "res://assets/ui/item_echo_box.png"
 	}
 }

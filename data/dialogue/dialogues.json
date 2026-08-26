@@ -1,61 +1,150 @@
 {
-	"sign_town": {
-		"pages": [
-			{ "speaker": "告示牌", "text": "歡迎來到苔木鎮——青苔替時間打拍子的小鎮。" }
-		]
-	},
-	"sign_route": {
-		"pages": [
-			{ "speaker": "告示牌", "text": "蕨徑。高草叢裡住著野生怪獸，記得帶上藤縛球！" }
-		]
-	},
-	"npc_bram": {
-		"pages": [
-			{ "speaker": "布蘭", "text": "苔木鎮就守在蕨徑荒野的邊上。" },
-			{ "speaker": "布蘭", "text": "這裡的人不築牆擋怪獸，反而跟牠們交朋友。奇怪嗎？也許吧。溫馨嗎？那當然。" }
-		]
-	},
-	"npc_alder": {
+	"npc_rei": {
 		"variants": [
 			{
-				"if_flag_not": "met_alder",
-				"set_flag": "met_alder",
-				"grant_items": { "snare_orb": 5 },
+				"if_flag_not": "met_rei",
+				"set_flag": "met_rei",
+				"grant_items": { "echo_box": 5 },
 				"pages": [
-					{ "speaker": "艾德研究員", "text": "喔，生面孔！我在研究蕨徑的野生怪獸。" },
-					{ "speaker": "艾德研究員", "text": "走進高草叢就有機會遇到牠們。先在戰鬥中削弱對方，再丟出藤縛球就能收服。" },
-					{ "speaker": "艾德研究員", "text": "這五顆藤縛球送你。記住：隊伍最多只能帶三隻怪獸。" },
-					{ "speaker": "艾德研究員", "text": "隨時按 M 可以查看隊伍、使用道具，或記錄你的冒險進度。" }
+					{ "speaker": "沈芮", "text": "臨時證帶了？好。看這條線——古道的回聲，三週來一直在變薄。" },
+					{ "speaker": "沈芮", "text": "更怪的是舊塔。封了三十年，天線最近半夜自己在送一段訊號，來源查不到。" },
+					{ "speaker": "沈芮", "text": "這五個共鳴匣拿去。迴靈放下戒心時錄下牠的回聲，牠就會跟你走一段。最多三隻。" },
+					{ "speaker": "沈芮", "text": "去古道。別趕牠們走——先弄清楚牠們在聽什麼。按 M 可以整理背包和記錄進度。" }
 				]
 			},
 			{
 				"pages": [
-					{ "speaker": "艾德研究員", "text": "丟藤縛球前先削弱對方。隊伍累了就去伊妲的小屋休息吧。" }
+					{ "speaker": "沈芮", "text": "紀錄要在現場做才算數。牠們躁動的時候，先削弱、再收錄，別硬碰。" }
 				]
 			}
 		]
 	},
-	"npc_ida": {
+	"npc_haibo": {
 		"pages": [
-			{ "speaker": "守屋人伊妲", "text": "哎呀，親愛的。你的夥伴們看起來有點疲憊呢。" }
+			{ "speaker": "阿海伯", "text": "少年仔，這村子以前是挖磁鐵礦的喔——礦脈枯了，剩阮這幾戶看海的。" },
+			{ "speaker": "阿海伯", "text": "以前修浮標的時候，潮翼攏會綴著阮的船飛。牠飛低，湧就大。比氣象台準啦。" }
 		],
 		"choice": {
-			"prompt": "要讓隊伍休息嗎？",
+			"prompt": "喝杯熱茶再走？",
 			"options": [
 				{
-					"text": "好",
+					"text": "好，麻煩了",
 					"action": "heal_party",
 					"pages_after": [
-						{ "speaker": "守屋人伊妲", "text": "好了，像清晨的青苔一樣有精神。去吧！" }
+						{ "speaker": "阿海伯", "text": "免客氣。恁的迴靈嘛歇夠了——去吧去吧，路上小心霧。" }
 					]
 				},
 				{
-					"text": "不用",
+					"text": "下次吧",
 					"pages_after": [
-						{ "speaker": "守屋人伊妲", "text": "隨你囉，親愛的。茶壺會一直溫著的。" }
+						{ "speaker": "阿海伯", "text": "好啦，茶壺替你溫著。" }
 					]
 				}
 			]
 		}
+	},
+	"npc_xiaoman": {
+		"pages": [
+			{ "speaker": "小滿", "text": "跟你說喔，山上那個塔，晚上會唱歌。" },
+			{ "speaker": "小滿", "text": "都是同一段。阿嬤叫我不要聽。可是磁殼仔都排在坡下聽耶。" }
+		]
+	},
+	"sign_plaza": {
+		"pages": [
+			{ "speaker": "告示牌", "text": "霧港村　　東：潮霧古道　　北坡：舊觀測塔（封閉中）" }
+		]
+	},
+	"point_console": {
+		"pages": [
+			{ "speaker": "舊設備", "text": "被藤蔓纏滿的金屬櫃，面板凹了一角。指示燈竟然還亮著，每隔幾秒閃一下。" },
+			{ "speaker": "舊設備", "text": "閃的間隔很規律——和小滿說的「塔的歌」，會是同一個節拍嗎。" }
+		]
+	},
+	"point_blocked_road": {
+		"pages": [
+			{ "speaker": "封路的倒木", "text": "上塔的石階被兩截倒木擋住，切口平整，是人鋸的。木頭上釘著褪色的牌子：『迴聲網計畫　暫停維護』。" }
+		]
+	},
+	"point_sea": {
+		"pages": [
+			{ "speaker": "棧橋盡頭", "text": "浪拍在浮標上，一下，又一下。老人說這就是島最老的回聲——比村子老，比塔更老。" }
+		]
+	},
+	"point_store": {
+		"pages": [
+			{ "speaker": "店門", "text": "門上掛著手寫牌：『補貨中。要買什麼，對外面那個戴草帽的喊就好。』" }
+		]
+	},
+	"point_viewpoint": {
+		"pages": [
+			{ "speaker": "觀景點", "text": "銅製望遠鏡對著外海。霧散的時候，聽說看得到隔壁島的天線塔。" },
+			{ "speaker": "觀景點", "text": "鏡筒上刻著小字：迴聲網７號站　視界確認點。" }
+		]
+	},
+	"point_logs": {
+		"pages": [
+			{ "speaker": "倒木", "text": "又是切口平整的倒木，堵住往東的岔路。樹皮上有新鮮的爪痕——有什麼東西最近翻過去了。" }
+		]
+	},
+	"point_anomaly": {
+		"pages": [
+			{ "speaker": "廢棄天線", "text": "鏽穿的天線盤周圍一圈草倒向同一個方向，像被什麼聲音壓過。" },
+			{ "speaker": "廢棄天線", "text": "泥地上滿是磁殼仔的足跡，繞著天線一圈又一圈。牠們在聽。這裡就是回聲變薄的中心。" }
+		]
+	},
+	"point_cache": {
+		"variants": [
+			{
+				"if_flag_not": "found_trail_cache",
+				"set_flag": "found_trail_cache",
+				"grant_items": { "herbal_balm": 2 },
+				"pages": [
+					{ "speaker": "草叢深處", "text": "撥開高草，一個防水鐵盒半埋在土裡——是巡山員的補給點。拿到青草膏×2。" }
+				]
+			},
+			{
+				"pages": [
+					{ "speaker": "草叢深處", "text": "空鐵盒安靜地躺著。改天帶點東西來補上吧。" }
+				]
+			}
+		]
+	},
+	"point_bed": {
+		"pages": [
+			{ "speaker": "床鋪", "text": "被子曬過太陽的味道。" }
+		],
+		"choice": {
+			"prompt": "躺一下嗎？",
+			"options": [
+				{
+					"text": "小睡片刻",
+					"action": "heal_party",
+					"pages_after": [
+						{ "speaker": "床鋪", "text": "醒來時雨停了。隊伍的精神都恢復了。" }
+					]
+				},
+				{
+					"text": "還不睏",
+					"pages_after": [
+						{ "speaker": "床鋪", "text": "先把該做的事做完吧。" }
+					]
+				}
+			]
+		}
+	},
+	"point_books": {
+		"pages": [
+			{ "speaker": "書架", "text": "《群島潮汐表（十年版）》、《迴靈圖鑑・殘卷》，還有一卷沒貼標籤的磁帶。磁帶是誰放的？" }
+		]
+	},
+	"point_instruments": {
+		"pages": [
+			{ "speaker": "觀測儀", "text": "滾筒紙上畫著古道的回聲曲線：三週前開始，每天晚上都缺一角，缺口一天比一天寬。" }
+		]
+	},
+	"point_tapes": {
+		"pages": [
+			{ "speaker": "磁帶架", "text": "標著年份的磁帶排到三十年前就斷了。最後一卷的標籤只寫著：『７號站　最終記錄　勿播』。" }
+		]
 	}
 }

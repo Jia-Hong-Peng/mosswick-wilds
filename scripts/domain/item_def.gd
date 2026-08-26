@@ -12,6 +12,7 @@ var kind: String = KIND_HEAL
 var amount: int = 0
 var usable_in_battle: bool = false
 var usable_in_field: bool = false
+var icon_path: String = ""
 
 
 static func from_dict(item_id: String, data: Dictionary) -> ItemDef:
@@ -23,4 +24,5 @@ static func from_dict(item_id: String, data: Dictionary) -> ItemDef:
 	def.amount = int(data.get("amount", 0))
 	def.usable_in_battle = bool(data.get("usable_in_battle", false))
 	def.usable_in_field = bool(data.get("usable_in_field", false))
+	def.icon_path = String(data.get("icon_path", ""))
 	return def

@@ -3,9 +3,20 @@ extends Node
 ## strategy (write .tmp → verify → swap). Corrupt files never crash the game;
 ## the .tmp file doubles as a recovery fallback.
 
-const SCHEMA_VERSION := 1
+const SCHEMA_VERSION := 2
 const SAVE_PATH := "user://save.json"
 const TMP_SUFFIX := ".tmp"
+
+## v1（Mosswick Wilds 版）→ v2（潮霧群島版）對照表
+const V1_CREATURE_MAP := {
+	"peatpaw": "mosshorn",
+	"drippole": "tidewing",
+	"cindermoth": "magshell",
+}
+const V1_ITEM_MAP := {
+	"berry_tonic": "herbal_balm",
+	"snare_orb": "echo_box",
+}
 
 
 func has_save() -> bool:
@@ -42,6 +53,10 @@ func apply_payload(payload: Dictionary) -> void:
 	EventFlagStore.load_from(Dictionary(payload.get("flags", {})))
 	var settings := Dictionary(payload.get("settings", {}))
 	AudioManager.set_master_volume(float(settings.get("master_volume", AudioManager.master_volume)))
+	# 位置安全網：地圖被改版或座標失效時回到村口，不讓玩家卡牆
+	var map := DataRegistry.get_map(GameState.current_map_id)
+	if map == null or not map.is_walkable(GameState.player_cell):
+		GameState.respawn_at_start()
 
 
 func save_game() -> bool:
@@ -88,10 +103,34 @@ static func read_payload(path: String) -> Dictionary:
 	return {}
 
 
-## Save schema migration hook. Unknown or future versions are rejected safely.
+## 存檔 Schema 遷移。未知或未來版本安全拒絕。
 static func migrate(data: Dictionary) -> Dictionary:
 	var version := int(data.get("schema_version", 0))
 	if version <= 0 or version > SCHEMA_VERSION:
 		return {}
-	# Future migrations: while version < SCHEMA_VERSION, upgrade step by step.
+	if version == 1:
+		data = _migrate_v1_to_v2(data)
+		version = 2
+	data["schema_version"] = version
+	return data
+
+
+## v1 → v2：怪獸與道具 id 對照；舊地圖已不存在，位置交由
+## apply_payload 的安全網重置到村口。
+static func _migrate_v1_to_v2(data: Dictionary) -> Dictionary:
+	var party: Array = Array(data.get("party", []))
+	for i in range(party.size()):
+		var member := Dictionary(party[i])
+		var old_id := String(member.get("creature_id", ""))
+		if V1_CREATURE_MAP.has(old_id):
+			member["creature_id"] = String(V1_CREATURE_MAP[old_id])
+			party[i] = member
+	data["party"] = party
+	var inventory := Dictionary(data.get("inventory", {}))
+	var new_inventory := {}
+	for key: Variant in inventory:
+		var item_id := String(key)
+		new_inventory[String(V1_ITEM_MAP.get(item_id, item_id))] = inventory[key]
+	data["inventory"] = new_inventory
+	data["map_id"] = "harbor"
 	return data

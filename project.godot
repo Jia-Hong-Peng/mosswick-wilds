@@ -10,9 +10,9 @@ config_version=5
 
 [application]
 
-config/name="Mosswick Wilds"
-config/description="Original top-down creature-collecting RPG vertical slice."
-config/version="0.1.0"
+config/name="潮霧群島 Tidemist Isles"
+config/description="原創俯視角迴靈觀測 RPG：霧港村 Vertical Slice。"
+config/version="0.2.0"
 run/main_scene="res://scenes/main/title_screen.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/ui/icon.png"
@@ -48,8 +48,11 @@ window/stretch/scale_mode="integer"
 
 [gui]
 
-theme/custom_font="res://assets/fonts/NotoSansTC.ttf"
-theme/default_font_size=10
+theme/custom_font="res://assets/fonts/fusion-pixel-12px-tc.ttf"
+theme/default_font_size=12
+theme/default_font_antialiasing=0
+theme/default_font_hinting=0
+theme/default_font_subpixel_positioning=0
 
 [input]
 

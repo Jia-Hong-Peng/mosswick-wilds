@@ -1,32 +1,41 @@
 {
-	"peatpaw": {
-		"id": "peatpaw",
-		"display_name": "苔掌獾",
-		"description": "背上長滿青苔的小獾，最愛窩在鬆軟的泥炭裡打盹，爪子總帶著雨後的青草味。",
-		"element": "bloom",
-		"base_stats": { "max_hp": 44, "attack": 11, "defense": 12, "speed": 9 },
-		"skills": ["pounce", "leaf_toss", "spore_puff"],
+	"mosshorn": {
+		"id": "mosshorn",
+		"display_name": "苔角獸",
+		"description": "棲息在潮濕石牆縫與林緣的小獸，背上的厚苔吸附了多年雨水打在石頭上的回聲。下雨天會把幼角朝向雨最密的方向，一動也不動。",
+		"element": "forest",
+		"base_stats": { "max_hp": 46, "attack": 11, "defense": 13, "speed": 8 },
+		"skills": ["tackle", "moss_burst", "horn_jab"],
 		"capture_rate": 0.45,
-		"sprite_path": "res://assets/creatures/peatpaw.png"
+		"sprite_path": "res://assets/creatures/mosshorn_front.png",
+		"back_path": "res://assets/creatures/mosshorn_back.png",
+		"hit_path": "res://assets/creatures/mosshorn_hit.png",
+		"icon_path": "res://assets/creatures/mosshorn_icon.png"
 	},
-	"cindermoth": {
-		"id": "cindermoth",
-		"display_name": "燼翅蛾",
-		"description": "翅膀如餘燼般發亮的暮色飛蛾，寒冷的夜晚會繞著煙囪打轉取暖。",
-		"element": "flame",
-		"base_stats": { "max_hp": 38, "attack": 13, "defense": 9, "speed": 13 },
-		"skills": ["pounce", "ash_flurry", "wing_spark"],
-		"capture_rate": 0.4,
-		"sprite_path": "res://assets/creatures/cindermoth.png"
-	},
-	"drippole": {
-		"id": "drippole",
-		"display_name": "露滴蝌",
-		"description": "外形像一顆大雨滴的開朗池塘住民，天氣轉濕時會開心地哼歌。",
+	"tidewing": {
+		"id": "tidewing",
+		"display_name": "潮翼",
+		"description": "在港口浮標與海蝕岩之間盤旋的迴靈，海鳥的身、魚鰭的翼，翼緣的波浪缺刻是潮汐反覆沖磨留下的形狀。漲潮前會沿著防波堤低飛一整圈。",
 		"element": "tide",
-		"base_stats": { "max_hp": 42, "attack": 10, "defense": 11, "speed": 11 },
-		"skills": ["pounce", "bubble_jet", "tail_slap"],
+		"base_stats": { "max_hp": 38, "attack": 13, "defense": 9, "speed": 14 },
+		"skills": ["tackle", "tide_dive", "wing_snap"],
+		"capture_rate": 0.4,
+		"sprite_path": "res://assets/creatures/tidewing_front.png",
+		"back_path": "res://assets/creatures/tidewing_back.png",
+		"hit_path": "res://assets/creatures/tidewing_hit.png",
+		"icon_path": "res://assets/creatures/tidewing_icon.png"
+	},
+	"magshell": {
+		"id": "magshell",
+		"display_name": "磁殼仔",
+		"description": "出沒在廢棄觀測設備附近的小甲殼獸，殼上嵌著吸來的磁石碎片，一長一短的天線鬚會朝著微弱電波輕輕擺動。喜歡把撿到的金屬片排成一排再繞著走。",
+		"element": "signal",
+		"base_stats": { "max_hp": 42, "attack": 10, "defense": 12, "speed": 11 },
+		"skills": ["tackle", "static_pulse", "shell_ram"],
 		"capture_rate": 0.5,
-		"sprite_path": "res://assets/creatures/drippole.png"
+		"sprite_path": "res://assets/creatures/magshell_front.png",
+		"back_path": "res://assets/creatures/magshell_back.png",
+		"hit_path": "res://assets/creatures/magshell_hit.png",
+		"icon_path": "res://assets/creatures/magshell_icon.png"
 	}
 }

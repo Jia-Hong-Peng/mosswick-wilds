@@ -1,0 +1,100 @@
+{
+	"display_name": "霧港村",
+	"battle_bg": "village",
+	"encounter_key": "",
+	"fog": false,
+	"legend_ground": {
+		"g": "grass_a", "h": "grass_b", "j": "grass_c",
+		"p": "path_a", "q": "path_b", "r": "stairs",
+		"v": "water_shallow", "w": "water_deep", "o": "foam",
+		"s": "sand_a", "S": "sand_b", "b": "boardwalk",
+		"F": "stone_floor_a", "f": "stone_floor_b"
+	},
+	"legend_deco": {
+		"T": "tree_trunk", "R": "rock_a", "m": "rock_small", "n": "fern",
+		"x": "flowers_a", "y": "flowers_b", "B": "bush",
+		"L": "log_a", "N": "console_rust", "A": "antenna_dish",
+		"E": "bench", "e": "power_pole", "l": "lamp_post", "G": "sign_wood",
+		"c": "crate", "k": "barrel", "o": "pot_plant", "u": "buoy", "f": "flag",
+		"s": "stone_wall", "P": "plaster_wall", "V": "plaster_window",
+		"W": "brick_window", "K": "brick_wall", "D": "door_wood",
+		"1": "roof_tin_a", "2": "roof_tin_b", "3": "roof_tin_ridge",
+		"4": "roof_brick_a", "5": "roof_brick_b", "6": "roof_brick_ridge",
+		"8": "chimney", "r": "reed", "p": "pebbles"
+	},
+	"legend_overhead": {
+		"a": "canopy_a", "b": "canopy_b", "c": "canopy_c", "w": "wire_h"
+	},
+	"ground": [
+		"gghgrghgvghggjhggghgjhgg",
+		"ghjgrghgvgjhghgghjgghghj",
+		"gjhgrhjgvhgghhgjghgjhgjg",
+		"ghggghjgvgjghgghggghghgh",
+		"gjhghghgvghjgghggjhgjhgj",
+		"ghgpjhjgvjhghjjhggpghjhg",
+		"gpqppqppbppqppppqppppqpp",
+		"ghghghjgvgFfFFfFghghghgh",
+		"gjhghggjvhfFfFFfghghghjg",
+		"ghgjhghgvgFfFfFFghghghgh",
+		"ghghjjhgvghgpghgjhgpghgj",
+		"gjhghghgvhghpgjhghgpjhgh",
+		"ssSssSssvsSsbsSssSssSsss",
+		"sSssSsssosSsbssSsSsSssSs",
+		"oooooooooooobooooooooooo",
+		"wwwwwwwwwwwwwwwwwwwwwwww"
+	],
+	"deco": [
+		"TTTT.TTT.TTTTTTTTTTTTTTT",
+		"T.T......T....T....T.R.T",
+		"T...L.N.........33333...",
+		"..3333..........12181...",
+		"..1281..........PVDVPA..",
+		"..VDPV.e..B..x.......y..",
+		"........................",
+		"..........l...E.e.6666..",
+		"..y...c...........4548..",
+		".........G.......fWDVKk.",
+		".ssssssn............o...",
+		"..m....r.r......B.......",
+		"....c...........p.......",
+		"......p.............m...",
+		"........................",
+		".....u............u....."
+	],
+	"overhead": [
+		"abcabcab.cabcabcabcabcab",
+		"a.......................",
+		"........................",
+		"........................",
+		"........................",
+		"........wwwwwwww........",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................"
+	],
+	"spawn": { "x": 3, "y": 6, "facing": "down" },
+	"warps": [
+		{ "x": 3, "y": 5, "target_map": "home", "target_x": 5, "target_y": 5, "facing": "up" },
+		{ "x": 18, "y": 4, "target_map": "station", "target_x": 6, "target_y": 6, "facing": "up" },
+		{ "x": 23, "y": 6, "target_map": "trail", "target_x": 1, "target_y": 3, "facing": "right" }
+	],
+	"signs": [
+		{ "x": 9, "y": 9, "dialogue_id": "sign_plaza" },
+		{ "x": 6, "y": 2, "dialogue_id": "point_console" },
+		{ "x": 4, "y": 2, "dialogue_id": "point_blocked_road" },
+		{ "x": 12, "y": 15, "dialogue_id": "point_sea" },
+		{ "x": 19, "y": 9, "dialogue_id": "point_store" }
+	],
+	"npcs": [
+		{ "id": "haibo", "x": 18, "y": 10, "sprite": "res://assets/characters/npc_haibo.png", "facing": "down", "dialogue_id": "npc_haibo" },
+		{ "id": "xiaoman", "x": 14, "y": 13, "sprite": "res://assets/characters/npc_xiaoman.png", "facing": "left", "dialogue_id": "npc_xiaoman" }
+	],
+	"smoke": [ { "x": 4, "y": 4 }, { "x": 21, "y": 8 } ]
+}

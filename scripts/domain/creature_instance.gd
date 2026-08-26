@@ -15,6 +15,9 @@ var speed: int = 1
 var skill_ids: Array[String] = []
 var capture_rate: float = 0.3
 var sprite_path: String = ""
+var back_path: String = ""
+var hit_path: String = ""
+var icon_path: String = ""
 
 
 static func from_def(def: CreatureDef, at_level: int) -> CreatureInstance:
@@ -31,6 +34,9 @@ static func from_def(def: CreatureDef, at_level: int) -> CreatureInstance:
 	creature.skill_ids = def.skill_ids.duplicate()
 	creature.capture_rate = def.capture_rate
 	creature.sprite_path = def.sprite_path
+	creature.back_path = def.back_path
+	creature.hit_path = def.hit_path
+	creature.icon_path = def.icon_path
 	return creature
 
 
