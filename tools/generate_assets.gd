@@ -9,6 +9,7 @@ func _initialize() -> void:
 	GenTiles.generate()
 	GenCharacters.generate()
 	GenCreatures.generate()
+	GenPortraits.generate()
 	GenUi.generate()
 	GenBackgrounds.generate()
 	# 色盤圖搬到 docs/（docs 不在 res:// 掃描外，直接寫）

@@ -3,7 +3,7 @@ extends Node
 ## poll actions only while their context is on top of the stack, so opening
 ## a dialogue or menu automatically freezes world movement.
 
-enum Context { NONE, TITLE, WORLD, DIALOGUE, MENU, BATTLE }
+enum Context { NONE, TITLE, WORLD, DIALOGUE, MENU, BATTLE, OBSERVE }
 
 var _stack: Array[int] = []
 

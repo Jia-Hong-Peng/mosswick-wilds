@@ -20,8 +20,13 @@ static func generate() -> void:
 	_elem_icon("res://assets/ui/elem_neutral.png", "neutral")
 	_item_balm("res://assets/ui/item_herbal_balm.png")
 	_item_echo_box("res://assets/ui/item_echo_box.png")
+	_item_stable_echo("res://assets/ui/item_stable_echo.png")
 	_shadow("res://assets/ui/contact_shadow.png")
 	_fog_blob("res://assets/ui/fog_blob.png")
+	_clue_sprites()
+	_battle_props()
+	_observe_button("res://assets/ui/btn_observe.png", false)
+	_observe_button("res://assets/ui/btn_observe_pressed.png", true)
 	_app_icon("res://assets/ui/icon.png")
 
 
@@ -158,6 +163,99 @@ static func _item_echo_box(path: String) -> void:
 	Pix.hline(c, 6, 3, 5, Pal.WOOD_DK)
 	Pix.px(c, 5, 4, Pal.WOOD_DK)
 	Pix.px(c, 11, 4, Pal.WOOD_DK)
+	Pix.save(c, path)
+
+
+static func _item_stable_echo(path: String) -> void:
+	var c := Pix.img(16, 16)
+	# 穩定回聲：琥珀同心環，中心一點海藍
+	Pix.ellipse(c, 8, 8, 7, 7, Pal.INK)
+	Pix.ellipse(c, 8, 8, 6, 6, Pal.AMBER_DK)
+	Pix.ellipse(c, 8, 8, 4.5, 4.5, Pal.AMBER)
+	Pix.ellipse(c, 8, 8, 3, 3, Pal.AMBER_LT)
+	Pix.ellipse(c, 8, 8, 1.4, 1.4, Pal.SEA_PALE)
+	Pix.px(c, 6, 6, Pal.FOAM)
+	Pix.save(c, path)
+
+
+## 觀測線索（16×16 ×2 幀）：潮痕（海藍弧）／電波刮痕（珊瑚鋸齒）／無聲波紋（霧白圈）
+static func _clue_sprites() -> void:
+	for kind: String in ["tide", "signal", "ripple"]:
+		var sheet := Pix.img(32, 16)
+		for f in range(2):
+			var c := Pix.img(16, 16)
+			match kind:
+				"tide":
+					for i in range(3):
+						var y := 4 + i * 4 + f
+						Pix.px(c, 3, y + 1, Pal.SEA_LT)
+						Pix.hline(c, 4, y, 8, Pal.SEA_LT)
+						Pix.px(c, 12, y + 1, Pal.SEA_PALE)
+				"signal":
+					var x := 2
+					var y := 11 - f
+					for i in range(6):
+						Pix.px(c, x, y, Pal.CORAL if i % 2 == 0 else Pal.GLITCH_LT)
+						Pix.px(c, x + 1, y - 1, Pal.CORAL_LT)
+						x += 2
+						y -= 1
+					Pix.px(c, 13, 3 + f, Pal.GLITCH_LT)
+				"ripple":
+					var radius := 4.0 + float(f) * 2.0
+					for angle in range(0, 360, 20):
+						var px := 8.0 + cos(deg_to_rad(angle)) * radius
+						var py := 8.0 + sin(deg_to_rad(angle)) * radius * 0.6
+						Pix.px(c, int(px), int(py), Pal.FOAM if f == 0 else Pal.MIST_LT)
+			Pix.blit(sheet, c, f * 16, 0)
+		Pix.save(sheet, "res://assets/ui/clue_%s.png" % kind)
+
+
+## 戰鬥道具化 VFX 素材：防禦弧、逆頻箭、共鳴環
+static func _battle_props() -> void:
+	var arc := Pix.img(12, 32)
+	for y in range(32):
+		var dy := (float(y) - 15.5) / 16.0
+		var x := int(6.0 - dy * dy * 6.0)
+		Pix.px(arc, x + 3, y, Pal.SEA_PALE)
+		Pix.px(arc, x + 4, y, Pal.FOAM)
+	Pix.save(arc, "res://assets/ui/guard_arc.png")
+
+	var bolt := Pix.img(18, 10)
+	var bx := 0
+	var by := 6
+	for i in range(8):
+		Pix.px(bolt, bx, by, Pal.CORAL)
+		Pix.px(bolt, bx + 1, by - 1, Pal.CORAL_LT)
+		bx += 2
+		by = 6 if by == 3 else 3
+	Pix.px(bolt, 17, 4, Pal.GLITCH_LT)
+	Pix.save(bolt, "res://assets/ui/jam_bolt.png")
+
+	var ring := Pix.img(32, 32)
+	for angle in range(0, 360, 6):
+		var px := 15.5 + cos(deg_to_rad(angle)) * 14.0
+		var py := 15.5 + sin(deg_to_rad(angle)) * 14.0
+		Pix.px(ring, int(px), int(py), Pal.SEA_PALE)
+		var inner_x := 15.5 + cos(deg_to_rad(angle)) * 12.5
+		var inner_y := 15.5 + sin(deg_to_rad(angle)) * 12.5
+		Pix.px(ring, int(inner_x), int(inner_y), Pal.alpha(Pal.FOAM, 0.6))
+	Pix.save(ring, "res://assets/ui/resonance_ring.png")
+
+
+## 觀測鍵（觸控）：眼形波紋儀
+static func _observe_button(path: String, pressed: bool) -> void:
+	var size := 22
+	var c := Pix.img(size, size)
+	Pix.rect(c, 1, 1, size - 2, size - 2, Pal.INK)
+	Pix.rect(c, 2, 2, size - 4, size - 4, Pal.NIGHT if pressed else Pal.SLATE)
+	if not pressed:
+		Pix.hline(c, 2, 2, size - 4, Pal.MIST_LT)
+	var glow := Pal.SEA_PALE if not pressed else Pal.CORAL_LT
+	Pix.ellipse(c, 10.5, 10.5, 6.5, 4.0, Pal.SEA_DK)
+	Pix.ellipse(c, 10.5, 10.5, 4.5, 2.6, glow)
+	Pix.ellipse(c, 10.5, 10.5, 1.6, 1.6, Pal.INK)
+	Pix.px(c, 9, 9, Pal.FOAM)
+	_fade(c, 0.82)
 	Pix.save(c, path)
 
 

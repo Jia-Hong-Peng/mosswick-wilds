@@ -3,7 +3,7 @@ extends Node
 ## strategy (write .tmp → verify → swap). Corrupt files never crash the game;
 ## the .tmp file doubles as a recovery fallback.
 
-const SCHEMA_VERSION := 2
+const SCHEMA_VERSION := 3
 const SAVE_PATH := "user://save.json"
 const TMP_SUFFIX := ".tmp"
 
@@ -37,6 +37,8 @@ func collect_payload() -> Dictionary:
 		"flags": EventFlagStore.to_dict(),
 		"settings": {
 			"master_volume": AudioManager.master_volume,
+			"reduce_flash": AudioManager.reduce_flash,
+			"reduce_shake": AudioManager.reduce_shake,
 		},
 	}
 
@@ -53,6 +55,8 @@ func apply_payload(payload: Dictionary) -> void:
 	EventFlagStore.load_from(Dictionary(payload.get("flags", {})))
 	var settings := Dictionary(payload.get("settings", {}))
 	AudioManager.set_master_volume(float(settings.get("master_volume", AudioManager.master_volume)))
+	AudioManager.reduce_flash = bool(settings.get("reduce_flash", AudioManager.reduce_flash))
+	AudioManager.reduce_shake = bool(settings.get("reduce_shake", AudioManager.reduce_shake))
 	# 位置安全網：地圖被改版或座標失效時回到村口，不讓玩家卡牆
 	var map := DataRegistry.get_map(GameState.current_map_id)
 	if map == null or not map.is_walkable(GameState.player_cell):
@@ -111,7 +115,21 @@ static func migrate(data: Dictionary) -> Dictionary:
 	if version == 1:
 		data = _migrate_v1_to_v2(data)
 		version = 2
+	if version == 2:
+		data = _migrate_v2_to_v3(data)
+		version = 3
 	data["schema_version"] = version
+	return data
+
+
+## v2 → v3：settings 補 Accessibility 欄位（預設關閉）
+static func _migrate_v2_to_v3(data: Dictionary) -> Dictionary:
+	var settings := Dictionary(data.get("settings", {}))
+	if not settings.has("reduce_flash"):
+		settings["reduce_flash"] = false
+	if not settings.has("reduce_shake"):
+		settings["reduce_shake"] = false
+	data["settings"] = settings
 	return data
 
 

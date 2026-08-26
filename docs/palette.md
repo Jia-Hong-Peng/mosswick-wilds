@@ -1,4 +1,4 @@
-# 全域色盤（40 色）
+# 全域色盤（42 色）
 
 視覺化：`docs/palette.png`（由 `tools/generate_assets.gd` 產生）。
 程式對照表：`tools/pixgen/pal.gd`。**全專案禁止使用本表以外的顏色**
@@ -46,3 +46,5 @@
 | 紙 | PAPER | `#e8e2d0` | UI 底（手冊紙面） |
 | 紙 | PAPER_DIM | `#cfc7b2` | UI 底陰影、分隔 |
 | 灰 | GRAY | `#8c8a80` | 停用文字、次要資訊 |
+| 異常 | GLITCH | `#9c4f88` | 異常電波、失衡訊號（僅此用途） |
+| 異常 | GLITCH_LT | `#d178b8` | 異常電波亮部 |

@@ -35,7 +35,11 @@
 | Dialogue Box | 紙面板 312×50 底部；說話者名牌浮左上（儀器色）；▼ 續頁符 CORAL |
 | Choice/Modal | 紙面板浮動於右上；結算面板置中（── 調查紀錄 ──） |
 | Tooltip | 技能聚焦時於訊息列顯示「威力・命中％・描述」 |
-| Touch Control | 儀器按鍵材質（`assets/ui/arrow_*.png`、`btn_*.png`），有 normal/pressed 兩態、82% 透明度、觸控裝置自動顯示 |
+| Touch Control | 儀器按鍵材質（`assets/ui/arrow_*.png`、`btn_*.png`＋觀測鍵 `btn_observe`），有 normal/pressed 兩態、82% 透明度、觸控裝置自動顯示 |
+| 立繪 | 40×48 胸像，左右槽位；說話者高亮＋3px 進場位移、非說話者 55% 壓暗；名牌跟隨說話側 |
+| 前兆橫幅 | 頭目戰左上儀器色帶：異常前兆＝GLITCH_LT 字、紊亂窗口＝AMBER_LT 字；顯示不需確認鍵，維持節奏 |
+| 訊號強度條 | 頭目專用：GLITCH_LT 填色＋FOAM 下限刻度（攻擊打不破的 30% 線可視化） |
+| 章節卡／黑幕 | 紙面卡置中＋INK 45% 壓暗；伏筆黑幕上訊號燈以 CORAL 節拍閃爍 |
 
 ## 狀態（Focus / Pressed / Disabled）
 

@@ -1,7 +1,8 @@
 extends Node2D
-## 依 GameState.current_map_id 從資料建構目前地圖：
-## 地面／物件／頂層三層 TileMapLayer（含動畫 tile）、NPC、玩家、
-## 炊煙粒子、飄霧層與世界 UI（對話框、選單、地名浮標）。
+## 世界場景：三層 TileMap、NPC、玩家、粒子與霧之外，本版加入——
+## 回聲觀測模式（去彩度＋線索顯形＋環境音收窄）、地圖觸發器與自動對話、
+## 條件 warp、演出 FX（DialogueManager.fx_requested）、關卡結局導演、
+## 通關前後的世界狀態差異（色溫／鐘聲／對話變體）。
 
 const TILE_SIZE := 16
 
@@ -10,14 +11,31 @@ const NpcScene := preload("res://scenes/characters/npc.tscn")
 const DialogueBoxScene := preload("res://scenes/ui/dialogue_box.tscn")
 const PauseMenuScene := preload("res://scenes/ui/pause_menu.tscn")
 
+const OBSERVE_TINT := Color(0.6, 0.72, 0.8)
+const RESTORED_TINT := Color(1.0, 0.96, 0.86)
+const CLUE_TEXTURES := {
+	"tide": "res://assets/ui/clue_tide.png",
+	"signal": "res://assets/ui/clue_signal.png",
+	"ripple": "res://assets/ui/clue_ripple.png",
+}
+const CLUES_READY_COUNT := 2
+
 var _map: MapData
 var _npcs_by_cell: Dictionary = {}
 var _encounters: EncounterSystem
 var _player: Node2D
 var _pause_menu: Control
+var _dialogue_box: Control
+var _ui_layer: CanvasLayer
 var _rng := RandomNumberGenerator.new()
 var _leaving := false
 var _fog_sprites: Array[Sprite2D] = []
+var _tint: CanvasModulate
+var _observing := false
+var _clue_sprites: Dictionary = {}
+var _clue_clock := 0.0
+var _boss_sprite: Sprite2D
+var _ending_running := false
 
 
 func _ready() -> void:
@@ -26,27 +44,162 @@ func _ready() -> void:
 	if _map == null:
 		push_error("Unknown map id: " + GameState.current_map_id)
 		return
+	_tint = CanvasModulate.new()
+	_tint.color = _base_tint()
+	add_child(_tint)
 	_build_layers()
 	_spawn_npcs()
 	_spawn_player()
 	_spawn_smoke()
 	_spawn_fog()
+	_spawn_clues()
+	_spawn_station_extras()
 	_build_ui()
 	_setup_encounters()
+	_apply_ambience()
 	InputRouter.set_base_context(InputRouter.Context.WORLD)
+	DialogueManager.fx_requested.connect(_on_fx)
+	_run_entry_flow.call_deferred()
+
+
+func _exit_tree() -> void:
+	if DialogueManager.fx_requested.is_connected(_on_fx):
+		DialogueManager.fx_requested.disconnect(_on_fx)
+	AudioManager.set_observe_filter(false)
 
 
 func _process(delta: float) -> void:
 	_drift_fog(delta)
+	_animate_clues(delta)
+	var walkable_context := InputRouter.is_context(InputRouter.Context.WORLD) or InputRouter.is_context(InputRouter.Context.OBSERVE)
+	if walkable_context and Input.is_action_just_pressed("observe"):
+		_toggle_observe()
+		return
 	if InputRouter.is_context(InputRouter.Context.WORLD) and Input.is_action_just_pressed("menu"):
 		_pause_menu.open()
 
+
+# ====== 進場流程與自動對話 ======
+
+func _run_entry_flow() -> void:
+	await get_tree().create_timer(0.35).timeout
+	if EventFlagStore.has_flag("ending_pending"):
+		EventFlagStore.clear_flag("ending_pending")
+		await _run_ending()
+		return
+	for entry in _map.auto_dialogues:
+		if not _conditions_met(entry):
+			continue
+		if entry.has("fire_flag"):
+			if EventFlagStore.has_flag(String(entry["fire_flag"])):
+				continue
+			EventFlagStore.set_flag(String(entry["fire_flag"]))
+		DialogueManager.start(String(entry.get("dialogue_id", "")))
+		await DialogueManager.dialogue_finished
+		if String(entry.get("fire_flag", "")) == "opening_done":
+			_show_observe_hint()
+		break
+
+
+func _conditions_met(entry: Dictionary) -> bool:
+	if entry.has("if_flag") and not EventFlagStore.has_flag(String(entry["if_flag"])):
+		return false
+	if entry.has("if_flag_not") and EventFlagStore.has_flag(String(entry["if_flag_not"])):
+		return false
+	return true
+
+
+func _show_observe_hint() -> void:
+	var tag := PanelContainer.new()
+	tag.position = Vector2(96, 56)
+	tag.add_theme_stylebox_override("panel", UiTheme.name_tag_style())
+	var label := Label.new()
+	label.text = "Ｃ／觀測鍵：回聲觀測"
+	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_color_override("font_color", Pal.FOAM)
+	tag.add_child(label)
+	_ui_layer.add_child(tag)
+	var tween := create_tween()
+	tween.tween_interval(2.6)
+	tween.tween_property(tag, "modulate:a", 0.0, 0.6)
+	tween.tween_callback(tag.queue_free)
+
+
+# ====== 回聲觀測 ======
+
+func _toggle_observe() -> void:
+	_observing = not _observing
+	if _observing:
+		AudioManager.play_observe_on()
+		AudioManager.set_observe_filter(true)
+		InputRouter.push_context(InputRouter.Context.OBSERVE)
+	else:
+		AudioManager.play_observe_off()
+		AudioManager.set_observe_filter(false)
+		InputRouter.pop_context()
+	var tween := create_tween()
+	tween.tween_property(_tint, "color", OBSERVE_TINT if _observing else _base_tint(), 0.35)
+	for cell: Vector2i in _clue_sprites:
+		var sprite := _clue_sprites[cell] as Sprite2D
+		sprite.visible = _observing
+
+
+func _spawn_clues() -> void:
+	for clue in _map.clues:
+		var cell := Vector2i(int(clue.get("x", 0)), int(clue.get("y", 0)))
+		var sprite := Sprite2D.new()
+		var texture_path := String(CLUE_TEXTURES.get(String(clue.get("type", "signal")), CLUE_TEXTURES["signal"]))
+		sprite.texture = load(texture_path)
+		sprite.hframes = 2
+		sprite.position = Vector2(cell * TILE_SIZE) + Vector2(8, 8)
+		sprite.visible = false
+		sprite.z_index = 3
+		if EventFlagStore.has_flag(String(clue.get("flag", ""))):
+			sprite.modulate.a = 0.4
+		add_child(sprite)
+		_clue_sprites[cell] = sprite
+
+
+func _animate_clues(delta: float) -> void:
+	if _clue_sprites.is_empty():
+		return
+	_clue_clock += delta
+	var frame := int(_clue_clock / 0.4) % 2
+	for cell: Vector2i in _clue_sprites:
+		(_clue_sprites[cell] as Sprite2D).frame = frame
+
+
+func _clue_at(cell: Vector2i) -> Dictionary:
+	for clue in _map.clues:
+		if int(clue.get("x", -1)) == cell.x and int(clue.get("y", -1)) == cell.y:
+			return clue
+	return {}
+
+
+func _examine_clue(clue: Dictionary, cell: Vector2i) -> void:
+	AudioManager.play_clue()
+	var flag := String(clue.get("flag", ""))
+	var newly := not EventFlagStore.has_flag(flag)
+	if newly and not flag.is_empty():
+		EventFlagStore.set_flag(flag)
+		if _clue_sprites.has(cell):
+			(_clue_sprites[cell] as Sprite2D).modulate.a = 0.4
+	DialogueManager.start(String(clue.get("dialogue_id", "")))
+	if newly:
+		var count := 0
+		for entry in _map.clues:
+			if EventFlagStore.has_flag(String(entry.get("flag", ""))):
+				count += 1
+		if count >= CLUES_READY_COUNT:
+			EventFlagStore.set_flag("clues_ready")
+
+
+# ====== 移動、互動與觸發 ======
 
 func try_step(from_cell: Vector2i, direction: Vector2i) -> Dictionary:
 	return GridMovement.attempt_move(_map, from_cell, direction, _npcs_by_cell)
 
 
-## 玩家腳下地面種類（給腳步聲用）："grass" | "splash" | "hard"
 func ground_kind_at(cell: Vector2i) -> String:
 	if _map.is_splash(cell):
 		return "splash"
@@ -62,6 +215,10 @@ func on_player_arrived(arrived_cell: Vector2i) -> void:
 	GameState.player_cell = arrived_cell
 	var warp := _map.warp_at(arrived_cell)
 	if not warp.is_empty():
+		if warp.has("requires_flag") and not EventFlagStore.has_flag(String(warp["requires_flag"])):
+			if not DialogueManager.active:
+				DialogueManager.start(String(warp.get("blocked_dialogue", "")))
+			return
 		_leaving = true
 		AudioManager.play_door()
 		SceneRouter.goto_world_at(
@@ -70,6 +227,7 @@ func on_player_arrived(arrived_cell: Vector2i) -> void:
 			Directions.from_name(String(warp.get("facing", "down")))
 		)
 		return
+	_fire_triggers(arrived_cell)
 	if _encounters != null and _map.is_grass(arrived_cell) and PartyService.has_conscious():
 		var roll := _encounters.roll_step()
 		if not roll.is_empty():
@@ -79,9 +237,30 @@ func on_player_arrived(arrived_cell: Vector2i) -> void:
 			SceneRouter.goto_battle(roll)
 
 
+func _fire_triggers(cell: Vector2i) -> void:
+	if DialogueManager.active:
+		return
+	for trigger in _map.triggers:
+		if int(trigger.get("x", -1)) != cell.x or int(trigger.get("y", -1)) != cell.y:
+			continue
+		if not _conditions_met(trigger):
+			continue
+		if trigger.has("fire_flag"):
+			if EventFlagStore.has_flag(String(trigger["fire_flag"])):
+				continue
+			EventFlagStore.set_flag(String(trigger["fire_flag"]))
+		DialogueManager.start(String(trigger.get("dialogue_id", "")))
+		return
+
+
 func on_player_interact(target_cell: Vector2i) -> void:
 	if DialogueManager.active:
 		return
+	if _observing:
+		var clue := _clue_at(target_cell)
+		if not clue.is_empty():
+			_examine_clue(clue, target_cell)
+			return
 	if _npcs_by_cell.has(target_cell):
 		var npc: Node2D = _npcs_by_cell[target_cell]
 		npc.face_towards(GameState.player_cell)
@@ -94,13 +273,240 @@ func on_player_interact(target_cell: Vector2i) -> void:
 		DialogueManager.start(sign_id)
 
 
+# ====== 演出 FX ======
+
+func _on_fx(fx_name: String) -> void:
+	match fx_name:
+		"station_flash":
+			_screen_flash(Pal.FOAM, 0.16)
+		"lights_on":
+			_fx_lights_on()
+		"silence":
+			AudioManager.set_ambience("none")
+			AudioManager.set_observe_filter(true)
+		"gather":
+			_fx_gather()
+		"boss_reveal":
+			_fx_boss_reveal()
+		"bell":
+			AudioManager.play_bell()
+			_screen_flash(Pal.alpha(Pal.AMBER_LT, 0.5), 0.2)
+		"quake":
+			_shake_world(3.0, 0.4)
+		"observe_pulse":
+			_fx_observe_pulse()
+		_:
+			pass
+
+
+func _screen_flash(color: Color, duration: float) -> void:
+	if AudioManager.reduce_flash:
+		return
+	var flash := ColorRect.new()
+	flash.color = color
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui_layer.add_child(flash)
+	var tween := create_tween()
+	tween.tween_property(flash, "modulate:a", 0.0, duration)
+	tween.tween_callback(flash.queue_free)
+
+
+func _shake_world(strength: float, duration: float) -> void:
+	if AudioManager.reduce_shake:
+		return
+	var steps := int(duration / 0.05)
+	var tween := create_tween()
+	for i in range(steps):
+		tween.tween_property(self, "position", Vector2((strength if i % 2 == 0 else -strength), 0), 0.05)
+	tween.tween_property(self, "position", Vector2.ZERO, 0.05)
+
+
+func _fx_lights_on() -> void:
+	AudioManager.play_item()
+	var tween := create_tween()
+	tween.tween_property(_tint, "color", Color(1.1, 1.02, 0.85), 0.3)
+	tween.tween_property(_tint, "color", _base_tint(), 0.5)
+
+
+func _fx_gather() -> void:
+	AudioManager.play_jam()
+	_shake_world(2.0, 0.3)
+	var burst := CPUParticles2D.new()
+	burst.position = Vector2(_map.width * TILE_SIZE / 2.0, _map.height * TILE_SIZE / 2.0)
+	burst.one_shot = true
+	burst.emitting = true
+	burst.amount = 20
+	burst.lifetime = 0.6
+	burst.explosiveness = 1.0
+	burst.spread = 180.0
+	burst.initial_velocity_min = 30.0
+	burst.initial_velocity_max = 60.0
+	burst.color = Pal.GLITCH_LT
+	add_child(burst)
+	get_tree().create_timer(1.0).timeout.connect(burst.queue_free)
+
+
+func _fx_boss_reveal() -> void:
+	AudioManager.play_encounter()
+	if _boss_sprite == null:
+		_boss_sprite = Sprite2D.new()
+		_boss_sprite.texture = load("res://assets/creatures/magshell_unbalanced.png")
+		_boss_sprite.hframes = 2
+		add_child(_boss_sprite)
+	var center := Vector2(_map.width * TILE_SIZE / 2.0, _map.height * TILE_SIZE / 2.0 - 6.0)
+	_boss_sprite.position = center + Vector2(0, -24)
+	_boss_sprite.modulate.a = 0.0
+	_boss_sprite.visible = true
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(_boss_sprite, "position", center, 0.3).set_ease(Tween.EASE_IN)
+	tween.tween_property(_boss_sprite, "modulate:a", 1.0, 0.25)
+	tween.chain().tween_callback(func() -> void: _shake_world(2.0, 0.25))
+
+
+func _fx_observe_pulse() -> void:
+	AudioManager.play_observe_on()
+	var tween := create_tween()
+	tween.tween_property(_tint, "color", OBSERVE_TINT, 0.4)
+	tween.tween_interval(0.8)
+	tween.tween_property(_tint, "color", _base_tint(), 0.5)
+
+
+# ====== 關卡結局導演 ======
+
+func _run_ending() -> void:
+	_ending_running = true
+	# 1) 聲音與色彩回歸
+	AudioManager.stop_music()
+	AudioManager.set_ambience(_map.ambience_restored if _map.ambience_restored != "" else "harbor_restored")
+	var tween := create_tween()
+	tween.tween_property(_tint, "color", RESTORED_TINT, 1.6)
+	await get_tree().create_timer(1.0).timeout
+	# 2) 結尾對話（含鐘聲 FX 與「穩定回聲」給予）
+	DialogueManager.start("ending_scene")
+	await DialogueManager.dialogue_finished
+	# 3) 自動存檔
+	SaveService.save_game()
+	# 4) 章節完成卡
+	await _show_chapter_card()
+	# 5) 伏筆（黑幕＋訊號）→ 繼續探索／返回標題
+	await _show_epilogue()
+	_ending_running = false
+
+
+func _show_chapter_card() -> void:
+	InputRouter.push_context(InputRouter.Context.MENU)
+	var dim := ColorRect.new()
+	dim.color = Pal.alpha(Pal.INK, 0.0)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui_layer.add_child(dim)
+	var card := PanelContainer.new()
+	card.position = Vector2(70, 62)
+	card.custom_minimum_size = Vector2(180, 0)
+	card.add_theme_stylebox_override("panel", UiTheme.panel_style())
+	card.modulate.a = 0.0
+	_ui_layer.add_child(card)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	card.add_child(box)
+	var chapter := Label.new()
+	chapter.text = "第一章：失聲的港灣"
+	chapter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	chapter.add_theme_font_size_override("font_size", 14)
+	chapter.add_theme_color_override("font_color", UiTheme.text_color("header"))
+	box.add_child(chapter)
+	var done := Label.new()
+	done.text = "完　成"
+	done.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	done.add_theme_font_size_override("font_size", 14)
+	done.add_theme_color_override("font_color", UiTheme.text_color("accent"))
+	box.add_child(done)
+	var hint := Label.new()
+	hint.text = "Z 繼續"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hint.add_theme_font_size_override("font_size", 12)
+	hint.add_theme_color_override("font_color", UiTheme.text_color("dim"))
+	box.add_child(hint)
+	AudioManager.play_level_complete()
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(dim, "color:a", 0.45, 0.5)
+	tween.tween_property(card, "modulate:a", 1.0, 0.5)
+	await tween.finished
+	await _wait_confirm_press()
+	dim.queue_free()
+	card.queue_free()
+	InputRouter.pop_context()
+
+
+func _show_epilogue() -> void:
+	var black := ColorRect.new()
+	black.color = Pal.alpha(Pal.INK, 0.0)
+	black.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_ui_layer.add_child(black)
+	var tween := create_tween()
+	tween.tween_property(black, "color:a", 1.0, 0.8)
+	await tween.finished
+	# 遠方訊號：珊瑚色斷續閃爍（有節拍——不屬於自然）
+	var signal_box := HBoxContainer.new()
+	signal_box.position = Vector2(112, 70)
+	signal_box.add_theme_constant_override("separation", 6)
+	_ui_layer.add_child(signal_box)
+	var dots: Array[ColorRect] = []
+	for i in range(5):
+		var dot := ColorRect.new()
+		dot.custom_minimum_size = Vector2(14 if i % 2 == 0 else 8, 4)
+		dot.color = Pal.alpha(Pal.CORAL, 0.0)
+		signal_box.add_child(dot)
+		dots.append(dot)
+	var blink := create_tween().set_loops(4)
+	for i in range(dots.size()):
+		blink.tween_property(dots[i], "color:a", 1.0, 0.08)
+		blink.tween_interval(0.08)
+	blink.parallel().tween_property(signal_box, "modulate:a", 1.0, 0.1)
+	for dot in dots:
+		blink.tween_property(dot, "color:a", 0.15, 0.1)
+	AudioManager.play_jam()
+	# 對話框提到黑幕之上
+	_ui_layer.move_child(_dialogue_box, _ui_layer.get_child_count() - 1)
+	DialogueManager.start("ending_epilogue")
+	await DialogueManager.dialogue_finished
+	# 若選擇繼續探索：淡出黑幕回到港口
+	if is_inside_tree():
+		blink.kill()
+		signal_box.queue_free()
+		var out := create_tween()
+		out.tween_property(black, "color:a", 0.0, 0.8)
+		out.tween_callback(black.queue_free)
+
+
+func _wait_confirm_press() -> void:
+	while is_inside_tree():
+		await get_tree().process_frame
+		if Input.is_action_just_pressed("confirm"):
+			AudioManager.play_confirm()
+			return
+
+
+# ====== 建構 ======
+
+func _base_tint() -> Color:
+	if EventFlagStore.has_flag("level1_complete") and _map.id == "harbor":
+		return RESTORED_TINT
+	return Color.WHITE
+
+
+func _apply_ambience() -> void:
+	var profile := _map.ambience
+	if EventFlagStore.has_flag("level1_complete") and _map.ambience_restored != "":
+		profile = _map.ambience_restored
+	AudioManager.set_ambience(profile)
+
+
 func _build_layers() -> void:
 	var tile_set := _build_tile_set()
 	_fill_layer(_make_layer(tile_set), _map.ground_rows, _map.legend_ground, true)
 	_fill_layer(_make_layer(tile_set), _map.deco_rows, _map.legend_deco, false)
 
 
-## 頂層在玩家之後加入（蓋過角色）
 func add_overhead_layer() -> void:
 	var tile_set := _build_tile_set()
 	_fill_layer(_make_layer(tile_set), _map.overhead_rows, _map.legend_overhead, false)
@@ -149,7 +555,6 @@ func _fill_layer(layer: TileMapLayer, rows: PackedStringArray, legend: Dictionar
 			layer.set_cell(Vector2i(x, y), 0, TileCatalog.pos(tile_name))
 
 
-## 一次性寶物等：旗標成立後不再顯示
 func _is_hidden_deco(cell: Vector2i, legend: Dictionary, symbol: String) -> bool:
 	if symbol == "." or legend.is_empty():
 		return false
@@ -161,6 +566,8 @@ func _is_hidden_deco(cell: Vector2i, legend: Dictionary, symbol: String) -> bool
 
 func _spawn_npcs() -> void:
 	for npc_data in _map.npcs:
+		if npc_data.has("if_flag_not") and EventFlagStore.has_flag(String(npc_data["if_flag_not"])):
+			continue
 		var npc: Node2D = NpcScene.instantiate()
 		add_child(npc)
 		npc.setup(npc_data)
@@ -221,6 +628,19 @@ func _drift_fog(delta: float) -> void:
 			fog.position.x = -150.0
 
 
+## 觀測站專屬：通關後中央出現「安定的磁殼仔」
+func _spawn_station_extras() -> void:
+	if _map.id != "tide_station":
+		return
+	if EventFlagStore.has_flag("level1_complete"):
+		var calm := Sprite2D.new()
+		calm.texture = load("res://assets/creatures/magshell_calm.png")
+		calm.position = Vector2(_map.width * TILE_SIZE / 2.0, _map.height * TILE_SIZE / 2.0 - 6.0)
+		add_child(calm)
+	elif EventFlagStore.has_flag("station_entered"):
+		_fx_boss_reveal.call_deferred()
+
+
 func _setup_encounters() -> void:
 	if _map.encounter_key.is_empty():
 		return
@@ -230,16 +650,16 @@ func _setup_encounters() -> void:
 
 
 func _build_ui() -> void:
-	var ui_layer := CanvasLayer.new()
-	add_child(ui_layer)
-	var dialogue_box: Control = DialogueBoxScene.instantiate()
-	ui_layer.add_child(dialogue_box)
+	_ui_layer = CanvasLayer.new()
+	add_child(_ui_layer)
+	_dialogue_box = DialogueBoxScene.instantiate()
+	_ui_layer.add_child(_dialogue_box)
 	_pause_menu = PauseMenuScene.instantiate()
-	ui_layer.add_child(_pause_menu)
-	_show_map_name(ui_layer)
+	_ui_layer.add_child(_pause_menu)
+	_show_map_name()
 
 
-func _show_map_name(ui_layer: CanvasLayer) -> void:
+func _show_map_name() -> void:
 	var tag := PanelContainer.new()
 	tag.position = Vector2(4, 4)
 	tag.add_theme_stylebox_override("panel", UiTheme.name_tag_style())
@@ -248,7 +668,7 @@ func _show_map_name(ui_layer: CanvasLayer) -> void:
 	label.add_theme_font_size_override("font_size", 12)
 	label.add_theme_color_override("font_color", Pal.PAPER)
 	tag.add_child(label)
-	ui_layer.add_child(tag)
+	_ui_layer.add_child(tag)
 	var tween := create_tween()
 	tween.tween_interval(2.2)
 	tween.tween_property(tag, "modulate:a", 0.0, 0.6)

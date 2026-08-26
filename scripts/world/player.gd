@@ -47,7 +47,8 @@ func _process(delta: float) -> void:
 	if _moving:
 		_advance_step(delta)
 		return
-	if not InputRouter.is_context(InputRouter.Context.WORLD):
+	var movable := InputRouter.is_context(InputRouter.Context.WORLD) or InputRouter.is_context(InputRouter.Context.OBSERVE)
+	if not movable:
 		_update_frame()
 		return
 	if Input.is_action_just_pressed("confirm"):

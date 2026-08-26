@@ -9,6 +9,8 @@ const TEST_SCRIPTS: Array[String] = [
 	"res://tests/test_grid_movement.gd",
 	"res://tests/test_damage.gd",
 	"res://tests/test_battle.gd",
+	"res://tests/test_boss.gd",
+	"res://tests/test_demo_flow.gd",
 	"res://tests/test_encounter.gd",
 	"res://tests/test_inventory.gd",
 	"res://tests/test_party.gd",
@@ -29,6 +31,8 @@ func _initialize() -> void:
 		var suite: RefCounted = script.new()
 		var context := TestContext.new(path)
 		suite.run(context)
+		if context.assert_count == 0:
+			context.failures.append("suite ran zero asserts (aborted by runtime error?)")
 		total_asserts += context.assert_count
 		total_failures += context.failures.size()
 		print("%s  %s (%d asserts)" % ["PASS " if context.failures.is_empty() else "FAIL ", path, context.assert_count])

@@ -40,6 +40,11 @@ var battle_bg: String = "village"
 var fog: bool = false
 var smoke_cells: Array[Vector2i] = []
 var hidden_deco: Array[Dictionary] = []
+var clues: Array[Dictionary] = []
+var triggers: Array[Dictionary] = []
+var auto_dialogues: Array[Dictionary] = []
+var ambience: String = "none"
+var ambience_restored: String = ""
 
 
 static func from_dict(map_id: String, data: Dictionary) -> MapData:
@@ -74,6 +79,14 @@ static func from_dict(map_id: String, data: Dictionary) -> MapData:
 		map.smoke_cells.append(Vector2i(int(cell_data.get("x", 0)), int(cell_data.get("y", 0))))
 	for entry: Variant in Array(data.get("hidden_deco", [])):
 		map.hidden_deco.append(Dictionary(entry))
+	for entry: Variant in Array(data.get("clues", [])):
+		map.clues.append(Dictionary(entry))
+	for entry: Variant in Array(data.get("triggers", [])):
+		map.triggers.append(Dictionary(entry))
+	for entry: Variant in Array(data.get("auto_dialogue", [])):
+		map.auto_dialogues.append(Dictionary(entry))
+	map.ambience = String(data.get("ambience", "none"))
+	map.ambience_restored = String(data.get("ambience_restored", ""))
 	return map
 
 

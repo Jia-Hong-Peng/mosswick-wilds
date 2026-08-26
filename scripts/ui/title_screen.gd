@@ -5,7 +5,9 @@ extends Control
 const MENU_NEW_GAME := 0
 const MENU_CONTINUE := 1
 const MENU_VOLUME := 2
-const MENU_COUNT := 3
+const MENU_FLASH := 3
+const MENU_SHAKE := 4
+const MENU_COUNT := 5
 
 var _cursor := 0
 var _has_save := false
@@ -56,6 +58,14 @@ func _activate() -> void:
 				AudioManager.play_bump()
 		MENU_VOLUME:
 			AudioManager.play_confirm()
+		MENU_FLASH:
+			AudioManager.set_reduce_flash(not AudioManager.reduce_flash)
+			AudioManager.play_confirm()
+			_refresh()
+		MENU_SHAKE:
+			AudioManager.set_reduce_shake(not AudioManager.reduce_shake)
+			AudioManager.play_confirm()
+			_refresh()
 
 
 func _refresh() -> void:
@@ -64,6 +74,8 @@ func _refresh() -> void:
 		"新的觀測",
 		"繼續觀測",
 		"音量　◂ %d%% ▸" % volume_percent,
+		"減少閃爍：%s" % ("開" if AudioManager.reduce_flash else "關"),
+		"減少震動：%s" % ("開" if AudioManager.reduce_shake else "關"),
 	]
 	for i in range(_rows.size()):
 		var row := _rows[i]

@@ -4,6 +4,7 @@ extends Node
 const TITLE_SCENE := "res://scenes/main/title_screen.tscn"
 const WORLD_SCENE := "res://scenes/world/world_scene.tscn"
 const BATTLE_SCENE := "res://scenes/battle/battle_scene.tscn"
+const BOSS_SCENE := "res://scenes/battle/boss_battle_scene.tscn"
 
 
 func goto_title() -> void:
@@ -20,10 +21,14 @@ func goto_world_at(map_id: String, cell: Vector2i, facing: Vector2i) -> void:
 	_change(WORLD_SCENE)
 
 
-## encounter: {"creature_id": String, "level": int}
+## encounter: {"creature_id": String, "level": int, "bg": String, "scripted": String}
 func goto_battle(encounter: Dictionary) -> void:
 	GameState.pending_encounter = encounter
 	_change(BATTLE_SCENE)
+
+
+func goto_boss() -> void:
+	_change(BOSS_SCENE)
 
 
 func _change(path: String) -> void:

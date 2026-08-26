@@ -18,6 +18,14 @@
 | 觸控按鍵（normal+pressed） | `assets/ui/arrow_*.png`、`btn_*.png` | 18–26px 儀器風 | 🟨 |
 | 屬性圖示（林/潮/訊/中性） | `assets/ui/elem_*.png` | 12×12 | 🟨 |
 | 道具圖示（青草膏/共鳴匣） | `assets/ui/item_*.png` | 16×16 | 🟨 |
+| 立繪（玩家×5／沈芮×4／阿海伯×4 表情） | `assets/portraits/*.png` | 40×48 胸像、參數化眉眼口 | 🟨 |
+| 頭目失衡體（Idle×2/充能/攻擊/虛弱） | `assets/creatures/magshell_{unbalanced,charge,attack,weak}.png` | 64×64 | 🟨 |
+| 迴靈姿勢幀（前搖/攻擊/虛弱/安定 ×3 隻） | `assets/creatures/*_{antic,attack,weak,calm}.png` | 64×64 | 🟨 |
+| 觀測線索（潮痕/電波/波紋 ×2 幀） | `assets/ui/clue_*.png` | 16×16 | 🟨 |
+| 戰鬥 VFX（防禦弧/逆頻箭/共鳴環） | `assets/ui/{guard_arc,jam_bolt,resonance_ring}.png` | — | 🟨 |
+| 觀測站戰鬥背景 | `assets/battle/bg_station.png` | 320×180 | 🟨 |
+| 觀測觸控鍵（normal+pressed） | `assets/ui/btn_observe*.png` | 22px | 🟨 |
+| 穩定回聲圖示 | `assets/ui/item_stable_echo.png` | 16×16 | 🟨 |
 | 接觸陰影／霧片 | `assets/ui/contact_shadow.png`、`fog_blob.png` | — | ✅ |
 | 遊戲圖示 | `assets/ui/icon.png` | 128×128 | 🟨 |
 | 字型 | `assets/fonts/fusion-pixel-12px-tc.ttf` | 12px 繁中像素字型（OFL） | ✅ |

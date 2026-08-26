@@ -27,13 +27,13 @@ func _cleanup() -> void:
 
 func _payload() -> Dictionary:
 	return {
-		"schema_version": 2,
+		"schema_version": 3,
 		"map_id": "trail",
 		"player": {"x": 6, "y": 8, "facing": "left"},
 		"party": [{"creature_id": "mosshorn", "level": 6, "hp": 20}],
 		"inventory": {"herbal_balm": 2, "echo_box": 4},
-		"flags": {"met_rei": true},
-		"settings": {"master_volume": 0.5},
+		"flags": {"opening_done": true, "clue_signal": true, "boss_hint": true},
+		"settings": {"master_volume": 0.5, "reduce_flash": true, "reduce_shake": false},
 	}
 
 
@@ -51,8 +51,10 @@ func _test_roundtrip(t: TestContext) -> void:
 	t.check_eq(party.size(), 1, "隊伍往返一致")
 	t.check_eq(int(Dictionary(party[0]).get("hp", -1)), 20, "隊伍 HP 往返一致")
 	t.check_eq(int(Dictionary(loaded.get("inventory", {})).get("echo_box", -1)), 4, "背包往返一致")
-	t.check(bool(Dictionary(loaded.get("flags", {})).get("met_rei", false)), "旗標往返一致")
-	t.check(absf(float(Dictionary(loaded.get("settings", {})).get("master_volume", 0.0)) - 0.5) < 0.0001, "設定往返一致")
+	t.check(bool(Dictionary(loaded.get("flags", {})).get("boss_hint", false)), "觀測線索旗標往返一致")
+	var settings := Dictionary(loaded.get("settings", {}))
+	t.check(absf(float(settings.get("master_volume", 0.0)) - 0.5) < 0.0001, "音量往返一致")
+	t.check(bool(settings.get("reduce_flash", false)), "Accessibility 設定往返一致")
 	var second := _payload()
 	second["map_id"] = "home"
 	t.check(SaveScript.write_payload(TEST_PATH, second), "第二次寫入必須成功")
@@ -95,7 +97,8 @@ func _test_v1_migration(t: TestContext) -> void:
 	}
 	var migrated := SaveScript.migrate(v1)
 	t.check(not migrated.is_empty(), "v1 存檔必須可遷移")
-	t.check_eq(int(migrated.get("schema_version", 0)), 2, "遷移後版本為 2")
+	t.check_eq(int(migrated.get("schema_version", 0)), 3, "遷移後版本為最新（3）")
+	t.check(Dictionary(migrated.get("settings", {})).has("reduce_flash"), "遷移鏈補上 Accessibility 欄位")
 	t.check_eq(String(migrated.get("map_id", "")), "harbor", "舊地圖重設為霧港村")
 	var party := Array(migrated.get("party", []))
 	t.check_eq(String(Dictionary(party[0]).get("creature_id", "")), "mosshorn", "peatpaw → mosshorn")
@@ -104,6 +107,16 @@ func _test_v1_migration(t: TestContext) -> void:
 	var inventory := Dictionary(migrated.get("inventory", {}))
 	t.check_eq(int(inventory.get("herbal_balm", -1)), 2, "berry_tonic → herbal_balm")
 	t.check_eq(int(inventory.get("echo_box", -1)), 4, "snare_orb → echo_box")
+	# v2 → v3 單獨遷移
+	var v2 := _payload()
+	v2["schema_version"] = 2
+	var settings_v2 := Dictionary(v2["settings"])
+	settings_v2.erase("reduce_flash")
+	settings_v2.erase("reduce_shake")
+	v2["settings"] = settings_v2
+	var migrated_v2 := SaveScript.migrate(v2)
+	t.check_eq(int(migrated_v2.get("schema_version", 0)), 3, "v2 遷移到 3")
+	t.check(not bool(Dictionary(migrated_v2.get("settings", {})).get("reduce_flash", true)), "v2 遷移補預設值（關）")
 
 
 func _test_tmp_fallback(t: TestContext) -> void:
@@ -125,7 +138,7 @@ func _test_service_roundtrip(t: TestContext) -> void:
 	t.check_eq(GameState.player_facing, Vector2i.LEFT, "apply_payload 還原朝向")
 	t.check_eq(PartyService.size(), 1, "apply_payload 還原隊伍")
 	t.check_eq(InventoryService.count("herbal_balm"), 2, "apply_payload 還原背包")
-	t.check(EventFlagStore.has_flag("met_rei"), "apply_payload 還原旗標")
+	t.check(EventFlagStore.has_flag("clue_signal"), "apply_payload 還原觀測線索")
 	var collected: Dictionary = SaveService.collect_payload()
 	t.check_eq(int(collected.get("schema_version", 0)), SaveScript.SCHEMA_VERSION, "collect 蓋上目前版本")
 	t.check_eq(String(collected.get("map_id", "")), "trail", "collect 反映還原後狀態")

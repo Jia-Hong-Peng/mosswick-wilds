@@ -1,116 +1,94 @@
-# 潮霧群島 Tidemist Isles
+# 潮霧群島 Tidemist Isles — 第一章：失聲的港灣
 
-原創 2D 像素俯視角 RPG 的 **Vertical Slice**。你是霧港村新上任的**回聲觀測員**：
-這座亞熱帶群島的環境會把聲音留在物質裡，吸附了回聲的生物成為「**迴靈**」。
-古道的回聲三週來持續變薄、封存三十年的觀測塔半夜自己開始廣播——
-你的工作不是變強，是**弄清楚牠們在聽什麼**。
+原創 2D 像素 RPG 的 **3–5 分鐘完整關卡 DEMO**。
+霧港村的浮標還在浪裡搖，鐘聲卻消失了。你是新上任的**回聲觀測員**：
+用回聲觀測判讀線索、穿過潮霧古道、在廢棄潮汐觀測站面對被三十年殘留訊號
+纏住的**磁殼仔**——不是打倒牠，而是在正確的時機**建立共鳴**，把耳朵還給海。
 
-世界觀：`docs/world-bible.md`｜美術：`docs/art-bible.md`＋`docs/palette.md`｜
-UI：`docs/ui-system.md`｜稽核：`docs/visual-audit.md`（Before/After 截圖）
+**線上遊玩：https://jia-hong-peng.github.io/mosswick-wilds/**
+
+設計文件：`docs/`（world-bible／art-bible／palette／ui-system／narrative-script／
+text-style-guide／vertical-slice-audit／quality-scorecard／asset-manifest／asset-licenses）
 
 ![Title](docs/screenshots/after/title.png)
 
-| 霧港村 | 潮霧古道 |
+| 立繪對話開場 | 回聲觀測（線索判讀） |
 |---|---|
-| ![Harbor](docs/screenshots/after/world_harbor.png) | ![Trail](docs/screenshots/after/world_trail.png) |
+| ![Opening](docs/screenshots/after/dialogue_opening.png) | ![Observe](docs/screenshots/after/observe_clue.png) |
 
-| 較勁（戰鬥） | 觀測手冊 |
+| 頭目戰（前兆判讀） | 關卡完成 |
 |---|---|
-| ![Battle](docs/screenshots/after/battle_menu.png) | ![Menu](docs/screenshots/after/menu_party.png) |
+| ![Boss](docs/screenshots/after/boss_phase2.png) | ![Done](docs/screenshots/after/chapter_card.png) |
 
-## 使用技術
+## DEMO 流程（首玩約 4.5–5 分鐘）
+
+```text
+0:00 廣場異常（浮標無聲、觀測站閃光）→ 兩句對話交付目標
+0:30 村口回聲觀測：三線索擇二 → 路徑判讀（選錯＝30 秒潮翼教學遭遇，不懲罰）
+1:15 潮霧古道：補給箱／傾倒天線／可選觀測位（取得頭目前兆明示）／異常加劇
+2:00 觀測站進場演出（可跳過）：設備自醒 → 聲音消失 → 磁殼仔現身
+2:30 兩階段頭目戰（60–90 秒）：判讀前兆 → 防禦強波 → 干擾充能 → 紊亂窗口共鳴
+4:00 鐘聲回歸 → 色彩變暖 → 取得「穩定回聲」→ 自動存檔 → 章節完成 → 遠方訊號伏筆
+```
+
+## 操作
+
+```text
+方向鍵 / WASD : 移動　　Z / Enter : 確認・調查
+C             : 回聲觀測（線索顯形、環境音收窄）
+X / Escape    : 取消・跳過演出　　M : 觀測手冊
+```
+
+觸控裝置自動顯示儀器按鍵（十字鍵／確認／取消／觀測／選單）。
+標題選單含音量與「減少閃爍／減少震動」輔助選項。
+
+## 技術
 
 | 項目 | 值 |
 |---|---|
-| Engine | Godot **4.7.2 Stable**（CI 釘此版；本機以 4.7.1 Stable 驗證） |
-| 語言 | typed GDScript（untyped_declaration warning 開啟） |
-| Renderer | Compatibility（GL） |
-| 解析度 | 320×180、integer scaling、Nearest、無 mipmaps |
-| Tile | 16×16；角色 16×24；迴靈戰鬥畫布 64×64 |
-| 色盤 | 全域 40 色（`docs/palette.md`） |
-| 字型 | Fusion Pixel 12px 繁中（OFL，關閉 AA/subpixel） |
-| 主要平台 | Web（次要：Windows） |
+| Engine | Godot **4.7.2 Stable**（CI 釘死；本機 4.7.1 驗證） |
+| 規格 | typed GDScript・Compatibility・320×180 integer scaling・Nearest・16px tile |
+| 色盤 | 全域 42 色（紫紅僅用於異常電波） |
+| 字型 | Fusion Pixel 12px 繁中（OFL） |
+| 音訊 | 全程序化合成：6 種環境音狀態＋頭目雙層音樂＋22 種 SFX |
+| 存檔 | user:// JSON・原子寫入・Schema v3（v1/v2 自動遷移）・通關自動存檔 |
 
-## 本機啟動
+## 驗證指令
 
 ```powershell
 $godot = 'D:\Tools\Godot\4.7.1-stable-standard\Godot_v4.7.1-stable_win64_console.exe'
-& $godot --editor --path .   # 開編輯器
-& $godot --path .            # 直接跑遊戲
-& $godot --headless --path . --import   # 第一次 clone 後先 import
-```
-
-## 操作方法
-
-```text
-方向鍵 / WASD : 移動（格狀四方向；輕點轉向、長按行走）
-Z / Enter     : 確認、對話、調查
-X / Escape    : 取消、返回
-M             : 觀測手冊（隊伍／工具包／記錄）
-```
-
-觸控裝置自動顯示儀器風按鍵：左下十字鍵、右下確認（珊瑚）／取消（海藍）、右上選單。
-
-## 測試與驗證
-
-```powershell
 & $godot --headless --path . --import                              # Headless 驗證
-& $godot --headless --path . --script res://tests/run_tests.gd     # 自動化測試（880 asserts）
-& $godot --headless --path . --export-release "Web" build/web/index.html   # Web Export
-& $godot --path . --resolution 1280x720 -- --tour                  # 視覺 QA：自動截圖到 build/qa/
+& $godot --headless --path . --script res://tests/run_tests.gd     # 1021 asserts
+& $godot --headless --path . --export-release "Web" build/web/index.html
+& $godot --path . --resolution 1280x720 -- --tour                  # 自動完整通關＋計時＋截圖
+& $godot --path . --resolution 1280x720 -- --tour-wrong            # 錯誤路線／教學遭遇
+& $godot --path . --resolution 1280x720 -- --tour-continue         # Continue 恢復驗證
 ```
 
-測試涵蓋：穿牆／斜向禁止／物件層碰撞／warp 格規則、傷害公式 seed 重放、
-速度順序、道具扣除、收錄成敗（clone-RNG）、隊伍上限、存檔往返、損壞容錯、
-`.tmp` 復原、**Schema v1→v2 遷移**、全場景載入、全腳本編譯、
-資料完整性（legend 覆蓋／圖塊存在／warp 落點可走／素材檔存在，452 項）。
+測試涵蓋：頭目規則（前兆一致／攻擊下限／干擾窗口／共鳴時機／教科書打法必勝）、
+DEMO 流程（觀測情境／對話凍結移動／路徑選擇旗標／結局旗標＋自動存檔＋Continue）、
+存檔 v1→v3 遷移鏈、資料引用完整性（立繪/線索/觸發器/warp 527 項）等。
 
-## Web Export 與 GitHub Pages
-
-- Preset `Web` → `build/web/`；`thread_support=false`，免 COOP/COEP，任何靜態站可放。
-- CI（`.github/workflows/deploy-web.yml`）：push `main` → 裝 Godot 4.7.2 →
-  驗證 → 測試 → Export → 部署 Pages。
-- 線上版：https://jia-hong-peng.github.io/mosswick-wilds/
-
-## 專案架構
+## 專案架構重點
 
 ```text
-res://
-├─ assets/           程式生成的像素素材（tilesets/characters/creatures/battle/ui/fonts）
-├─ data/             全資料驅動（JSON）
-│  ├─ creatures/ skills/ items/ encounters/ dialogue/
-│  └─ maps/          三層網格（ground/deco/overhead）＋per-map legend＋warp/互動點/NPC/炊煙/霧
-├─ scenes/           薄場景（root＋script）
-├─ scripts/
-│  ├─ domain/        純規則（RefCounted、RNG 注入）：BattleService/DamageCalculator/
-│  │                 EncounterSystem/GridMovement/MapData…
-│  ├─ core/          Autoload：GameState/SceneRouter/InputRouter/DialogueManager/
-│  │                 EventFlagStore/Party/Inventory/Audio/DataRegistry/DebugTour
-│  ├─ persistence/   SaveService（原子寫入、v1→v2 migration、位置安全網）
-│  ├─ world/         三層 TileMap 渲染（動畫 tile）、玩家（4 幀步行＋腳步聲）、NPC（微動作）
-│  ├─ ui/            UiTheme 設計系統＋各畫面
-│  └─ battle/        戰鬥演出（進場/前搖/受擊/震動/粒子/收錄動畫/結算）
-├─ tools/pixgen/     素材產生器（Pal 色盤／Pix 繪圖庫／tiles/characters/creatures/ui/backgrounds）
-├─ tests/            headless 測試（run_tests.gd）
-└─ docs/             world-bible / art-bible / palette / ui-system /
-                     visual-audit / asset-manifest / asset-licenses / screenshots(before,after)
+scripts/domain/boss_battle_service.gd   頭目規則（純邏輯、前兆制、可注入 RNG）
+scripts/world/world_scene.gd            觀測模式／觸發器／演出 FX／結局導演
+scripts/battle/boss_battle_scene.gd     前兆橫幅／姿勢幀／共鳴演出
+scripts/core/{dialogue_manager,audio_manager,debug_tour}.gd
+data/maps/*.json                        三層網格＋線索/觸發器/自動對話（資料驅動）
+tools/pixgen/*                          全素材產生器（含立繪 gen_portraits）
 ```
 
-## 素材替換方式
+## 已知限制（誠實清單）
 
-全部素材為程式生成的「設計稿」，狀態與替換規則見 **`docs/asset-manifest.md`**：
-同路徑、同尺寸、同表格佈局覆蓋即生效，不需改程式；色盤限 40 色、Nearest、
-角色腳底貼齊畫布底、圖集佈局以 `tile_catalog.gd` 為準。
-
-## 已知限制
-
-- 無經驗值／升級／進化；無屬性相剋（僅同屬性技能加成）。
-- 無背景音樂（14 類 SFX 為程序化合成）；素材屬設計稿等級（見 asset-manifest 🟨 項）。
-- 敵方 AI 隨機選招；單一存檔欄位；Windows preset 未實測（本機僅裝 Web templates）。
+- 全素材為**程式生成設計稿**（合規於 art-bible，工藝低於手繪；替換規則見 asset-manifest）。
+- 通關時間為自動化 bot 實測（43 秒）換算的人類估計，未做真人試玩取樣。
+- 音訊為合成器等級，無旋律主題曲；行動裝置未實機測試。
+- 指令清單開啟時會暫時遮住頭目本體（320 寬度取捨）。
 
 ## Roadmap
 
-1. 舊觀測塔章節：磁帶播放解謎＋首領級異常迴靈。
-2. 經驗值／成長與換角上場；狀態效果。
-3. 專業美術重繪 manifest 🟨 項；BGM（海霧環境音）。
-4. i18n 框架（translation csv）＋英文版。
+1. 第二章：遠方島嶼的訊號源（伏筆兌現）＋觀測機制深化（頻率匹配小玩法）。
+2. 專業美術重繪 manifest 🟨 項；主題曲與環境錄音。
+3. 真人試玩取樣與節奏調校；手機實機驗證。

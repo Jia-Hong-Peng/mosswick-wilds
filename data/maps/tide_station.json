@@ -1,0 +1,62 @@
+{
+	"display_name": "廢棄潮汐觀測站",
+	"battle_bg": "station",
+	"encounter_key": "",
+	"fog": false,
+	"ambience": "station",
+	"ambience_restored": "harbor_restored",
+	"legend_ground": {
+		"k": "wall_plank_top", "W": "wall_plank", "N": "window_in", "M": "map_wall",
+		"u": "wood_floor_a", "U": "wood_floor_b", "m": "rug_border"
+	},
+	"legend_deco": {
+		"I": "instrument", "T": "tape_shelf", "N": "console_rust",
+		"C": "chair", "o": "plant_pot", "c": "crate", "V": "vine_wall"
+	},
+	"legend_overhead": {},
+	"ground": [
+		"kkkkkkkkkkkkkkk",
+		"kWNWWWWMWWNWWWk",
+		"kuUuuUuuUuuUuuk",
+		"kUuuuuUuuuuUuuk",
+		"kuuUuuuuuUuuUuk",
+		"kmuuUuuuuuUuuuk",
+		"kUuuuuUuuUuuuuk",
+		"kuuUuuuuuuuUuuk",
+		"kUuuuuuUuuUuuuk",
+		"kuuuUuuuuuuuUuk",
+		"kkkkkkkkkkkkkkk"
+	],
+	"deco": [
+		"...............",
+		".....V...V.....",
+		"..I.I..N..I.T..",
+		"...........C...",
+		"..o............",
+		"...............",
+		"...........c...",
+		"..T............",
+		"...............",
+		"...............",
+		"..............."
+	],
+	"overhead": [],
+	"spawn": { "x": 2, "y": 5, "facing": "right" },
+	"warps": [
+		{ "x": 1, "y": 5, "target_map": "trail", "target_x": 14, "target_y": 3, "facing": "left" }
+	],
+	"signs": [
+		{ "x": 7, "y": 2, "dialogue_id": "point_station_console" },
+		{ "x": 12, "y": 2, "dialogue_id": "point_station_tapes" }
+	],
+	"triggers": [
+		{ "x": 6, "y": 5, "dialogue_id": "boss_confront", "if_flag": "station_entered", "if_flag_not": "level1_complete" },
+		{ "x": 7, "y": 5, "dialogue_id": "boss_confront", "if_flag": "station_entered", "if_flag_not": "level1_complete" },
+		{ "x": 6, "y": 4, "dialogue_id": "boss_confront", "if_flag": "station_entered", "if_flag_not": "level1_complete" },
+		{ "x": 6, "y": 6, "dialogue_id": "boss_confront", "if_flag": "station_entered", "if_flag_not": "level1_complete" }
+	],
+	"auto_dialogue": [
+		{ "dialogue_id": "station_entry", "fire_flag": "station_entered", "if_flag_not": "level1_complete" }
+	],
+	"npcs": []
+}

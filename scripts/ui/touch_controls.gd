@@ -13,6 +13,7 @@ func _ready() -> void:
 	_add_button("arrow_right", "move_right", Vector2(50, 138), true)
 	_add_button("btn_confirm", "confirm", Vector2(288, 134), false)
 	_add_button("btn_cancel", "cancel", Vector2(258, 152), false)
+	_add_button("btn_observe", "observe", Vector2(288, 104), false)
 	_add_button("btn_menu", "menu", Vector2(296, 24), false)
 
 

@@ -43,7 +43,5 @@
 		{ "x": 2, "y": 2, "dialogue_id": "point_instruments" },
 		{ "x": 9, "y": 2, "dialogue_id": "point_tapes" }
 	],
-	"npcs": [
-		{ "id": "rei", "x": 5, "y": 4, "sprite": "res://assets/characters/npc_rei.png", "facing": "down", "dialogue_id": "npc_rei" }
-	]
+	"npcs": []
 }

@@ -1,15 +1,26 @@
 extends Node
-## Autoload：主音量＋程序化 SFX（方波／噪音合成，零版權素材）。
-## 音效分類見 docs/asset-licenses.md；所有波形於執行期生成並快取。
+## Autoload：音量／輔助設定、程序化 SFX、環境音狀態機與頭目戰音樂。
+## 所有聲音皆於執行期以方波／正弦／濾波噪音合成（零外部素材，見
+## docs/asset-licenses.md）。環境音參與敘事：霧港村「缺少鐘聲」→
+## 通關後鐘聲回歸（docs/vertical-slice-audit.md §9）。
 
 const SETTINGS_PATH := "user://settings.json"
 const MIX_RATE := 22050
 
 var master_volume: float = 0.8
+var reduce_flash := false
+var reduce_shake := false
 
 var _players: Array[AudioStreamPlayer] = []
 var _next_player := 0
 var _cache: Dictionary = {}
+
+var _amb_player: AudioStreamPlayer
+var _hum_player: AudioStreamPlayer
+var _music_player: AudioStreamPlayer
+var _music_layer: AudioStreamPlayer
+var _ambience_profile := ""
+var _observing := false
 
 
 func _ready() -> void:
@@ -17,9 +28,17 @@ func _ready() -> void:
 		var player := AudioStreamPlayer.new()
 		add_child(player)
 		_players.append(player)
+	_amb_player = AudioStreamPlayer.new()
+	_hum_player = AudioStreamPlayer.new()
+	_music_player = AudioStreamPlayer.new()
+	_music_layer = AudioStreamPlayer.new()
+	for extra: AudioStreamPlayer in [_amb_player, _hum_player, _music_player, _music_layer]:
+		add_child(extra)
 	load_settings()
 	_apply_volume()
 
+
+# ====== 設定（含 Accessibility） ======
 
 func set_master_volume(volume: float) -> void:
 	master_volume = clampf(volume, 0.0, 1.0)
@@ -27,7 +46,125 @@ func set_master_volume(volume: float) -> void:
 	save_settings()
 
 
-# --- 介面音 ---
+func set_reduce_flash(active: bool) -> void:
+	reduce_flash = active
+	save_settings()
+
+
+func set_reduce_shake(active: bool) -> void:
+	reduce_shake = active
+	save_settings()
+
+
+func load_settings() -> void:
+	if not FileAccess.file_exists(SETTINGS_PATH):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SETTINGS_PATH))
+	if parsed is Dictionary:
+		var data := Dictionary(parsed)
+		master_volume = clampf(float(data.get("master_volume", master_volume)), 0.0, 1.0)
+		reduce_flash = bool(data.get("reduce_flash", false))
+		reduce_shake = bool(data.get("reduce_shake", false))
+
+
+func save_settings() -> void:
+	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
+	if file == null:
+		return
+	file.store_string(JSON.stringify({
+		"master_volume": master_volume,
+		"reduce_flash": reduce_flash,
+		"reduce_shake": reduce_shake,
+	}))
+	file.close()
+
+
+func _apply_volume() -> void:
+	var bus := AudioServer.get_bus_index("Master")
+	AudioServer.set_bus_mute(bus, master_volume <= 0.001)
+	AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(master_volume, 0.001)))
+
+
+# ====== 環境音狀態機 ======
+
+## profile: harbor_muted | harbor_restored | trail | station | none
+func set_ambience(profile: String) -> void:
+	if profile == _ambience_profile:
+		return
+	_ambience_profile = profile
+	if profile == "none":
+		_fade_out(_amb_player)
+		return
+	var key := "amb_" + profile
+	if not _cache.has(key):
+		_cache[key] = _build_ambience(profile)
+	_amb_player.stream = _cache[key]
+	_amb_player.volume_db = -60.0
+	_amb_player.play()
+	var tween := create_tween()
+	tween.tween_property(_amb_player, "volume_db", _amb_target_db(), 0.8)
+
+
+## 觀測模式：環境聲收窄（壓低）＋細微儀器嗡鳴
+func set_observe_filter(active: bool) -> void:
+	if _observing == active:
+		return
+	_observing = active
+	var tween := create_tween()
+	tween.tween_property(_amb_player, "volume_db", _amb_target_db(), 0.4)
+	if active:
+		if not _cache.has("amb_hum"):
+			_cache["amb_hum"] = _build_hum()
+		_hum_player.stream = _cache["amb_hum"]
+		_hum_player.volume_db = -26.0
+		_hum_player.play()
+	else:
+		_fade_out(_hum_player)
+
+
+func _amb_target_db() -> float:
+	return -22.0 if _observing else -8.0
+
+
+func play_music(kind: String) -> void:
+	if kind == "":
+		_fade_out(_music_player)
+		_fade_out(_music_layer)
+		return
+	var key := "music_" + kind
+	if not _cache.has(key):
+		_cache[key] = _build_music()
+	_music_player.stream = _cache[key]
+	_music_player.volume_db = -14.0
+	_music_player.play()
+
+
+## 頭目第二階段：加入高音琶音層
+func set_music_layer(active: bool) -> void:
+	if active:
+		if not _cache.has("music_layer"):
+			_cache["music_layer"] = _build_music_layer()
+		_music_layer.stream = _cache["music_layer"]
+		_music_layer.volume_db = -16.0
+		_music_layer.play()
+	else:
+		_fade_out(_music_layer)
+
+
+func stop_music() -> void:
+	play_music("")
+
+
+func _fade_out(player: AudioStreamPlayer) -> void:
+	if not player.playing:
+		return
+	var tween := create_tween()
+	tween.tween_property(player, "volume_db", -60.0, 0.6)
+	tween.tween_callback(player.stop)
+
+
+# ====== 介面與世界 SFX ======
+
 func play_confirm() -> void:
 	_play("confirm", func() -> AudioStreamWAV: return _tone([[760.0, 0.05], [1020.0, 0.05]], 0.22))
 
@@ -37,7 +174,7 @@ func play_cancel() -> void:
 
 
 func play_bump() -> void:
-	_play("bump", func() -> AudioStreamWAV: return _noise(0.05, 0.18, 900.0))
+	_play("bump", func() -> AudioStreamWAV: return _noise_sfx(0.05, 0.18, 900.0))
 
 
 func play_talk() -> void:
@@ -52,24 +189,40 @@ func play_door() -> void:
 	_play("door", func() -> AudioStreamWAV: return _tone([[300.0, 0.05], [220.0, 0.07]], 0.2))
 
 
-# --- 腳步 ---
 func play_step(kind: String) -> void:
 	match kind:
 		"grass":
-			_play("step_grass", func() -> AudioStreamWAV: return _noise(0.035, 0.1, 2200.0))
+			_play("step_grass", func() -> AudioStreamWAV: return _noise_sfx(0.035, 0.1, 2200.0))
 		"splash":
-			_play("step_splash", func() -> AudioStreamWAV: return _noise(0.07, 0.16, 1400.0))
+			_play("step_splash", func() -> AudioStreamWAV: return _noise_sfx(0.07, 0.16, 1400.0))
 		_:
-			_play("step_hard", func() -> AudioStreamWAV: return _noise(0.03, 0.12, 600.0))
+			_play("step_hard", func() -> AudioStreamWAV: return _noise_sfx(0.03, 0.12, 600.0))
 
 
-# --- 戰鬥 ---
+func play_observe_on() -> void:
+	_play("observe_on", func() -> AudioStreamWAV: return _tone([[420.0, 0.06], [560.0, 0.09]], 0.16, "sine"))
+
+
+func play_observe_off() -> void:
+	_play("observe_off", func() -> AudioStreamWAV: return _tone([[560.0, 0.05], [420.0, 0.07]], 0.14, "sine"))
+
+
+func play_clue() -> void:
+	_play("clue", func() -> AudioStreamWAV: return _tone([[700.0, 0.05], [940.0, 0.05], [1180.0, 0.08]], 0.2, "sine"))
+
+
+func play_bell() -> void:
+	_play("bell", func() -> AudioStreamWAV: return _bell_tone())
+
+
+# ====== 戰鬥 SFX ======
+
 func play_encounter() -> void:
 	_play("encounter", func() -> AudioStreamWAV: return _tone([[880.0, 0.05], [660.0, 0.05], [440.0, 0.05], [330.0, 0.08]], 0.24))
 
 
 func play_attack() -> void:
-	_play("attack", func() -> AudioStreamWAV: return _noise(0.08, 0.16, 3200.0))
+	_play("attack", func() -> AudioStreamWAV: return _noise_sfx(0.08, 0.16, 3200.0))
 
 
 func play_hit() -> void:
@@ -78,6 +231,18 @@ func play_hit() -> void:
 
 func play_heal() -> void:
 	_play("heal", func() -> AudioStreamWAV: return _tone([[523.0, 0.06], [659.0, 0.06], [784.0, 0.08]], 0.2))
+
+
+func play_guard() -> void:
+	_play("guard", func() -> AudioStreamWAV: return _tone([[240.0, 0.05], [240.0, 0.08]], 0.22, "sine"))
+
+
+func play_jam() -> void:
+	_play("jam", func() -> AudioStreamWAV: return _tone([[1400.0, 0.03], [900.0, 0.03], [1400.0, 0.03], [700.0, 0.05]], 0.2))
+
+
+func play_phase_shift() -> void:
+	_play("phase", func() -> AudioStreamWAV: return _tone([[220.0, 0.08], [277.0, 0.08], [330.0, 0.12], [415.0, 0.16]], 0.24))
 
 
 func play_capture_throw() -> void:
@@ -92,33 +257,19 @@ func play_capture_fail() -> void:
 	_play("escaped", func() -> AudioStreamWAV: return _tone([[500.0, 0.06], [420.0, 0.06], [330.0, 0.1]], 0.2))
 
 
+func play_resonance_success() -> void:
+	_play("resonance", func() -> AudioStreamWAV: return _tone([[392.0, 0.1], [523.0, 0.1], [659.0, 0.1], [784.0, 0.2], [1046.0, 0.28]], 0.22, "sine"))
+
+
+func play_level_complete() -> void:
+	_play("level_done", func() -> AudioStreamWAV: return _tone([[523.0, 0.12], [659.0, 0.12], [784.0, 0.12], [1046.0, 0.2], [784.0, 0.1], [1046.0, 0.3]], 0.24, "sine"))
+
+
 func play_fanfare() -> void:
 	play_capture_success()
 
 
-# --- 內部 ---
-
-func load_settings() -> void:
-	if not FileAccess.file_exists(SETTINGS_PATH):
-		return
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SETTINGS_PATH))
-	if parsed is Dictionary:
-		master_volume = clampf(float(Dictionary(parsed).get("master_volume", master_volume)), 0.0, 1.0)
-
-
-func save_settings() -> void:
-	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
-	if file == null:
-		return
-	file.store_string(JSON.stringify({"master_volume": master_volume}))
-	file.close()
-
-
-func _apply_volume() -> void:
-	var bus := AudioServer.get_bus_index("Master")
-	AudioServer.set_bus_mute(bus, master_volume <= 0.001)
-	AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(master_volume, 0.001)))
-
+# ====== 合成核心 ======
 
 func _play(key: String, builder: Callable) -> void:
 	if _players.is_empty():
@@ -131,51 +282,162 @@ func _play(key: String, builder: Callable) -> void:
 	player.play()
 
 
-## 方波音序：notes = [[頻率, 秒數], ...]
-static func _tone(notes: Array, volume: float) -> AudioStreamWAV:
+static func _buffer(seconds: float) -> PackedByteArray:
+	var data := PackedByteArray()
+	data.resize(int(seconds * MIX_RATE) * 2)
+	return data
+
+
+static func _mix_add(data: PackedByteArray, index: int, sample: float) -> void:
+	var offset := index * 2
+	if offset + 1 >= data.size():
+		return
+	var current := data.decode_s16(offset)
+	var mixed := clampi(current + int(sample * 32767.0), -32767, 32767)
+	data.encode_s16(offset, mixed)
+
+
+static func _add_tone(data: PackedByteArray, start_s: float, dur_s: float, freq: float, vol: float, shape: String = "square", decay: bool = true) -> void:
+	var start := int(start_s * MIX_RATE)
+	var frames := int(dur_s * MIX_RATE)
+	for i in range(frames):
+		var t := float(i) / float(MIX_RATE)
+		var envelope := (1.0 - float(i) / float(frames)) if decay else 1.0
+		var value: float
+		if shape == "sine":
+			value = sin(TAU * freq * t)
+		else:
+			value = 1.0 if fmod(t * freq, 1.0) < 0.5 else -1.0
+		_mix_add(data, start + i, vol * envelope * value)
+
+
+static func _add_noise(data: PackedByteArray, start_s: float, dur_s: float, vol: float, cutoff: float, seed_value: int, fade_in: bool = false) -> void:
+	var start := int(start_s * MIX_RATE)
+	var frames := int(dur_s * MIX_RATE)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var previous := 0.0
+	var alpha := clampf(cutoff / float(MIX_RATE), 0.01, 0.9)
+	for i in range(frames):
+		var t := float(i) / float(frames)
+		var envelope := sin(t * PI) if fade_in else (1.0 - t)
+		previous += alpha * (rng.randf_range(-1.0, 1.0) - previous)
+		_mix_add(data, start + i, vol * envelope * previous * 2.0)
+
+
+static func _wrap_loop(data: PackedByteArray) -> AudioStreamWAV:
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = MIX_RATE
+	stream.stereo = false
+	stream.data = data
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_end = data.size() / 2
+	return stream
+
+
+static func _tone(notes: Array, volume: float, shape: String = "square") -> AudioStreamWAV:
 	var total := 0.0
 	for note: Variant in notes:
 		total += float(Array(note)[1])
-	var frames := int(total * MIX_RATE)
-	var data := PackedByteArray()
-	data.resize(frames * 2)
+	var data := _buffer(total)
+	var cursor := 0.0
 	var index := 0
 	for note: Variant in notes:
 		var freq := float(Array(note)[0])
-		var duration := float(Array(note)[1])
-		var note_frames := int(duration * MIX_RATE)
-		for i in range(note_frames):
-			if index >= frames:
-				break
-			var t := float(index) / float(MIX_RATE)
-			var envelope := 1.0 - float(index) / float(frames)
-			var square := 1.0 if fmod(t * freq, 1.0) < 0.5 else -1.0
-			data.encode_s16(index * 2, int(clampf(volume * envelope * square, -1.0, 1.0) * 32767.0))
-			index += 1
-	return _wrap(data)
+		var dur := float(Array(note)[1])
+		var fade := 1.0 - cursor / maxf(total, 0.01) * 0.5
+		_add_tone(data, cursor, dur, freq, volume * fade, shape)
+		cursor += dur
+		index += 1
+	return _wrap_plain(data)
 
 
-## 濾波噪音（腳步、撞擊、揮擊）
-static func _noise(duration: float, volume: float, cutoff: float) -> AudioStreamWAV:
-	var frames := int(duration * MIX_RATE)
-	var data := PackedByteArray()
-	data.resize(frames * 2)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = int(cutoff)
-	var previous := 0.0
-	var alpha := clampf(cutoff / float(MIX_RATE), 0.02, 0.9)
-	for i in range(frames):
-		var envelope := 1.0 - float(i) / float(frames)
-		var raw := rng.randf_range(-1.0, 1.0)
-		previous += alpha * (raw - previous)
-		data.encode_s16(i * 2, int(clampf(volume * envelope * previous * 2.0, -1.0, 1.0) * 32767.0))
-	return _wrap(data)
+static func _noise_sfx(duration: float, volume: float, cutoff: float) -> AudioStreamWAV:
+	var data := _buffer(duration)
+	_add_noise(data, 0.0, duration, volume, cutoff, int(cutoff))
+	return _wrap_plain(data)
 
 
-static func _wrap(data: PackedByteArray) -> AudioStreamWAV:
+static func _wrap_plain(data: PackedByteArray) -> AudioStreamWAV:
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = MIX_RATE
 	stream.stereo = false
 	stream.data = data
 	return stream
+
+
+static func _bell_tone() -> AudioStreamWAV:
+	var data := _buffer(1.4)
+	_add_tone(data, 0.0, 1.4, 660.0, 0.16, "sine")
+	_add_tone(data, 0.0, 1.1, 990.0, 0.07, "sine")
+	_add_tone(data, 0.0, 0.7, 1320.0, 0.04, "sine")
+	return _wrap_plain(data)
+
+
+## 環境音（8 秒循環）：以敘事狀態組層
+static func _build_ambience(profile: String) -> AudioStreamWAV:
+	var data := _buffer(8.0)
+	match profile:
+		"harbor_muted", "harbor_restored", "title":
+			# 海風（持續低頻噪）＋兩次浪湧
+			_add_noise(data, 0.0, 8.0, 0.10, 300.0, 11, true)
+			_add_noise(data, 0.6, 2.6, 0.14, 900.0, 12, true)
+			_add_noise(data, 4.4, 2.8, 0.13, 900.0, 13, true)
+			if profile == "harbor_restored":
+				# 浮標鐘聲回歸：每循環一響＋遠處回聲
+				_add_tone(data, 1.2, 1.4, 660.0, 0.12, "sine")
+				_add_tone(data, 1.2, 1.0, 990.0, 0.05, "sine")
+				_add_tone(data, 5.6, 1.2, 660.0, 0.06, "sine")
+		"trail":
+			# 山風＋葉浪，混入零星異常刮痕
+			_add_noise(data, 0.0, 8.0, 0.09, 500.0, 21, true)
+			_add_noise(data, 1.4, 1.2, 0.10, 2400.0, 22, true)
+			_add_noise(data, 5.2, 1.4, 0.10, 2400.0, 23, true)
+			_add_tone(data, 3.1, 0.05, 1800.0, 0.06)
+			_add_tone(data, 3.2, 0.04, 1400.0, 0.05)
+			_add_tone(data, 6.9, 0.06, 1700.0, 0.06)
+		"station":
+			# 不穩定機械脈衝＋斷續靜電
+			for i in range(6):
+				var beat := 0.4 + float(i) * 1.3 + (0.18 if i % 2 == 1 else 0.0)
+				_add_tone(data, beat, 0.14, 78.0, 0.16)
+				_add_tone(data, beat, 0.06, 156.0, 0.06)
+			_add_noise(data, 2.2, 0.3, 0.08, 4000.0, 31)
+			_add_noise(data, 5.7, 0.22, 0.08, 4000.0, 32)
+			_add_tone(data, 6.6, 0.05, 2100.0, 0.05)
+	return _wrap_loop(data)
+
+
+static func _build_hum() -> AudioStreamWAV:
+	var data := _buffer(2.0)
+	_add_tone(data, 0.0, 2.0, 110.0, 0.05, "sine", false)
+	_add_tone(data, 0.0, 2.0, 220.0, 0.025, "sine", false)
+	return _wrap_loop(data)
+
+
+## 頭目戰底層：3.27 秒（110bpm、8 分）方波 bass 循環
+static func _build_music() -> AudioStreamWAV:
+	var eighth := 60.0 / 110.0 / 2.0
+	var bass_notes: Array = [110.0, 110.0, 130.8, 110.0, 98.0, 98.0, 123.5, 130.8,
+		110.0, 110.0, 130.8, 146.8, 98.0, 98.0, 87.3, 98.0]
+	var data := _buffer(eighth * bass_notes.size())
+	for i in range(bass_notes.size()):
+		_add_tone(data, float(i) * eighth, eighth * 0.85, float(bass_notes[i]), 0.11)
+		if i % 4 == 0:
+			_add_noise(data, float(i) * eighth, 0.05, 0.10, 800.0, 40 + i)
+	return _wrap_loop(data)
+
+
+## 第二階段附加層：高八度 16 分琶音
+static func _build_music_layer() -> AudioStreamWAV:
+	var sixteenth := 60.0 / 110.0 / 4.0
+	var arp: Array = [440.0, 523.3, 659.3, 523.3, 440.0, 523.3, 698.5, 659.3,
+		440.0, 523.3, 659.3, 880.0, 392.0, 493.9, 587.3, 493.9,
+		440.0, 523.3, 659.3, 523.3, 440.0, 523.3, 698.5, 659.3,
+		349.2, 440.0, 523.3, 698.5, 392.0, 493.9, 587.3, 784.0]
+	var data := _buffer(sixteenth * arp.size())
+	for i in range(arp.size()):
+		_add_tone(data, float(i) * sixteenth, sixteenth * 0.7, float(arp[i]), 0.05)
+	return _wrap_loop(data)

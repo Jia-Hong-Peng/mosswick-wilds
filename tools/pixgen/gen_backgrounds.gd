@@ -11,7 +11,64 @@ static func generate() -> void:
 	_title_bg("res://assets/ui/title_bg.png")
 	_battle_bg_trail("res://assets/battle/bg_trail.png")
 	_battle_bg_village("res://assets/battle/bg_village.png")
+	_battle_bg_station("res://assets/battle/bg_station.png")
 	_palette_sheet("res://docs_src/palette.png")
+
+
+## ---------- 頭目戰背景：廢棄潮汐觀測站內部 ----------
+
+static func _battle_bg_station(path: String) -> void:
+	var c := Pix.img(W, H)
+	# 背景層：暗牆與高窗
+	Pix.rect(c, 0, 0, W, 70, Pal.NIGHT)
+	Pix.dither(c, 0, 0, W, 12, Pal.INK, Pal.NIGHT)
+	for x: int in [40, 150, 262]:
+		Pix.rect(c, x, 8, 22, 30, Pal.SLATE)
+		Pix.rect(c, x + 2, 10, 18, 26, Pal.SEA_DK)
+		Pix.dither(c, x + 2, 10, 18, 10, Pal.SEA_DK, Pal.MIST_DK)
+		Pix.vline(c, x + 10, 10, 26, Pal.SLATE)
+	# 中景：儀器牆剪影＋指示燈
+	var r := Pix.rng(61)
+	for i in range(6):
+		var mx := 6 + i * 54
+		var mh := r.randi_range(22, 34)
+		Pix.rect(c, mx, 70 - mh, 40, mh, Pal.INK)
+		Pix.rect(c, mx + 2, 70 - mh + 2, 36, mh - 2, Pal.SLATE)
+		Pix.rect(c, mx + 6, 70 - mh + 6, 12, 8, Pal.NIGHT)
+		Pix.px(c, mx + 8, 70 - mh + 8, Pal.GLITCH_LT if i % 2 == 0 else Pal.AMBER)
+		Pix.px(c, mx + 30, 70 - mh + 10, Pal.CORAL if i % 3 == 0 else Pal.SEA_PALE)
+		# 藤蔓
+		if i % 2 == 1:
+			for v in range(10):
+				Pix.px(c, mx + 4 + v / 2, 70 - mh - 4 + v, Pal.MOSS)
+	Pix.hline(c, 0, 70, W, Pal.INK)
+	# 地面：舊木地板
+	Pix.rect(c, 0, 71, W, 109, Pal.WOOD)
+	Pix.dither(c, 0, 71, W, 8, Pal.WOOD_DK, Pal.WOOD)
+	for y in range(78, 180, 12):
+		Pix.hline(c, 0, y, W, Pal.WOOD_DK)
+	for i in range(20):
+		Pix.hline(c, r.randi_range(0, W - 20), r.randi_range(74, 176), r.randi_range(6, 18), Pal.WOOD_LT)
+	# 異常電波紋（地板上的干涉環）
+	for ring: Array in [[240, 92, 40.0], [240, 92, 26.0], [76, 150, 30.0]]:
+		var cx := float(ring[0])
+		var cy := float(ring[1])
+		var radius := float(ring[2])
+		for angle in range(0, 360, 5):
+			var px := cx + cos(deg_to_rad(angle)) * radius
+			var py := cy + sin(deg_to_rad(angle)) * radius * 0.4
+			if int(py) > 72 and int(py) < H:
+				Pix.blend(c, int(px), int(py), Pal.GLITCH, 0.25)
+	_platform(c, 240, 86, 46, 12)
+	_platform(c, 76, 152, 54, 14)
+	# 前景：兩側傾倒的儀器架
+	Pix.rect(c, 0, 118, 26, 62, Pal.INK)
+	Pix.rect(c, 2, 122, 22, 58, Pal.SLATE)
+	Pix.px(c, 8, 130, Pal.AMBER)
+	Pix.rect(c, 296, 108, 24, 72, Pal.INK)
+	Pix.rect(c, 298, 112, 20, 68, Pal.SLATE)
+	Pix.px(c, 306, 120, Pal.GLITCH_LT)
+	Pix.save(c, path)
 
 
 ## ---------- 標題：霧港村的黃昏海面 ----------

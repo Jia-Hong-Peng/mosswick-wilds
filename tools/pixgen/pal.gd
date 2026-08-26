@@ -43,6 +43,8 @@ const SKIN_DK := Color("c49a72")
 const PAPER := Color("e8e2d0")
 const PAPER_DIM := Color("cfc7b2")
 const GRAY := Color("8c8a80")
+const GLITCH := Color("9c4f88")
+const GLITCH_LT := Color("d178b8")
 
 ## palette.png 的排列順序（名稱, 顏色）
 const ORDER: Array = [
@@ -57,6 +59,7 @@ const ORDER: Array = [
 	["CORAL", CORAL], ["CORAL_LT", CORAL_LT], ["AMBER_DK", AMBER_DK],
 	["AMBER", AMBER], ["AMBER_LT", AMBER_LT], ["SKIN", SKIN], ["SKIN_DK", SKIN_DK],
 	["PAPER", PAPER], ["PAPER_DIM", PAPER_DIM], ["GRAY", GRAY],
+	["GLITCH", GLITCH], ["GLITCH_LT", GLITCH_LT],
 ]
 
 

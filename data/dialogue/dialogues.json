@@ -1,112 +1,266 @@
 {
-	"npc_rei": {
+	"opening_harbor": {
+		"pages": [
+			{ "speaker": "阿海伯", "left": "haibo:doubt", "speaker_side": "left", "fx": "station_flash", "text": "浮標還在動——聲音卻不見了。" },
+			{ "speaker": "沈芮", "right": "rei:urgent", "speaker_side": "right", "text": "整個港的回聲正在被抽走。訊號源，是舊潮汐觀測站。" },
+			{ "speaker": "沈芮", "right": "rei:neutral", "speaker_side": "right", "text": "你去。到村口先「觀測」，跟著回聲走。" }
+		]
+	},
+	"gate_blocked": {
 		"variants": [
 			{
-				"if_flag_not": "met_rei",
-				"set_flag": "met_rei",
-				"grant_items": { "echo_box": 5 },
+				"if_flag": "level1_complete",
+				"pages": [ { "speaker": "路標", "text": "潮霧古道→　觀測站的方向，今天很安靜。" } ]
+			},
+			{
 				"pages": [
-					{ "speaker": "沈芮", "text": "臨時證帶了？好。看這條線——古道的回聲，三週來一直在變薄。" },
-					{ "speaker": "沈芮", "text": "更怪的是舊塔。封了三十年，天線最近半夜自己在送一段訊號，來源查不到。" },
-					{ "speaker": "沈芮", "text": "這五個共鳴匣拿去。迴靈放下戒心時錄下牠的回聲，牠就會跟你走一段。最多三隻。" },
-					{ "speaker": "沈芮", "text": "去古道。別趕牠們走——先弄清楚牠們在聽什麼。按 M 可以整理背包和記錄進度。" }
+					{ "speaker": "沈芮", "right": "rei:thinking", "speaker_side": "right", "text": "先觀測。回聲會告訴你方向——按下觀測鍵看看村口。" }
+				]
+			}
+		]
+	},
+	"clue_tide": {
+		"pages": [
+			{ "speaker": "潮痕", "left": "player:focused", "speaker_side": "left", "text": "沙上的潮痕全都退向低處海灣——這是自然的方向。" }
+		]
+	},
+	"clue_signal": {
+		"pages": [
+			{ "speaker": "電波刮痕", "left": "player:surprised", "speaker_side": "left", "text": "斷續的電波刮痕，一路往上坡去。這訊號不自然。" }
+		]
+	},
+	"clue_ripple": {
+		"pages": [
+			{ "speaker": "無聲波紋", "left": "player:worried", "speaker_side": "left", "text": "水面有波紋，卻沒有聲音。回聲被什麼吃掉了。" }
+		]
+	},
+	"gate_choice": {
+		"variants": [
+			{
+				"if_flag": "path_chosen",
+				"pages": [ { "speaker": "路標", "text": "潮霧古道→　沿著上坡的電波刮痕走。" } ]
+			},
+			{
+				"if_flag": "clues_ready",
+				"pages": [
+					{ "speaker": "路標", "left": "player:focused", "speaker_side": "left", "text": "路在這裡分成兩條。回聲，也分成兩種。" }
+				],
+				"choice": {
+					"prompt": "跟著哪個方向走？",
+					"options": [
+						{
+							"text": "上坡・電波刮痕",
+							"action": "choose_signal_path",
+							"pages_after": [
+								{ "speaker": "沈芮", "right": "rei:relieved", "speaker_side": "right", "text": "（無線電）對，往上坡。牠出手前會先「吸氣」——盯著天線看。" }
+							]
+						},
+						{
+							"text": "沿岸・自然潮痕",
+							"action": "choose_tide_path",
+							"pages_after": [
+								{ "speaker": "旁白", "left": "player:surprised", "speaker_side": "left", "text": "一隻潮翼被突來的寂靜嚇得炸了毛，朝你衝過來！" }
+							]
+						}
+					]
+				}
+			},
+			{
+				"pages": [
+					{ "speaker": "路標", "left": "player:neutral", "speaker_side": "left", "text": "字被鹽風磨掉了。先觀測，找兩條以上的線索再判斷。" }
+				]
+			}
+		]
+	},
+	"tutorial_after": {
+		"pages": [
+			{ "speaker": "旁白", "text": "潮翼安靜下來，朝上坡的方向叫了一聲。" },
+			{ "speaker": "沈芮", "right": "rei:neutral", "speaker_side": "right", "text": "（無線電）看來海不是源頭。上坡，跟著電波刮痕。" }
+		]
+	},
+	"point_antenna": {
+		"pages": [
+			{ "speaker": "傾倒的中繼天線", "text": "三十年前的中繼天線，鏽出了洞。今天，它在微微發燙。" }
+		]
+	},
+	"point_supply": {
+		"variants": [
+			{
+				"if_flag_not": "found_supply",
+				"set_flag": "found_supply",
+				"grant_items": { "herbal_balm": 1 },
+				"pages": [
+					{ "speaker": "補給箱", "text": "巡山員的補給箱：青草膏 ×1。" }
+				]
+			},
+			{
+				"pages": [ { "speaker": "補給箱", "text": "空箱子。下次帶點東西來補上。" } ]
+			}
+		]
+	},
+	"point_watchpost": {
+		"variants": [
+			{
+				"if_flag_not": "boss_hint",
+				"set_flag": "boss_hint",
+				"pages": [
+					{ "speaker": "觀測位", "left": "player:focused", "speaker_side": "left", "fx": "observe_pulse", "text": "站上石台，回聲一下子清楚起來——" },
+					{ "speaker": "觀測位", "left": "player:determined", "speaker_side": "left", "text": "強波之前，長鬚會先發紅、往後繃。記住這個前兆。" }
+				]
+			},
+			{
+				"pages": [ { "speaker": "觀測位", "text": "長鬚發紅＝強波。你已經記下了。" } ]
+			}
+		]
+	},
+	"point_quake": {
+		"pages": [
+			{ "speaker": "旁白", "fx": "quake", "text": "腳下的碎石在震。聲音，一層一層變少了。" }
+		]
+	},
+	"station_entry": {
+		"pages": [
+			{ "speaker": "旁白", "fx": "lights_on", "text": "設備自己醒了。指示燈一盞、一盞亮起。" },
+			{ "speaker": "旁白", "fx": "silence", "text": "浪聲、風聲、你的腳步聲……逐層消失。" },
+			{ "speaker": "旁白", "fx": "gather", "text": "電波在房間中央絞成一團——有東西被裹在裡面。" },
+			{ "speaker": "旁白", "left": "player:worried", "speaker_side": "left", "fx": "boss_reveal", "text": "磁殼仔！牠不是奪走聲音的兇手——牠被三十年的殘留訊號纏住了。" }
+		]
+	},
+	"boss_confront": {
+		"pages": [
+			{ "speaker": "旁白", "left": "player:determined", "speaker_side": "left", "text": "磁殼仔的天線指向你，雜訊漲成一面牆——" }
+		],
+		"choice": {
+			"prompt": "上前，替牠解開訊號？",
+			"options": [
+				{ "text": "上前", "action": "start_boss", "pages_after": [] },
+				{ "text": "再準備一下", "pages_after": [ { "speaker": "旁白", "text": "你退開半步。牠的天線仍指著你。" } ] }
+			]
+		}
+	},
+	"point_station_console": {
+		"variants": [
+			{
+				"if_flag": "level1_complete",
+				"pages": [ { "speaker": "主控台", "text": "殘留訊號像退潮一樣淺了。滾筒紙上，曲線終於連成一條。" } ]
+			},
+			{
+				"pages": [ { "speaker": "主控台", "text": "儀表全數超標。三十年沒人關掉的東西，一直在這裡響。" } ]
+			}
+		]
+	},
+	"point_station_tapes": {
+		"pages": [
+			{ "speaker": "磁帶架", "text": "散落的磁帶。最後一卷寫著：「７號站　最終記錄　勿播」。" }
+		]
+	},
+	"ending_scene": {
+		"set_flag": "level1_complete",
+		"grant_items": { "stable_echo": 1 },
+		"pages": [
+			{ "speaker": "旁白", "fx": "bell", "text": "——鐺。浮標的鐘聲，回來了。" },
+			{ "speaker": "阿海伯", "left": "haibo:smile", "speaker_side": "left", "text": "聽見沒？海又開口了。" },
+			{ "speaker": "沈芮", "right": "rei:relieved", "speaker_side": "right", "text": "觀測站安靜了。牠只是想把耳朵還給我們。" },
+			{ "speaker": "觀測手冊", "text": "取得「穩定回聲」。進度已寫入觀測手冊。" }
+		]
+	},
+	"ending_epilogue": {
+		"pages": [
+			{ "speaker": "旁白", "text": "當晚，觀測器又輕輕響了一聲。" },
+			{ "speaker": "旁白", "left": "player:worried", "speaker_side": "left", "text": "同樣的訊號——來自遠方的島。這一次，它有節拍。" }
+		],
+		"choice": {
+			"prompt": "",
+			"options": [
+				{ "text": "繼續探索", "action": "continue_explore", "pages_after": [] },
+				{ "text": "返回標題", "action": "return_title", "pages_after": [] }
+			]
+		}
+	},
+	"npc_rei_field": {
+		"variants": [
+			{
+				"if_flag": "level1_complete",
+				"pages": [
+					{ "speaker": "沈芮", "right": "rei:relieved", "speaker_side": "right", "text": "港口的聲音回來了。下一站——換我們去聽別的島。" }
 				]
 			},
 			{
 				"pages": [
-					{ "speaker": "沈芮", "text": "紀錄要在現場做才算數。牠們躁動的時候，先削弱、再收錄，別硬碰。" }
+					{ "speaker": "沈芮", "right": "rei:thinking", "speaker_side": "right", "text": "別停在這。牠出手前會先吸氣——盯著天線。" }
 				]
 			}
 		]
 	},
 	"npc_haibo": {
-		"pages": [
-			{ "speaker": "阿海伯", "text": "少年仔，這村子以前是挖磁鐵礦的喔——礦脈枯了，剩阮這幾戶看海的。" },
-			{ "speaker": "阿海伯", "text": "以前修浮標的時候，潮翼攏會綴著阮的船飛。牠飛低，湧就大。比氣象台準啦。" }
-		],
-		"choice": {
-			"prompt": "喝杯熱茶再走？",
-			"options": [
-				{
-					"text": "好，麻煩了",
-					"action": "heal_party",
-					"pages_after": [
-						{ "speaker": "阿海伯", "text": "免客氣。恁的迴靈嘛歇夠了——去吧去吧，路上小心霧。" }
-					]
-				},
-				{
-					"text": "下次吧",
-					"pages_after": [
-						{ "speaker": "阿海伯", "text": "好啦，茶壺替你溫著。" }
+		"variants": [
+			{
+				"if_flag": "level1_complete",
+				"pages": [
+					{ "speaker": "阿海伯", "left": "haibo:smile", "speaker_side": "left", "text": "鐘聲一響，阮這把老骨頭都輕了三斤。" }
+				],
+				"choice": {
+					"prompt": "喝杯熱茶？",
+					"options": [
+						{ "text": "好，麻煩了", "action": "heal_party", "pages_after": [ { "speaker": "阿海伯", "left": "haibo:smile", "speaker_side": "left", "text": "免客氣。慢慢喝，海風正好。" } ] },
+						{ "text": "下次吧", "pages_after": [ { "speaker": "阿海伯", "left": "haibo:neutral", "speaker_side": "left", "text": "好啦，茶壺替你溫著。" } ] }
 					]
 				}
-			]
-		}
+			},
+			{
+				"pages": [
+					{ "speaker": "阿海伯", "left": "haibo:sad", "speaker_side": "left", "text": "修了四十年浮標，頭一次看它啞掉……" }
+				],
+				"choice": {
+					"prompt": "喝杯熱茶再走？",
+					"options": [
+						{ "text": "好，麻煩了", "action": "heal_party", "pages_after": [ { "speaker": "阿海伯", "left": "haibo:neutral", "speaker_side": "left", "text": "免客氣。路上小心霧。" } ] },
+						{ "text": "下次吧", "pages_after": [ { "speaker": "阿海伯", "left": "haibo:neutral", "speaker_side": "left", "text": "好啦，茶壺替你溫著。" } ] }
+					]
+				}
+			}
+		]
 	},
 	"npc_xiaoman": {
-		"pages": [
-			{ "speaker": "小滿", "text": "跟你說喔，山上那個塔，晚上會唱歌。" },
-			{ "speaker": "小滿", "text": "都是同一段。阿嬤叫我不要聽。可是磁殼仔都排在坡下聽耶。" }
+		"variants": [
+			{
+				"if_flag": "level1_complete",
+				"pages": [ { "speaker": "小滿", "text": "鐘響了！你聽、你聽！" } ]
+			},
+			{
+				"pages": [ { "speaker": "小滿", "text": "海今天好安靜……安靜得怪怪的。" } ]
+			}
 		]
 	},
 	"sign_plaza": {
 		"pages": [
-			{ "speaker": "告示牌", "text": "霧港村　　東：潮霧古道　　北坡：舊觀測塔（封閉中）" }
+			{ "speaker": "告示牌", "text": "霧港村　　東：潮霧古道／舊觀測站　　北坡：封閉中" }
 		]
 	},
 	"point_console": {
 		"pages": [
-			{ "speaker": "舊設備", "text": "被藤蔓纏滿的金屬櫃，面板凹了一角。指示燈竟然還亮著，每隔幾秒閃一下。" },
-			{ "speaker": "舊設備", "text": "閃的間隔很規律——和小滿說的「塔的歌」，會是同一個節拍嗎。" }
+			{ "speaker": "觀測設備", "text": "指示燈亂閃，滾筒紙畫出缺了角的曲線。訊號，來自東邊上坡。" }
 		]
 	},
 	"point_blocked_road": {
 		"pages": [
-			{ "speaker": "封路的倒木", "text": "上塔的石階被兩截倒木擋住，切口平整，是人鋸的。木頭上釘著褪色的牌子：『迴聲網計畫　暫停維護』。" }
+			{ "speaker": "封路的倒木", "text": "上塔的石階被鋸倒的木頭擋住。牌子寫著：「迴聲網計畫　暫停維護」。" }
 		]
 	},
 	"point_sea": {
-		"pages": [
-			{ "speaker": "棧橋盡頭", "text": "浪拍在浮標上，一下，又一下。老人說這就是島最老的回聲——比村子老，比塔更老。" }
+		"variants": [
+			{
+				"if_flag": "level1_complete",
+				"pages": [ { "speaker": "棧橋盡頭", "text": "浪拍在浮標上，一下，又一下。然後——鐺。世界齊全了。" } ]
+			},
+			{
+				"pages": [ { "speaker": "棧橋盡頭", "text": "浪還在拍打浮標。該有的鐘聲，卻一聲也沒有。" } ]
+			}
 		]
 	},
 	"point_store": {
 		"pages": [
-			{ "speaker": "店門", "text": "門上掛著手寫牌：『補貨中。要買什麼，對外面那個戴草帽的喊就好。』" }
-		]
-	},
-	"point_viewpoint": {
-		"pages": [
-			{ "speaker": "觀景點", "text": "銅製望遠鏡對著外海。霧散的時候，聽說看得到隔壁島的天線塔。" },
-			{ "speaker": "觀景點", "text": "鏡筒上刻著小字：迴聲網７號站　視界確認點。" }
-		]
-	},
-	"point_logs": {
-		"pages": [
-			{ "speaker": "倒木", "text": "又是切口平整的倒木，堵住往東的岔路。樹皮上有新鮮的爪痕——有什麼東西最近翻過去了。" }
-		]
-	},
-	"point_anomaly": {
-		"pages": [
-			{ "speaker": "廢棄天線", "text": "鏽穿的天線盤周圍一圈草倒向同一個方向，像被什麼聲音壓過。" },
-			{ "speaker": "廢棄天線", "text": "泥地上滿是磁殼仔的足跡，繞著天線一圈又一圈。牠們在聽。這裡就是回聲變薄的中心。" }
-		]
-	},
-	"point_cache": {
-		"variants": [
-			{
-				"if_flag_not": "found_trail_cache",
-				"set_flag": "found_trail_cache",
-				"grant_items": { "herbal_balm": 2 },
-				"pages": [
-					{ "speaker": "草叢深處", "text": "撥開高草，一個防水鐵盒半埋在土裡——是巡山員的補給點。拿到青草膏×2。" }
-				]
-			},
-			{
-				"pages": [
-					{ "speaker": "草叢深處", "text": "空鐵盒安靜地躺著。改天帶點東西來補上吧。" }
-				]
-			}
+			{ "speaker": "店門", "text": "手寫牌：「補貨中。要買什麼，對外面那個戴草帽的喊就好。」" }
 		]
 	},
 	"point_bed": {
@@ -116,35 +270,24 @@
 		"choice": {
 			"prompt": "躺一下嗎？",
 			"options": [
-				{
-					"text": "小睡片刻",
-					"action": "heal_party",
-					"pages_after": [
-						{ "speaker": "床鋪", "text": "醒來時雨停了。隊伍的精神都恢復了。" }
-					]
-				},
-				{
-					"text": "還不睏",
-					"pages_after": [
-						{ "speaker": "床鋪", "text": "先把該做的事做完吧。" }
-					]
-				}
+				{ "text": "小睡片刻", "action": "heal_party", "pages_after": [ { "speaker": "床鋪", "text": "醒來時霧薄了一點。隊伍的精神都恢復了。" } ] },
+				{ "text": "還不睏", "pages_after": [ { "speaker": "床鋪", "text": "先把該做的事做完吧。" } ] }
 			]
 		}
 	},
 	"point_books": {
 		"pages": [
-			{ "speaker": "書架", "text": "《群島潮汐表（十年版）》、《迴靈圖鑑・殘卷》，還有一卷沒貼標籤的磁帶。磁帶是誰放的？" }
+			{ "speaker": "書架", "text": "《群島潮汐表》、《迴靈圖鑑・殘卷》，和一卷沒貼標籤的磁帶。" }
 		]
 	},
 	"point_instruments": {
 		"pages": [
-			{ "speaker": "觀測儀", "text": "滾筒紙上畫著古道的回聲曲線：三週前開始，每天晚上都缺一角，缺口一天比一天寬。" }
+			{ "speaker": "觀測儀", "text": "滾筒紙上的回聲曲線：三週來每晚缺一角，缺口一天比一天寬。" }
 		]
 	},
 	"point_tapes": {
 		"pages": [
-			{ "speaker": "磁帶架", "text": "標著年份的磁帶排到三十年前就斷了。最後一卷的標籤只寫著：『７號站　最終記錄　勿播』。" }
+			{ "speaker": "磁帶架", "text": "標著年份的磁帶排到三十年前，就斷了。" }
 		]
 	}
 }

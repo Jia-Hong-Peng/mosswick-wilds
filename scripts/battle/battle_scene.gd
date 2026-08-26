@@ -314,15 +314,33 @@ func _animate_idle(delta: float) -> void:
 
 
 func _lunge(side: String) -> void:
-	AudioManager.play_attack()
 	var sprite := _player_sprite if side == "player" else _enemy_sprite
 	var home := _player_home if side == "player" else _enemy_home
 	var push := Vector2(10, -4) if side == "player" else Vector2(-10, 4)
+	# 敵方：前搖幀（Anticipation）→ 攻擊幀 → 還原
+	var restore_texture: Texture2D = null
+	var restore_hframes := 1
+	if side == "enemy":
+		var antic_path := "res://assets/creatures/%s_antic.png" % _enemy.creature_id
+		var attack_path := "res://assets/creatures/%s_attack.png" % _enemy.creature_id
+		if ResourceLoader.exists(antic_path):
+			restore_texture = sprite.texture
+			restore_hframes = sprite.hframes
+			sprite.texture = load(antic_path)
+			sprite.hframes = 1
+			sprite.frame = 0
+			await get_tree().create_timer(0.22).timeout
+			if ResourceLoader.exists(attack_path):
+				sprite.texture = load(attack_path)
+	AudioManager.play_attack()
 	var tween := create_tween()
 	tween.tween_property(sprite, "position", home - push * 0.4, 0.1)
 	tween.tween_property(sprite, "position", home + push, 0.08)
 	tween.tween_property(sprite, "position", home, 0.12)
 	await tween.finished
+	if restore_texture != null:
+		sprite.texture = restore_texture
+		sprite.hframes = restore_hframes
 
 
 func _hit_fx(is_player: bool) -> void:
@@ -350,6 +368,8 @@ func _hit_fx(is_player: bool) -> void:
 
 
 func _shake_stage() -> void:
+	if AudioManager.reduce_shake:
+		return
 	var tween := create_tween()
 	for i in range(3):
 		tween.tween_property(_stage, "position", Vector2((2 if i % 2 == 0 else -2), 0), 0.04)
@@ -450,6 +470,8 @@ func _set_bar(bar: Dictionary, ratio: float, animated: bool) -> void:
 
 func _end_sequence() -> void:
 	_finished = true
+	if String(GameState.pending_encounter.get("scripted", "")) == "tutorial":
+		EventFlagStore.set_flag("tutorial_done")
 	if _battle.outcome == BattleService.Outcome.FLED:
 		SceneRouter.goto_world()
 		return

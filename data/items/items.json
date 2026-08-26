@@ -16,5 +16,14 @@
 		"usable_in_field": false,
 		"description": "觀測所配發的黃銅錄音匣。對放下戒心的迴靈錄下牠的回聲，牠會跟著回聲同行。",
 		"icon_path": "res://assets/ui/item_echo_box.png"
+	},
+	"stable_echo": {
+		"display_name": "穩定回聲",
+		"kind": "key",
+		"amount": 0,
+		"usable_in_battle": false,
+		"usable_in_field": false,
+		"description": "從觀測站帶回的第一段完整回聲。放在耳邊，聽得見退潮，和很遠的鐘。",
+		"icon_path": "res://assets/ui/item_stable_echo.png"
 	}
 }

@@ -1,16 +1,15 @@
 extends Node
-## Autoload: dialogue flow (pages, choices, event flags, one-time grants).
-## The DialogueBox UI listens to the signals; this node never builds UI.
+## Autoload：對話流程（頁、選項、旗標、一次性給予、立繪、演出 FX、跳過）。
+## UI（DialogueBox）與場景聽訊號；本節點不建 UI。
 ##
-## Dialogue entry format (res://data/dialogue/dialogues.json):
-##   {"pages": [{"speaker": "...", "text": "..."}],
-##    "choice": {"prompt": "...", "options": [
-##        {"text": "...", "action": "heal_party", "pages_after": [...]}]},
-##    "set_flag": "...", "grant_items": {"item_id": count},
-##    "variants": [{"if_flag_not": "...", ...entry...}, {...fallback...}]}
+## 頁面格式：{"speaker","text","left":"char:expr","right":"char:expr",
+##   "speaker_side":"left|right","fx":"效果名"}
+## 選項格式：{"text","action","set_flag","pages_after":[...]}
+## 條目可含 "variants"（if_flag / if_flag_not）、"set_flag"、"grant_items"。
 
-signal page_shown(speaker: String, text: String)
+signal page_shown(page: Dictionary)
 signal choice_shown(prompt: String, options: PackedStringArray)
+signal fx_requested(fx_name: String)
 signal dialogue_finished
 
 var active := false
@@ -21,6 +20,7 @@ var _page_index := 0
 var _variant: Dictionary = {}
 var _pending_choice: Dictionary = {}
 var _awaiting_choice := false
+var _post_action := ""
 
 
 func start(dialogue_id: String) -> bool:
@@ -49,6 +49,15 @@ func advance() -> void:
 		_finish()
 
 
+## 跳過演出：直接跳到最後一頁（保留必要資訊），選項不可跳過
+func skip() -> void:
+	if not active or _awaiting_choice:
+		return
+	if _page_index < _pages.size() - 1:
+		_page_index = _pages.size() - 1
+		_show_current_page()
+
+
 func select_choice(index: int) -> void:
 	if not active or not _awaiting_choice:
 		return
@@ -59,6 +68,8 @@ func select_choice(index: int) -> void:
 	var option := Dictionary(options[clampi(index, 0, options.size() - 1)])
 	_awaiting_choice = false
 	_pending_choice = {}
+	if option.has("set_flag"):
+		EventFlagStore.set_flag(String(option["set_flag"]))
 	_apply_action(String(option.get("action", "")))
 	var after_pages := Array(option.get("pages_after", []))
 	if after_pages.is_empty():
@@ -88,6 +99,7 @@ func _begin(variant: Dictionary) -> void:
 	active = true
 	opened_frame = Engine.get_process_frames()
 	_variant = variant
+	_post_action = ""
 	_pages.clear()
 	for page: Variant in Array(variant.get("pages", [])):
 		_pages.append(Dictionary(page))
@@ -105,7 +117,9 @@ func _begin(variant: Dictionary) -> void:
 
 func _show_current_page() -> void:
 	var page := _pages[_page_index]
-	page_shown.emit(String(page.get("speaker", "")), String(page.get("text", "")))
+	if page.has("fx"):
+		fx_requested.emit(String(page["fx"]))
+	page_shown.emit(page)
 
 
 func _present_choice() -> void:
@@ -120,7 +134,15 @@ func _apply_action(action: String) -> void:
 	match action:
 		"heal_party":
 			PartyService.heal_all()
-			AudioManager.play_fanfare()
+			AudioManager.play_heal()
+		"choose_signal_path":
+			EventFlagStore.set_flag("path_chosen")
+			EventFlagStore.set_flag("path_correct")
+		"choose_tide_path":
+			EventFlagStore.set_flag("path_chosen")
+			_post_action = "tutorial_battle"
+		"tutorial_battle", "start_boss", "return_title", "continue_explore":
+			_post_action = action
 		"":
 			pass
 		_:
@@ -128,13 +150,25 @@ func _apply_action(action: String) -> void:
 
 
 func _finish() -> void:
-	# One-time effects fire exactly once: the flag flips the variant next time.
 	if _variant.has("set_flag"):
 		EventFlagStore.set_flag(String(_variant["set_flag"]))
 	var grants := Dictionary(_variant.get("grant_items", {}))
 	for item_id: Variant in grants:
 		InventoryService.add_item(String(item_id), int(grants[item_id]))
+	if not grants.is_empty():
+		AudioManager.play_item()
 	_variant = {}
 	active = false
 	InputRouter.pop_context()
+	var pending := _post_action
+	_post_action = ""
 	dialogue_finished.emit()
+	match pending:
+		"tutorial_battle":
+			SceneRouter.goto_battle({"creature_id": "tidewing", "level": 3, "bg": "village", "scripted": "tutorial"})
+		"start_boss":
+			SceneRouter.goto_boss()
+		"return_title":
+			SceneRouter.goto_title()
+		_:
+			pass

@@ -21,6 +21,11 @@ func has_flag(flag_name: String) -> bool:
 	return _flags.has(flag_name)
 
 
+## 一次性流程旗標（如 ending_pending）用完即清，避免存檔後重播
+func clear_flag(flag_name: String) -> void:
+	_flags.erase(flag_name)
+
+
 func to_dict() -> Dictionary:
 	return _flags.duplicate()
 

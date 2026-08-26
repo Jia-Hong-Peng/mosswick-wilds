@@ -13,6 +13,7 @@ static func generate() -> void:
 	_export_creature("mosshorn", Callable(GenCreatures, "_mosshorn"))
 	_export_creature("tidewing", Callable(GenCreatures, "_tidewing"))
 	_export_creature("magshell", Callable(GenCreatures, "_magshell"))
+	_export_boss_variants()
 
 
 static func _export_creature(id: String, draw: Callable) -> void:
@@ -47,6 +48,83 @@ static func _export_creature(id: String, draw: Callable) -> void:
 	var mini := front0.duplicate() as Image
 	mini.resize(16, 16, Image.INTERPOLATE_NEAREST)
 	Pix.save(mini, "res://assets/creatures/%s_mini.png" % id)
+	# 姿勢幀：前搖（後坐蓄力）／攻擊（前撲＋速度線）／虛弱（下沉壓暗）／安定
+	var antic := _shifted(front_sheet_frame(front_sheet, 1), 3, 2)
+	Pix.save(antic, "res://assets/creatures/%s_antic.png" % id)
+	var attack := _shifted(front0, -5, 1)
+	for dash_y: int in [26, 34, 42]:
+		Pix.hline(attack, 52, dash_y, 8, Pal.alpha(Pal.FOAM, 0.6))
+		Pix.hline(attack, 54, dash_y + 3, 6, Pal.alpha(Pal.MIST_LT, 0.6))
+	Pix.save(attack, "res://assets/creatures/%s_attack.png" % id)
+	var weak := _dimmed(_shifted(front0, 0, 3), 0.45)
+	Pix.save(weak, "res://assets/creatures/%s_weak.png" % id)
+	Pix.save(front0, "res://assets/creatures/%s_calm.png" % id)
+
+
+static func front_sheet_frame(sheet: Image, index: int) -> Image:
+	var frame := Pix.img(S, S)
+	frame.blit_rect(sheet, Rect2i(index * S, 0, S, S), Vector2i.ZERO)
+	return frame
+
+
+static func _shifted(src: Image, dx: int, dy: int) -> Image:
+	var out := Pix.img(S, S)
+	Pix.blit(out, src, dx, dy)
+	return out
+
+
+static func _dimmed(src: Image, amount: float) -> Image:
+	var out := src.duplicate() as Image
+	for y in range(out.get_height()):
+		for x in range(out.get_width()):
+			var color := out.get_pixel(x, y)
+			if color.a > 0.05:
+				out.set_pixel(x, y, color.lerp(Pal.SLATE, amount))
+	return out
+
+
+static func _glitched(src: Image, seed_value: int) -> Image:
+	var out := src.duplicate() as Image
+	var rng := Pix.rng(seed_value)
+	for i in range(26):
+		var x := rng.randi_range(10, 52)
+		var y := rng.randi_range(16, 52)
+		if out.get_pixel(x, y).a > 0.5:
+			out.set_pixel(x, y, Pal.GLITCH if i % 2 == 0 else Pal.GLITCH_LT)
+	# 殼緣的異常電弧
+	for i in range(4):
+		var ax := rng.randi_range(14, 48)
+		var ay := rng.randi_range(20, 30)
+		Pix.px(out, ax, ay, Pal.GLITCH_LT)
+		Pix.px(out, ax + 1, ay - 1, Pal.GLITCH_LT)
+	return out
+
+
+## 頭目「失衡體」變體：腐蝕色 Idle ×2、充能（天線發紅後繃）、攻擊、虛弱
+static func _export_boss_variants() -> void:
+	var base := Pix.img(S, S)
+	_magshell(base, 0, false)
+	Pix.outline_sprite(base)
+	var base1 := Pix.img(S, S)
+	_magshell(base1, 1, false)
+	Pix.outline_sprite(base1)
+	var unbalanced := Pix.img(S * 2, S)
+	Pix.blit(unbalanced, _glitched(base, 71), 0, 0)
+	Pix.blit(unbalanced, _glitched(base1, 72), S, 0)
+	Pix.save(unbalanced, "res://assets/creatures/magshell_unbalanced.png")
+	# 充能：整體後坐、長鬚轉紅、殼頂聚光
+	var charge := _shifted(_glitched(base, 73), 3, 2)
+	for p: Vector2i in [Vector2i(15, 13), Vector2i(16, 14), Vector2i(17, 15), Vector2i(18, 16), Vector2i(19, 17)]:
+		Pix.px(charge, p.x, p.y, Pal.CORAL)
+		Pix.px(charge, p.x + 1, p.y, Pal.CORAL_LT)
+	Pix.ellipse(charge, 35, 30, 3, 2, Pal.CORAL_LT)
+	Pix.save(charge, "res://assets/creatures/magshell_charge.png")
+	var attack := _shifted(_glitched(base, 74), -6, 2)
+	for dash_y: int in [24, 34, 44]:
+		Pix.hline(attack, 50, dash_y, 10, Pal.alpha(Pal.GLITCH_LT, 0.7))
+	Pix.save(attack, "res://assets/creatures/magshell_attack.png")
+	var weak := _dimmed(_shifted(_glitched(base, 75), 0, 4), 0.4)
+	Pix.save(weak, "res://assets/creatures/magshell_weak.png")
 
 
 ## 體積感基底：中間色主體＋左上亮面＋底部 dither 陰影
