@@ -598,9 +598,7 @@ static func _pot_plant(c: Image) -> void:
 
 
 static func _buoy(c: Image) -> void:
-	# 浮在水面上：底部畫水色補底
-	Pix.rect(c, 0, 0, T, T, Pal.SEA)
-	Pix.dither(c, 0, 11, T, 5, Pal.SEA, Pal.SEA_DK)
+	# 透明背景（3D 立牌直接浮在水面 Shader 上；只留船身與兩撇浪花）
 	Pix.ellipse(c, 8, 9, 4.5, 3.5, Pal.INK)
 	Pix.ellipse(c, 8, 9, 3.5, 2.7, Pal.CORAL)
 	Pix.ellipse(c, 7, 8, 1.5, 1.0, Pal.CORAL_LT)

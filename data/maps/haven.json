@@ -40,8 +40,8 @@
 		"ghjgghjghgjhghgjhghggphj",
 		"pppppppppppqppppppppppqp",
 		"ssSssSssSssbbsSssSsSssSs",
-		"ooooooooooobbooooooooooo",
-		"wwwwwwwwwwwbbwwwwwwwwwww"
+		"oooooooooooooooooooooooo",
+		"wwwwwwwwwwwwwwwwwwwwwwww"
 	],
 	"deco": [
 		"TTTT............TTTTTTTT",
@@ -55,11 +55,11 @@
 		"........................",
 		"..........E.c.k.........",
 		"...y...............G....",
-		"sssssssssssssssssssss.ss",
+		"ssssssssssssssssssss..ss",
 		"..e.............e.......",
 		".........c....k.........",
 		".....u............u.....",
-		"............f.......u..."
+		"....................u..."
 	],
 	"overhead": [
 		"abca............bcabcabc",
@@ -103,6 +103,7 @@
 		{ "x": 19, "y": 10, "dialogue_id": "board_notice" }
 	],
 	"triggers": [
+		{ "x": 20, "y": 11, "dialogue_id": "yard_gate" },
 		{ "x": 21, "y": 11, "dialogue_id": "yard_gate" }
 	],
 	"npcs": [

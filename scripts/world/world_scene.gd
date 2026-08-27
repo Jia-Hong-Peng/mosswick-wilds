@@ -379,11 +379,10 @@ func _show_toast(text: String) -> void:
 
 # ====== 移動、互動與觸發 ======
 
+## 夥伴不阻擋玩家（可穿越；重疊時夥伴會自己讓開）——
+## 否則牠停在圍欄缺口等窄路時會把玩家關在外面。
 func try_step(from_cell: Vector2i, direction: Vector2i) -> Dictionary:
-	var result := GridMovement.attempt_move(_map, from_cell, direction, _npcs_by_cell)
-	if bool(result.get("moved", false)) and _follower != null and Vector2i(result["cell"]) == _follower.cell:
-		return {"moved": false, "cell": from_cell}
-	return result
+	return GridMovement.attempt_move(_map, from_cell, direction, _npcs_by_cell)
 
 
 ## 跟隨者尋路用：這一格可不可以站（含 NPC 阻擋，不含玩家）。
@@ -795,7 +794,15 @@ func _show_end_menu() -> void:
 	panel.queue_free()
 	match chosen:
 		0:
-			# 繼續探索：燈亮回來，自由走動
+			# 繼續探索：燈亮回來，自由走動；夥伴解除導演模式、回到玩家身邊
+			if _follower != null:
+				_follower.scripted = false
+				var gap: Vector2i = GameState.player_cell - _follower.cell
+				if not _follower.visible or absi(gap.x) + absi(gap.y) > 2:
+					for dir: Vector2i in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP]:
+						if is_cell_free(GameState.player_cell + dir):
+							_follower.place_at(GameState.player_cell + dir)
+							break
 			if _teaser_black != null:
 				var out := create_tween()
 				out.tween_property(_teaser_black, "color:a", 0.0, 0.8)

@@ -215,18 +215,35 @@ func _run() -> void:
 	await _wait(60)
 	_shot("chapter_card" if default_run else "chapter_card_%s" % starter)
 	await _press("confirm")
-	# 伏筆（公告板特寫）
-	await _wait(160)
+	# 伏筆（公告板特寫）——純演出，不吃輸入
+	await _wait(150)
 	if default_run:
 		_shot("teaser")
-	await _wait(120)
-	# 結尾選單：繼續探索
-	if default_run:
-		_shot("end_menu")
-	await _press("confirm")
-	await _wait(60)
+	# 結尾選單：游標預設「繼續探索」；按確認直到回到自由走動情境
+	var menu_guard := 0
+	while not InputRouter.is_context(InputRouter.Context.WORLD) and menu_guard < 90:
+		menu_guard += 1
+		if default_run and menu_guard == 1 and InputRouter.is_context(InputRouter.Context.MENU):
+			_shot("end_menu")
+		await _press("confirm")
+		await _wait(12)
+	_mark("結尾選單確認完成（%d 次）" % menu_guard)
+	await _wait(40)
 	if default_run:
 		_shot("free_roam")
+	# 迴歸驗證：走出閘門到海邊、再穿過閘門（與夥伴）回庭院——不得被困
+	await _walk("move_down", 1)
+	await _walk("move_left", 1)
+	for i in range(3):
+		await _walk("move_up", 1)
+		if DialogueManager.active:
+			await _pump_dialogue()
+	if GameState.player_cell.y <= 10:
+		_mark("海邊來回驗證：通過（可自由回到庭院）")
+	else:
+		_mark("海邊來回驗證：失敗！玩家被困在閘門外 cell=%s" % str(GameState.player_cell))
+	if default_run:
+		_shot("gate_return")
 	_mark("完整通關（含繼續探索）")
 	get_tree().quit()
 

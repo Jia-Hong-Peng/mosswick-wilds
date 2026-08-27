@@ -86,6 +86,10 @@ func _process(delta: float) -> void:
 		return
 	var player_cell: Vector2i = _player.get("cell")
 	var gap := absi(player_cell.x - cell.x) + absi(player_cell.y - cell.y)
+	if gap == 0:
+		# 玩家走進自己這一格（可穿越）：立刻讓到旁邊
+		_step_aside(player_cell)
+		return
 	if gap > _keep_distance:
 		_quirk_cell = Vector2i(-1, -1)
 		_idle_clock = 0.0
@@ -128,6 +132,27 @@ func _process(delta: float) -> void:
 
 func hop() -> void:
 	_hop_clock = 0.4
+
+
+## 與玩家重疊時讓開：優先退到玩家背後，再試左右
+func _step_aside(player_cell: Vector2i) -> void:
+	var player_facing := Vector2i(_player.get("facing"))
+	for dir: Vector2i in [-player_facing, Vector2i(player_facing.y, player_facing.x), Vector2i(-player_facing.y, -player_facing.x), player_facing]:
+		if dir != Vector2i.ZERO and _cell_free(cell + dir, player_cell):
+			facing = dir
+			_begin_move(cell + dir)
+			return
+
+
+## 導演／保險用：把夥伴直接放到某格（含從隱藏狀態復原）
+func place_at(new_cell: Vector2i) -> void:
+	cell = new_cell
+	_moving = false
+	_quirk_cell = Vector2i(-1, -1)
+	visible = true
+	scale = Vector3.ONE
+	position = _cell_anchor(cell)
+	_update_frame()
 
 
 func face_towards(other_cell: Vector2i) -> void:
