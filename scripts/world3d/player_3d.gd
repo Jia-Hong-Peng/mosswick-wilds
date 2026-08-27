@@ -8,11 +8,14 @@ const TURN_DELAY := 0.08
 const BUMP_COOLDOWN := 0.35
 const SHEET_COLUMNS := 6
 
-## 官方設定圖高解析立牌（存在時取代像素 sheet；HD 角色 × 3D 場景）
+## 官方設定圖高解析素材（存在時取代像素 sheet；HD 角色 × 3D 場景）
+## 優先序：走路動畫幀 → 全身立牌 → 像素 sheet
 const HERO_FRONT := "res://assets/characters/hero/front.png"
 const HERO_SIDE := "res://assets/characters/hero/side.png"
 const HERO_BACK := "res://assets/characters/hero/back.png"
+const HERO_WALK_TEMPLATE := "res://assets/characters/hero/walk_%s_%d.png"
 const HERO_HEIGHT := 1.42
+const HERO_WALK_HEIGHT := 1.18   # 走路圖為 Q 版比例，貼齊 HD-2D 標準身高
 
 var cell := Vector2i.ZERO
 var facing := Vector2i.DOWN
@@ -20,6 +23,8 @@ var _hero := false
 var _hero_front: Texture2D
 var _hero_side: Texture2D
 var _hero_back: Texture2D
+var _hero_walk := false
+var _walk_frames := {}   # "down"/"left"/"up" → Array[Texture2D]（右向鏡射）
 
 var _world: Node3D
 var _moving := false
@@ -35,8 +40,23 @@ var _sprite: Sprite3D
 
 func _ready() -> void:
 	_sprite = Sprite3D.new()
-	_hero = ResourceLoader.exists(HERO_FRONT)
-	if _hero:
+	_hero_walk = ResourceLoader.exists(HERO_WALK_TEMPLATE % ["down", 0])
+	_hero = not _hero_walk and ResourceLoader.exists(HERO_FRONT)
+	if _hero_walk:
+		for dir_name: String in ["down", "left", "up"]:
+			var frames: Array[Texture2D] = []
+			for i in range(4):
+				frames.append(load(HERO_WALK_TEMPLATE % [dir_name, i]))
+			_walk_frames[dir_name] = frames
+		var first: Texture2D = _walk_frames["down"][0]
+		_sprite.texture = first
+		# 幀畫布 208 高、內容 200、底邊留 4px：腳底貼齊地面
+		var ps := HERO_WALK_HEIGHT / 200.0
+		_sprite.pixel_size = ps
+		_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+		_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+		_sprite.position = Vector3(0, ps * (float(first.get_height()) * 0.5 - 4.0), 0)
+	elif _hero:
 		_hero_front = load(HERO_FRONT)
 		_hero_side = load(HERO_SIDE)
 		_hero_back = load(HERO_BACK)
@@ -161,6 +181,24 @@ func _advance_step(delta: float) -> void:
 
 
 func _update_frame(walking: bool = false) -> void:
+	if _hero_walk:
+		# 官方走路圖：四幀步態（step parity 決定前後半週期）
+		var dir_key := "down"
+		var flip := false
+		match facing:
+			Vector2i.UP:
+				dir_key = "up"
+			Vector2i.LEFT:
+				dir_key = "left"
+			Vector2i.RIGHT:
+				dir_key = "left"
+				flip = true
+		var idx := 0
+		if walking:
+			idx = (2 * _step_parity + (0 if _move_progress < 0.5 else 1)) % 4
+		_sprite.texture = _walk_frames[dir_key][idx]
+		_sprite.flip_h = flip
+		return
 	if _hero:
 		# 高解析立牌：視圖切換＋程序化步伐（小彈跳＋輕微擠壓）
 		match facing:
