@@ -936,7 +936,7 @@ func _drift_fog(delta: float) -> void:
 func _build_ui() -> void:
 	_ui_layer = CanvasLayer.new()
 	_ui_layer.layer = 1
-	_ui_layer.scale = Vector2(2, 2)
+	_ui_layer.scale = Vector2(4, 4)
 	add_child(_ui_layer)
 	_dialogue_box = DialogueBoxScene.instantiate()
 	_ui_layer.add_child(_dialogue_box)

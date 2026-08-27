@@ -8,8 +8,18 @@ const TURN_DELAY := 0.08
 const BUMP_COOLDOWN := 0.35
 const SHEET_COLUMNS := 6
 
+## 官方設定圖高解析立牌（存在時取代像素 sheet；HD 角色 × 3D 場景）
+const HERO_FRONT := "res://assets/characters/hero/front.png"
+const HERO_SIDE := "res://assets/characters/hero/side.png"
+const HERO_BACK := "res://assets/characters/hero/back.png"
+const HERO_HEIGHT := 1.42
+
 var cell := Vector2i.ZERO
 var facing := Vector2i.DOWN
+var _hero := false
+var _hero_front: Texture2D
+var _hero_side: Texture2D
+var _hero_back: Texture2D
 
 var _world: Node3D
 var _moving := false
@@ -25,15 +35,26 @@ var _sprite: Sprite3D
 
 func _ready() -> void:
 	_sprite = Sprite3D.new()
-	_sprite.texture = load("res://assets/characters/player.png")
-	_sprite.hframes = SHEET_COLUMNS
-	_sprite.vframes = 4
-	_sprite.pixel_size = 1.0 / 32.0
-	_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	_hero = ResourceLoader.exists(HERO_FRONT)
+	if _hero:
+		_hero_front = load(HERO_FRONT)
+		_hero_side = load(HERO_SIDE)
+		_hero_back = load(HERO_BACK)
+		_sprite.texture = _hero_front
+		_sprite.pixel_size = HERO_HEIGHT / float(_hero_front.get_height())
+		_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+		_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED
+		_sprite.position = Vector3(0, HERO_HEIGHT * 0.5 + 0.02, 0)
+	else:
+		_sprite.texture = load("res://assets/characters/player.png")
+		_sprite.hframes = SHEET_COLUMNS
+		_sprite.vframes = 4
+		_sprite.pixel_size = 1.0 / 32.0
+		_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+		_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+		_sprite.position = Vector3(0, 0.75, 0)
 	_sprite.shaded = true
-	_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	_sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-	_sprite.position = Vector3(0, 0.75, 0)
 	add_child(_sprite)
 	var shadow := MeshInstance3D.new()
 	var quad := QuadMesh.new()
@@ -140,6 +161,30 @@ func _advance_step(delta: float) -> void:
 
 
 func _update_frame(walking: bool = false) -> void:
+	if _hero:
+		# 高解析立牌：視圖切換＋程序化步伐（小彈跳＋輕微擠壓）
+		match facing:
+			Vector2i.UP:
+				_sprite.texture = _hero_back
+				_sprite.flip_h = false
+			Vector2i.LEFT:
+				# 設定圖側視朝左；朝右時鏡射
+				_sprite.texture = _hero_side
+				_sprite.flip_h = false
+			Vector2i.RIGHT:
+				_sprite.texture = _hero_side
+				_sprite.flip_h = true
+			_:
+				_sprite.texture = _hero_front
+				_sprite.flip_h = false
+		var hop := 0.0
+		var squash := 1.0
+		if walking:
+			hop = sin(_move_progress * PI) * 0.07
+			squash = 1.0 - 0.035 * sin(_move_progress * TAU)
+		_sprite.position.y = HERO_HEIGHT * 0.5 + 0.02 + hop
+		_sprite.scale = Vector3(1.0, squash, 1.0)
+		return
 	var column := 0
 	if walking:
 		var lift_column := 1 if _step_parity == 0 else 3

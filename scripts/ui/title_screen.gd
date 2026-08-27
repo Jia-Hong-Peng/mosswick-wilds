@@ -98,7 +98,7 @@ func _build_ui() -> void:
 	# 640×360 視窗下沿用 320×180 設計座標：整體 ×2
 	_root = Control.new()
 	_root.size = Vector2(320, 180)
-	_root.scale = Vector2(2, 2)
+	_root.scale = Vector2(4, 4)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_root)
 	var bg := TextureRect.new()

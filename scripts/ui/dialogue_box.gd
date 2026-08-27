@@ -145,6 +145,13 @@ func _build_ui() -> void:
 	_portrait_right.position = Vector2(274, 74)
 	_portrait_right.visible = false
 	add_child(_portrait_right)
+	# 立繪槽固定 40×48 邏輯尺寸；高解析立繪縮放進槽（LINEAR 平滑）
+	for rect: TextureRect in [_portrait_left, _portrait_right]:
+		rect.custom_minimum_size = Vector2(40, 48)
+		rect.size = Vector2(40, 48)
+		rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 
 	_panel = PanelContainer.new()
 	_panel.position = Vector2(4, 126)

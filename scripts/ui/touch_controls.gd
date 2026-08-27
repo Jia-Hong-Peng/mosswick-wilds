@@ -8,7 +8,7 @@ extends CanvasLayer
 
 func _ready() -> void:
 	layer = 100
-	scale = Vector2(2, 2)
+	scale = Vector2(4, 4)
 	visible = AudioManager.is_mobile()
 	_add_button("arrow_up", "move_up", Vector2(28, 120), true)
 	_add_button("arrow_down", "move_down", Vector2(28, 156), true)

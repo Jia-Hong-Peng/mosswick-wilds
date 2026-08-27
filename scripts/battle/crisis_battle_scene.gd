@@ -475,7 +475,7 @@ func _end_sequence() -> void:
 func _build_ui() -> void:
 	_canvas = CanvasLayer.new()
 	_canvas.layer = 1
-	_canvas.scale = Vector2(2, 2)
+	_canvas.scale = Vector2(4, 4)
 	add_child(_canvas)
 	_ui_root = Control.new()
 	_ui_root.set_anchors_preset(Control.PRESET_FULL_RECT)

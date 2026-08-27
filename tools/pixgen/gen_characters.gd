@@ -232,29 +232,51 @@ static func _draw_front(c: Image, cfg: Dictionary, dir: int, torso_top: int, hea
 			Pix.rect(c, 9, torso_top + 4, 1, 3, Pal.MIST_LT)
 			Pix.px(c, 23, torso_top + 8, Pal.WOOD_LT)
 			Pix.rect(c, 11, torso_top + 11, 10, 2, Pal.WOOD)
-	# --- 頭 ---
+	# --- 頭（圓顱＋收窄下顎，取代方塊頭） ---
 	var head_w := 16
 	var hx := 8
-	Pix.rect(c, hx, head_top, head_w, head_h - 2, cfg["skin"])
-	Pix.rect(c, hx, head_top + head_h - 4, head_w, 2, cfg["skin_dk"])
+	Pix.ellipse(c, 16.0, float(head_top) + 6.0, 7.5, 6.5, cfg["skin"])
+	Pix.rect(c, hx + 1, head_top + 7, head_w - 2, 4, cfg["skin"])
+	Pix.rect(c, hx + 2, head_top + 11, head_w - 4, 2, cfg["skin"])
+	Pix.rect(c, hx + 4, head_top + 13, head_w - 8, 1, cfg["skin"])
+	Pix.hline(c, hx + 4, head_top + 13, head_w - 8, cfg["skin_dk"])
+	Pix.px(c, hx + 2, head_top + 10, cfg["skin_dk"])
+	Pix.px(c, hx + head_w - 3, head_top + 10, cfg["skin_dk"])
 	if facing_down:
-		Pix.rect(c, hx, head_top, head_w, 4, cfg["hair"])
-		Pix.rect(c, hx, head_top + 4, 2, 3, cfg["hair"])
-		Pix.rect(c, hx + head_w - 2, head_top + 4, 2, 3, cfg["hair"])
+		# 髮：頂部＋不對稱瀏海＋鬢角＋外翹髮尾（海風感剪影）
+		Pix.rect(c, hx + 1, head_top, head_w - 2, 4, cfg["hair"])
+		Pix.rect(c, hx + 1, head_top + 4, 5, 2, cfg["hair"])
+		Pix.px(c, hx + 6, head_top + 4, cfg["hair"])
+		Pix.rect(c, hx + 10, head_top + 4, 5, 1, cfg["hair"])
+		Pix.rect(c, hx, head_top + 3, 2, 6, cfg["hair"])
+		Pix.rect(c, hx + head_w - 2, head_top + 3, 2, 6, cfg["hair"])
+		Pix.px(c, hx - 1, head_top + 5, cfg["hair"])
+		Pix.px(c, hx + head_w, head_top + 7, cfg["hair"])
 		Pix.px(c, hx + 2, head_top + 1, Color(cfg["hair"]).lightened(0.2))
+		# 臉：眉＋大眼（高光＋瞳色）＋嘴
 		var eye_y := head_top + head_h - 8
 		if bool(cfg.get("glasses", false)):
 			Pix.rect(c, hx + 2, eye_y - 1, 5, 4, Pal.MIST_LT)
 			Pix.rect(c, hx + 9, eye_y - 1, 5, 4, Pal.MIST_LT)
-		Pix.rect(c, hx + 3, eye_y, 2, 3, Pal.INK)
-		Pix.rect(c, hx + 11, eye_y, 2, 3, Pal.INK)
+		Pix.hline(c, hx + 3, eye_y - 2, 3, Color(cfg["hair"]).darkened(0.2))
+		Pix.hline(c, hx + 10, eye_y - 2, 3, Color(cfg["hair"]).darkened(0.2))
+		Pix.rect(c, hx + 3, eye_y, 3, 3, Pal.INK)
+		Pix.rect(c, hx + 10, eye_y, 3, 3, Pal.INK)
 		Pix.px(c, hx + 3, eye_y, Pal.FOAM)
-		Pix.px(c, hx + 11, eye_y, Pal.FOAM)
-		Pix.px(c, hx + 2, head_top + head_h - 4, cfg["skin_dk"])
-		Pix.px(c, hx + head_w - 3, head_top + head_h - 4, cfg["skin_dk"])
+		Pix.px(c, hx + 10, eye_y, Pal.FOAM)
+		if cfg.has("iris"):
+			Pix.px(c, hx + 4, eye_y + 1, cfg["iris"])
+			Pix.px(c, hx + 11, eye_y + 1, cfg["iris"])
+		Pix.hline(c, hx + 7, eye_y + 4, 2, cfg["skin_dk"])
 	else:
-		Pix.rect(c, hx, head_top, head_w, head_h - 4, cfg["hair"])
+		# 背面：圓後腦髮＋層次髮束
+		Pix.ellipse(c, 16.0, float(head_top) + 6.0, 7.5, 6.5, cfg["hair"])
+		Pix.rect(c, hx + 1, head_top + 6, head_w - 2, 6, cfg["hair"])
 		Pix.rect(c, hx + 3, head_top + 2, 4, 3, Color(cfg["hair"]).lightened(0.15))
+		Pix.px(c, hx + 1, head_top + 12, cfg["hair"])
+		Pix.px(c, hx + 5, head_top + 12, cfg["hair"])
+		Pix.px(c, hx + 10, head_top + 12, cfg["hair"])
+		Pix.px(c, hx + head_w - 2, head_top + 12, cfg["hair"])
 	_hat(c, cfg, dir, hx, head_top, head_w)
 
 
