@@ -189,6 +189,9 @@ static func _draw_front(c: Image, cfg: Dictionary, dir: int, torso_top: int, hea
 	Pix.rect(c, tx + torso_w, torso_top + 2 + maxi(0, -swing), 2, arm_h - absi(swing), torso_dk)
 	Pix.rect(c, tx - 2, torso_top + arm_h + maxi(0, swing), 2, 2, cfg["skin"])
 	Pix.rect(c, tx + torso_w, torso_top + arm_h + maxi(0, -swing), 2, 2, cfg["skin"])
+	# 皮革腕帶（右腕）
+	if bool(cfg.get("compass", false)):
+		Pix.rect(c, tx + torso_w, torso_top + arm_h - 1 + maxi(0, -swing), 2, 1, Pal.WOOD)
 	if alt and facing_down:
 		Pix.rect(c, tx + 3, torso_top + torso_h - 3, 3, 2, cfg["skin"])
 		Pix.rect(c, tx + torso_w - 6, torso_top + torso_h - 3, 3, 2, cfg["skin"])
@@ -224,8 +227,10 @@ static func _draw_front(c: Image, cfg: Dictionary, dir: int, torso_top: int, hea
 			# 浪花＋嫩芽徽（銅浪＋芽）
 			Pix.px(c, 15, torso_top + 6, Pal.AMBER)
 			Pix.px(c, 16, torso_top + 6, Pal.SPROUT)
-			# 側袋（照護工具）與底部捲毯
+			# 側袋（照護工具）、水壺、毛刷與底部捲毯
 			Pix.rect(c, 21, torso_top + 4, 2, 5, Pal.LEAF)
+			Pix.rect(c, 9, torso_top + 4, 1, 3, Pal.MIST_LT)
+			Pix.px(c, 23, torso_top + 8, Pal.WOOD_LT)
 			Pix.rect(c, 11, torso_top + 11, 10, 2, Pal.WOOD)
 	# --- 頭 ---
 	var head_w := 16
@@ -344,10 +349,12 @@ static func _leg(c: Image, cfg: Dictionary, x: int, top: int, w: int, h: int, li
 	if height <= 0:
 		return
 	if bool(cfg.get("shorts", false)) and height >= 8:
-		# 及膝短褲＋露出小腿＋越野鞋（沙色鞋底、珊瑚提耳）
+		# 及膝短褲（側袋）＋露出小腿＋白襪＋越野鞋（沙色鞋底、珊瑚提耳）
 		Pix.rect(c, x, top, w, 4, cfg["legs"])
 		Pix.px(c, x, top, Color(cfg["legs"]).lightened(0.15))
-		Pix.rect(c, x, top + 4, w, height - 7, cfg["skin"])
+		Pix.rect(c, x + w - 1, top + 1, 1, 2, Color(cfg["legs"]).darkened(0.3))
+		Pix.rect(c, x, top + 4, w, height - 8, cfg["skin"])
+		Pix.rect(c, x, top + height - 4, w, 1, Pal.FOAM)
 		Pix.rect(c, x, top + height - 3, w, 2, cfg["boots"])
 		Pix.rect(c, x, top + height - 1, w, 1, cfg.get("sole", Pal.SAND_LT))
 		Pix.px(c, x + w - 1, top + height - 3, Pal.CORAL)

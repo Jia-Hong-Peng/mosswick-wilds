@@ -20,3 +20,9 @@
 ## 引擎
 
 Godot Engine（MIT License）。
+
+## 主角官方設定圖
+
+- `docs/character/protagonist-model-sheet.png`：使用者提供之**原創**主角概念設定圖（依本專案原創性規範產出：無紅白帽、無球形徽記、非任何既有訓練家之可辨識設計）。
+- 用途：(1) 主角視覺定案參考（世界 Sprite 依其重繪）；(2) 底部三個表情頭像經 `tools/pixgen/gen_protagonist.gd` 裁切、縮放並**量化回全域色盤**後，作為對話立繪 `assets/portraits/player_*.png`。
+- 設定圖僅入 docs（.gdignore，不進遊戲 pck）；進入遊戲的只有量化後的像素立繪。

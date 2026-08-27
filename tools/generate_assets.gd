@@ -13,6 +13,7 @@ func _initialize() -> void:
 	GenUi.generate()
 	GenBackgrounds.generate()
 	Gen3D.generate()
+	GenProtagonist.generate()  # 官方設定圖 → 主角立繪（覆蓋 pixgen 版）
 	# 色盤圖搬到 docs/（docs 不在 res:// 掃描外，直接寫）
 	var src := ProjectSettings.globalize_path("res://docs_src/palette.png")
 	var dst := ProjectSettings.globalize_path("res://docs/palette.png")
