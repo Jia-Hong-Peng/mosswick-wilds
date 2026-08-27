@@ -12,8 +12,26 @@
 			{
 				"if_flag": "chapter_done",
 				"pages": [
-					{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "路上要是遇到怕生的伴獸，就想想今天。去吧。" }
-				]
+					{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "回來啦。要不要讓夥伴們休息一下？" }
+				],
+				"choice": {
+					"prompt": "讓夥伴們休息嗎？",
+					"options": [
+						{
+							"text": "休息（全隊恢復）",
+							"action": "heal_party",
+							"pages_after": [
+								{ "speaker": "葵姨", "left": "kui:relieved", "speaker_side": "left", "text": "毛順好了、水也喝飽了。大家精神都回來了。" }
+							]
+						},
+						{
+							"text": "不用，只是路過",
+							"pages_after": [
+								{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "路上要是遇到怕生的伴獸，就想想今天。去吧。" }
+							]
+						}
+					]
+				}
 			},
 			{
 				"if_flag": "travel_pack_taken",
@@ -370,8 +388,10 @@
 	},
 
 	"ending_farewell": {
+		"grant_items": { "blank_tag": 3 },
 		"pages": [
 			{ "speaker": "葵姨", "left": "kui:neutral", "speaker_side": "left", "text": "旅行證、群島的地圖。閘門我開了，港口道直通碼頭。" },
+			{ "speaker": "葵姨", "left": "kui:observing", "speaker_side": "left", "text": "再給你三張空白旅伴牌。路上遇到願意跟你走的野生伴獸，就替牠登記。記住——是牠願意。" },
 			{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "去吧。牠會跟著你。" }
 		]
 	},
@@ -380,6 +400,53 @@
 		"pages": [
 			{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "看來，不只是你選了牠。" },
 			{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "牠也選了你。" }
+		]
+	},
+
+	"route_locked": {
+		"pages": [
+			{ "speaker": "旁白", "text": "往潮風小徑的閘門。葵姨說：先辦完今天的事再出發。" }
+		]
+	},
+
+	"sign_route_end": {
+		"pages": [
+			{ "speaker": "路牌", "text": "潮風小徑東端──往霧杉島渡口。（渡口整修中，航班暫停──下一章待續）" }
+		]
+	},
+
+	"rival_shioh": {
+		"variants": [
+			{
+				"if_flag": "rival_beaten",
+				"pages": [
+					{ "speaker": "阿汐", "text": "哼，今天算你們默契好。我要回之家特訓了——下一座島見，別讓我等太久！" }
+				]
+			},
+			{
+				"pages": [
+					{ "speaker": "阿汐", "text": "站住！你就是今天在之家認養的那個吧？我是阿汐——比你早三天認養的前輩。" },
+					{ "speaker": "阿汐", "text": "我的夥伴剛好剋你的。正好，讓你見識一下什麼叫默契。" }
+				],
+				"choice": {
+					"prompt": "接受阿汐的較勁嗎？",
+					"options": [
+						{
+							"text": "接受較勁",
+							"action": "rival_battle",
+							"pages_after": [
+								{ "speaker": "阿汐", "text": "上吧！讓你看看三天的差距！" }
+							]
+						},
+						{
+							"text": "還沒準備好",
+							"pages_after": [
+								{ "speaker": "阿汐", "text": "切，膽小鬼。我就在這裡等，隨時奉陪。" }
+							]
+						}
+					]
+				}
+			}
 		]
 	},
 

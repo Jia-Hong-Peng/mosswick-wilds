@@ -4,7 +4,7 @@ extends Node
 
 signal party_changed
 
-const MAX_PARTY := 3
+const MAX_PARTY := 6
 
 var members: Array[CreatureInstance] = []
 

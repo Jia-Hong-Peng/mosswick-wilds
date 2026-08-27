@@ -1,1 +1,11 @@
-{}
+{
+	"shoreline": {
+		"rate": 0.16,
+		"entries": [
+			{ "creature_id": "rockbadger", "weight": 5, "min_level": 2, "max_level": 4 },
+			{ "creature_id": "sproutwing", "weight": 2, "min_level": 2, "max_level": 3 },
+			{ "creature_id": "tidecrest", "weight": 2, "min_level": 2, "max_level": 3 },
+			{ "creature_id": "emberhorn", "weight": 1, "min_level": 3, "max_level": 4 }
+		]
+	}
+}

@@ -21,6 +21,7 @@ static func generate() -> void:
 	_item_balm("res://assets/ui/item_herbal_balm.png")
 	_item_travel_pack("res://assets/ui/item_travel_pack.png")
 	_item_travel_tag("res://assets/ui/item_travel_tag.png")
+	_item_blank_tag("res://assets/ui/item_blank_tag.png")
 	_shadow("res://assets/ui/contact_shadow.png")
 	_fog_blob("res://assets/ui/fog_blob.png")
 	_battle_props()
@@ -162,6 +163,21 @@ static func _item_travel_pack(path: String) -> void:
 	Pix.px(c, 11, 4, Pal.WOOD_DK)
 	# 側袋小毛刷
 	Pix.px(c, 12, 7, Pal.CORAL)
+	Pix.save(c, path)
+
+
+static func _item_blank_tag(path: String) -> void:
+	var c := Pix.img(16, 16)
+	# 空白旅伴牌：未刻字的素木牌＋銅環
+	Pix.rect(c, 4, 4, 8, 10, Pal.INK)
+	Pix.rect(c, 5, 5, 6, 8, Pal.WOOD_LT)
+	Pix.rect(c, 5, 5, 6, 2, Pal.SAND)
+	Pix.px(c, 7, 3, Pal.STEEL)
+	Pix.px(c, 8, 3, Pal.STEEL)
+	Pix.px(c, 7, 2, Pal.MIST_LT)
+	Pix.px(c, 8, 2, Pal.MIST_LT)
+	# 中央留白（等著刻上名字）
+	Pix.rect(c, 6, 8, 4, 3, Pal.PAPER_DIM)
 	Pix.save(c, path)
 
 

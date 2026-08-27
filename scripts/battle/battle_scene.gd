@@ -4,12 +4,14 @@ extends Node3D
 
 enum View { EVENTS, COMMAND, SKILLS, ITEMS }
 
-const COMMANDS: Array[String] = ["較勁", "背包", "離開"]
+const COMMANDS: Array[String] = ["較勁", "登記", "背包", "離開"]
 const CREATURE_PIXEL := 1.0 / 26.0
 
 var _battle: BattleService
 var _player: CreatureInstance
 var _enemy: CreatureInstance
+var _trainer := false          # 較勁對手戰：不能登記、不能離開
+var _scripted := ""
 var _rng := RandomNumberGenerator.new()
 
 var _view: int = View.EVENTS
@@ -46,6 +48,8 @@ func _ready() -> void:
 	_rng.randomize()
 	_shake_rng.randomize()
 	var encounter := GameState.pending_encounter
+	_trainer = bool(encounter.get("trainer", false))
+	_scripted = String(encounter.get("scripted", ""))
 	_enemy = DataRegistry.make_creature(String(encounter.get("creature_id", "sproutwing")), int(encounter.get("level", 3)))
 	_player = PartyService.first_conscious()
 	if _enemy == null or _player == null:
@@ -180,6 +184,8 @@ func _activate() -> void:
 					_cursor = 0
 					_refresh_menu()
 				1:
+					_try_register()
+				2:
 					if _battle_items().is_empty():
 						_flash_message("背包裡沒有能用的東西。")
 					else:
@@ -187,8 +193,11 @@ func _activate() -> void:
 						_view = View.ITEMS
 						_cursor = 0
 						_refresh_menu()
-				2:
-					_do_action(BattleService.ActionType.FLEE, {})
+				3:
+					if _trainer:
+						_flash_message("較勁中不能中途走人！")
+					else:
+						_do_action(BattleService.ActionType.FLEE, {})
 		View.SKILLS:
 			var skills := DataRegistry.skills_for(_player)
 			if _cursor < skills.size():
@@ -199,6 +208,18 @@ func _activate() -> void:
 				_do_action(BattleService.ActionType.ITEM, {"item": items[_cursor]})
 		_:
 			pass
+
+
+## 登記：出示空白旅伴牌，邀請野生伴獸同行
+func _try_register() -> void:
+	if _trainer:
+		_flash_message("對手的夥伴已經有旅伴牌了！")
+		return
+	var tag := DataRegistry.get_item("blank_tag")
+	if tag == null or InventoryService.count(tag.id) <= 0:
+		_flash_message("沒有空白旅伴牌了。")
+		return
+	_do_action(BattleService.ActionType.CAPTURE, {"item": tag, "party_full": PartyService.is_full()})
 
 
 func _do_action(action: int, payload: Dictionary) -> void:
@@ -235,6 +256,11 @@ func _run_events(events: Array[BattleService.BattleEvent]) -> void:
 				await _apply_hp_event(event, true)
 			BattleService.EVENT_CONSUME_ITEM:
 				InventoryService.use_item(String(event.data.get("item_id", "")))
+			BattleService.EVENT_CAPTURED:
+				await _register_success()
+				PartyService.add_member(_enemy)
+				_message_label.text = event.text
+				await _wait_confirm()
 			BattleService.EVENT_END:
 				pass
 	_running_events = false
@@ -378,6 +404,33 @@ func _burst(at: Vector3, color: Color) -> void:
 	get_tree().create_timer(0.7).timeout.connect(burst.queue_free)
 
 
+## 勝利經驗值：給出戰的夥伴；回傳結算文字附加段
+func _award_exp() -> String:
+	var def := DataRegistry.get_creature(_player.creature_id)
+	if def == null:
+		return ""
+	var amount := CreatureInstance.exp_reward(_enemy.level)
+	var before := _player.level
+	var gained := _player.gain_exp(amount, def)
+	var text := "\n%s獲得了 %d 點經驗。" % [_player.display_name, amount]
+	if gained > 0:
+		AudioManager.play_heal()
+		text += "升到了 Lv%d！" % _player.level
+		if before < _player.level:
+			_refresh_bars(true)
+	return text
+
+
+## 登記成功：旅伴牌光紋＋野生伴獸走向我方
+func _register_success() -> void:
+	AudioManager.play_adopt_jingle()
+	_burst(_enemy_home + Vector3(0, 1.0, 0), Pal.AMBER_LT)
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(_enemy_sprite, "position", _enemy_home + Vector3(-1.2, 0, 0.8), 0.8).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_enemy_sprite, "modulate", Color(1.0, 0.95, 0.8), 0.8)
+	await tween.finished
+
+
 func _refresh_bars(animated: bool) -> void:
 	_enemy_name.text = "%s Lv%d" % [_enemy.display_name, _enemy.level]
 	_player_name.text = "%s Lv%d" % [_player.display_name, _player.level]
@@ -422,7 +475,14 @@ func _end_sequence() -> void:
 	result.custom_minimum_size = Vector2(140, 0)
 	match _battle.outcome:
 		BattleService.Outcome.VICTORY:
-			result.text = "野生的%s退開了，鑽回草叢深處。" % _enemy.display_name
+			if _scripted == "rival":
+				EventFlagStore.set_flag("rival_beaten")
+				result.text = "阿汐收回了夥伴：「可惡……默契輸你們一截！」"
+			else:
+				result.text = "野生的%s退開了，鑽回草叢深處。" % _enemy.display_name
+			result.text += _award_exp()
+		BattleService.Outcome.CAPTURED:
+			result.text = "%s 登記完成！牠成為你的旅伴了。" % _enemy.display_name
 		BattleService.Outcome.DEFEAT:
 			result.text = "你眼前一黑……醒來時已回到潮芽伴獸之家。"
 		_:

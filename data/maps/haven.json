@@ -98,7 +98,9 @@
 		"000000000000000000000000"
 	],
 	"spawn": { "x": 10, "y": 3, "facing": "down" },
-	"warps": [],
+	"warps": [
+		{ "x": 23, "y": 12, "target_map": "shoreline", "target_x": 1, "target_y": 5, "facing": "right", "requires_flag": "chapter_done", "blocked_dialogue": "route_locked" }
+	],
 	"signs": [
 		{ "x": 19, "y": 10, "dialogue_id": "board_notice" }
 	],

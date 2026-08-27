@@ -43,7 +43,7 @@ const STANDEE := [
 ## 光源收集（世界場景據此放置 ≤3 盞動態燈＋光暈）
 const LIGHT_EMITTERS := ["lamp_post", "lamp_floor", "stove", "brick_window"]
 
-const OUTDOOR_MAPS := ["harbor", "trail", "haven"]
+const OUTDOOR_MAPS := ["harbor", "trail", "haven", "shoreline"]
 
 
 static func build(map: MapData, parent: Node3D) -> Dictionary:
@@ -149,7 +149,7 @@ static func build(map: MapData, parent: Node3D) -> Dictionary:
 				lights.append(_center(cell) + Vector3(0, 0.85, 0.1))
 	# ---------- 水面 ----------
 	if not deep_cells.is_empty():
-		_water_plane(parent, deep_cells, -0.32, map, true, outdoor and map.id in ["harbor", "haven"])
+		_water_plane(parent, deep_cells, -0.32, map, true, outdoor and map.id in ["harbor", "haven", "shoreline"])
 	if not shallow_cells.is_empty():
 		_water_plane(parent, shallow_cells, -0.05, map, false, false)
 	# ---------- 戶外遠景 ----------

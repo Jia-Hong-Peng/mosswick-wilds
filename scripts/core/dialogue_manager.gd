@@ -137,7 +137,7 @@ func _apply_action(action: String) -> void:
 			PartyService.heal_all()
 			AudioManager.play_heal()
 		"adopt_sproutwing", "adopt_emberhorn", "adopt_tidecrest", \
-		"start_crisis", "return_title", "continue_explore":
+		"start_crisis", "rival_battle", "return_title", "continue_explore":
 			_post_action = action
 		"":
 			pass
@@ -162,6 +162,20 @@ func _finish() -> void:
 	match pending:
 		"start_crisis":
 			SceneRouter.goto_crisis()
+		"rival_battle":
+			# 阿汐的夥伴剋玩家御三家（草→火、火→水、水→草）
+			var counter := {
+				"sproutwing": "emberhorn",
+				"emberhorn": "tidecrest",
+				"tidecrest": "sproutwing",
+			}
+			SceneRouter.goto_battle({
+				"creature_id": String(counter.get(GameState.starter_id, "rockbadger")),
+				"level": 7,
+				"bg": "trail",
+				"trainer": true,
+				"scripted": "rival",
+			})
 		"return_title":
 			SceneRouter.goto_title()
 		"adopt_sproutwing", "adopt_emberhorn", "adopt_tidecrest":

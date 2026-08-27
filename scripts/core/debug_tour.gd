@@ -244,6 +244,22 @@ func _run() -> void:
 		_mark("海邊來回驗證：失敗！玩家被困在閘門外 cell=%s" % str(GameState.player_cell))
 	if default_run:
 		_shot("gate_return")
+	# 章節後開放的潮風小徑：走到東端 warp，確認換圖成功
+	for i in range(2):
+		await _walk("move_down", 1)
+		if DialogueManager.active:
+			await _pump_dialogue()
+	for i in range(3):
+		await _walk("move_right", 1)
+		if DialogueManager.active:
+			await _pump_dialogue()
+	await _wait(45)
+	if GameState.current_map_id == "shoreline":
+		_mark("潮風小徑：進入成功（野生遭遇與對手戰待玩家探索）")
+		if default_run:
+			_shot("route_shoreline")
+	else:
+		_mark("潮風小徑：進入失敗 map=%s cell=%s" % [GameState.current_map_id, str(GameState.player_cell)])
 	_mark("完整通關（含繼續探索）")
 	get_tree().quit()
 

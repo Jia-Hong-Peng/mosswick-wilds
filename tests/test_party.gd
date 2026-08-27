@@ -7,12 +7,11 @@ const PartyScript := preload("res://scripts/core/party_service.gd")
 func run(t: TestContext) -> void:
 	var party: Node = PartyScript.new()
 	t.check(not party.is_full(), "empty party is not full")
-	t.check(party.add_member(TestHelpers.make_creature("A", 30, 5, 5, 5)), "first member joins")
-	t.check(party.add_member(TestHelpers.make_creature("B", 30, 5, 5, 5)), "second member joins")
-	t.check(party.add_member(TestHelpers.make_creature("C", 30, 5, 5, 5)), "third member joins")
-	t.check(party.is_full(), "party of three is full")
-	t.check(not party.add_member(TestHelpers.make_creature("D", 30, 5, 5, 5)), "fourth member must be rejected")
-	t.check_eq(party.size(), 3, "party size caps at 3")
+	for member_name: String in ["A", "B", "C", "D", "E", "F"]:
+		t.check(party.add_member(TestHelpers.make_creature(member_name, 30, 5, 5, 5)), member_name + " joins")
+	t.check(party.is_full(), "party of six is full")
+	t.check(not party.add_member(TestHelpers.make_creature("G", 30, 5, 5, 5)), "seventh member must be rejected")
+	t.check_eq(party.size(), 6, "party size caps at 6")
 	t.check(not party.add_member(null), "null members are rejected")
 
 	var members: Array = party.members

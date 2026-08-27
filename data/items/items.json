@@ -25,5 +25,14 @@
 		"usable_in_field": false,
 		"description": "木材、陶片與金屬做成的小識別牌，刻著認養人與夥伴的名字。戰鬥開始時會亮起簡短的光紋。",
 		"icon_path": "res://assets/ui/item_travel_tag.png"
+	},
+	"blank_tag": {
+		"display_name": "空白旅伴牌",
+		"kind": "capture",
+		"amount": 0,
+		"usable_in_battle": true,
+		"usable_in_field": false,
+		"description": "還沒刻上名字的旅伴牌。對放下戒心的野生伴獸出示，牠若願意，就當場登記成你的旅伴。",
+		"icon_path": "res://assets/ui/item_blank_tag.png"
 	}
 }

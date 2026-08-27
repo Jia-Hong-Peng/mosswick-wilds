@@ -10,7 +10,7 @@ const FX_WHITELIST: Array[String] = [
 	"vfx_grass", "vfx_fire", "vfx_water", "soothe",
 ]
 const ACTION_WHITELIST: Array[String] = [
-	"", "heal_party", "start_crisis", "return_title", "continue_explore",
+	"", "heal_party", "start_crisis", "rival_battle", "return_title", "continue_explore",
 	"adopt_sproutwing", "adopt_emberhorn", "adopt_tidecrest",
 ]
 
@@ -124,55 +124,79 @@ func _test_starters(t: TestContext) -> void:
 
 
 func _test_map(t: TestContext) -> void:
-	t.check_eq(DataRegistry.maps.size(), 1, "示範章節只有潮芽伴獸之家一張地圖")
-	var map := DataRegistry.get_map("haven")
-	t.check(map != null, "haven 地圖存在")
-	if map == null:
-		return
-	t.check_eq(map.width, 24, "地圖寬 24")
-	t.check_eq(map.height, 16, "地圖高 16")
-	var raw := DataRegistry.read_json_dict("res://data/maps/haven.json")
-	# 三層網格與 elevation 尺寸一致、字元都有對應
-	for layer_key: String in ["ground", "deco", "overhead", "elevation"]:
-		var rows := Array(raw.get(layer_key, []))
-		t.check_eq(rows.size(), 16, layer_key + " 列數 16")
-		for row: Variant in rows:
-			t.check_eq(String(row).length(), 24, layer_key + " 每列 24 字")
-	var ground_legend := Dictionary(raw.get("legend_ground", {}))
-	for row: Variant in Array(raw.get("ground", [])):
-		for ch in String(row):
-			t.check(ground_legend.has(ch), "ground 字元有圖例：" + ch)
-	var deco_legend := Dictionary(raw.get("legend_deco", {}))
-	for row: Variant in Array(raw.get("deco", [])):
-		for ch in String(row):
-			t.check(ch == "." or deco_legend.has(ch), "deco 字元有圖例：" + ch)
-	# 圖例的磚名都在圖集裡
-	for key: Variant in ground_legend:
-		t.check(TileCatalog.has_tile(String(ground_legend[key])), "圖集有磚：" + String(ground_legend[key]))
-	for key: Variant in deco_legend:
-		t.check(TileCatalog.has_tile(String(deco_legend[key])), "圖集有磚：" + String(deco_legend[key]))
-	# 出生點可走、NPC 與觸發合法
-	t.check(map.is_walkable(map.spawn_cell()), "出生點可走")
-	for npc in map.npcs:
-		var cell := Vector2i(int(npc.get("x", -1)), int(npc.get("y", -1)))
-		t.check(map.in_bounds(cell), "NPC 在界內：" + String(npc.get("id", "")))
-		t.check(FileAccess.file_exists(String(npc.get("sprite", ""))), "NPC 圖檔存在：" + String(npc.get("sprite", "")))
-		t.check(not DataRegistry.get_dialogue(String(npc.get("dialogue_id", ""))).is_empty(), "NPC 對話存在：" + String(npc.get("dialogue_id", "")))
-	for sign_cell: Variant in map.sign_dialogues:
-		t.check(not DataRegistry.get_dialogue(String(map.sign_dialogues[sign_cell])).is_empty(), "告示對話存在")
-	for trigger in map.triggers:
-		t.check(not DataRegistry.get_dialogue(String(trigger.get("dialogue_id", ""))).is_empty(), "觸發對話存在")
-	for entry in map.auto_dialogues:
-		t.check(not DataRegistry.get_dialogue(String(entry.get("dialogue_id", ""))).is_empty(), "自動對話存在")
+	t.check(DataRegistry.maps.size() >= 2, "至少有認養之家與潮風小徑兩張地圖")
+	t.check(DataRegistry.get_map("haven") != null, "haven 地圖存在")
+	t.check(DataRegistry.get_map("shoreline") != null, "shoreline 地圖存在")
+	for map_id: Variant in DataRegistry.maps:
+		_check_one_map(t, String(map_id))
 	# 認養互動點的鄰格要可以站人（玩家能靠近）
+	var haven := DataRegistry.get_map("haven")
 	for starter_id in DataRegistry.starter_ids():
 		var pen := Dictionary(DataRegistry.get_starter(starter_id).get("pen_cell", {}))
 		var pen_cell := Vector2i(int(pen.get("x", 0)), int(pen.get("y", 0)))
 		var reachable := false
 		for offset: Vector2i in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
-			if map.is_walkable(pen_cell + offset):
+			if haven.is_walkable(pen_cell + offset):
 				reachable = true
 		t.check(reachable, starter_id + " 的圍欄可被玩家靠近")
+
+
+func _check_one_map(t: TestContext, map_id: String) -> void:
+	var map := DataRegistry.get_map(map_id)
+	var raw := DataRegistry.read_json_dict("res://data/maps/%s.json" % map_id)
+	var width := map.width
+	var height := map.height
+	t.check(width > 0 and height > 0, map_id + " 尺寸有效")
+	# 三層網格與 elevation 尺寸一致、字元都有對應
+	for layer_key: String in ["ground", "deco", "overhead", "elevation"]:
+		var rows := Array(raw.get(layer_key, []))
+		t.check_eq(rows.size(), height, "%s %s 列數一致" % [map_id, layer_key])
+		for row: Variant in rows:
+			t.check_eq(String(row).length(), width, "%s %s 每列 %d 字" % [map_id, layer_key, width])
+	var ground_legend := Dictionary(raw.get("legend_ground", {}))
+	for row: Variant in Array(raw.get("ground", [])):
+		for ch in String(row):
+			t.check(ground_legend.has(ch), "%s ground 字元有圖例：%s" % [map_id, ch])
+	var deco_legend := Dictionary(raw.get("legend_deco", {}))
+	for row: Variant in Array(raw.get("deco", [])):
+		for ch in String(row):
+			t.check(ch == "." or deco_legend.has(ch), "%s deco 字元有圖例：%s" % [map_id, ch])
+	for key: Variant in ground_legend:
+		t.check(TileCatalog.has_tile(String(ground_legend[key])), "圖集有磚：" + String(ground_legend[key]))
+	for key: Variant in deco_legend:
+		t.check(TileCatalog.has_tile(String(deco_legend[key])), "圖集有磚：" + String(deco_legend[key]))
+	# 出生點可走、NPC／告示／觸發合法
+	t.check(map.is_walkable(map.spawn_cell()), map_id + " 出生點可走")
+	for npc in map.npcs:
+		var cell := Vector2i(int(npc.get("x", -1)), int(npc.get("y", -1)))
+		t.check(map.in_bounds(cell), "%s NPC 在界內：%s" % [map_id, String(npc.get("id", ""))])
+		t.check(FileAccess.file_exists(String(npc.get("sprite", ""))), "NPC 圖檔存在：" + String(npc.get("sprite", "")))
+		t.check(not DataRegistry.get_dialogue(String(npc.get("dialogue_id", ""))).is_empty(), "NPC 對話存在：" + String(npc.get("dialogue_id", "")))
+	for sign_cell: Variant in map.sign_dialogues:
+		t.check(not DataRegistry.get_dialogue(String(map.sign_dialogues[sign_cell])).is_empty(), map_id + " 告示對話存在")
+	for trigger in map.triggers:
+		t.check(not DataRegistry.get_dialogue(String(trigger.get("dialogue_id", ""))).is_empty(), map_id + " 觸發對話存在")
+	for entry in map.auto_dialogues:
+		t.check(not DataRegistry.get_dialogue(String(entry.get("dialogue_id", ""))).is_empty(), map_id + " 自動對話存在")
+	# warp：目標地圖存在、落點可走；封鎖對話存在
+	for warp_cell: Variant in map.warps:
+		var warp := Dictionary(map.warps[warp_cell])
+		var target := DataRegistry.get_map(String(warp.get("target_map", "")))
+		t.check(target != null, "%s warp 目標地圖存在" % map_id)
+		if target != null:
+			var landing := Vector2i(int(warp.get("target_x", -1)), int(warp.get("target_y", -1)))
+			t.check(target.is_walkable(landing), "%s warp 落點可走 %s" % [map_id, str(landing)])
+		if warp.has("blocked_dialogue"):
+			t.check(not DataRegistry.get_dialogue(String(warp["blocked_dialogue"])).is_empty(), map_id + " warp 封鎖對話存在")
+	# 遭遇表：鍵存在、生物有效、等級範圍合法
+	if not map.encounter_key.is_empty():
+		var table := DataRegistry.get_encounter_table(map.encounter_key)
+		t.check(not table.is_empty(), map_id + " 遭遇表存在")
+		for entry: Variant in Array(table.get("entries", [])):
+			var data := Dictionary(entry)
+			t.check(DataRegistry.get_creature(String(data.get("creature_id", ""))) != null,
+				"遭遇表生物存在：" + String(data.get("creature_id", "")))
+			t.check(int(data.get("min_level", 1)) <= int(data.get("max_level", 1)), "遭遇等級範圍合法")
 
 
 func _test_dialogues(t: TestContext) -> void:
