@@ -32,13 +32,21 @@ static func _kui_cfg() -> Dictionary:
 	}
 
 
+## 主角：島嶼旅人（15 歲）。海青短簷探險帽（沙色帽簷＋珊瑚縫線＋黃銅浪芽徽）、
+## 米白機能襯衫＋深藍綠不對稱背心（海藍側片）、石板灰及膝短褲＋深色越野鞋
+## （沙色鞋底）、苔綠防水捲口背包（珊瑚束繩＋旅伴牌）、黃銅潮汐羅盤。
+## 禁：紅白帽、球形徽記、素藍背心、綠色方形書包。
 static func _player_cfg() -> Dictionary:
 	return {
 		"skin": Pal.SKIN, "skin_dk": Pal.SKIN_DK,
-		"hair": Pal.WOOD_DK, "hat": "cap", "hat_color": Pal.CORAL, "hat_dark": Pal.BRICK_DK,
-		"torso": Pal.SEA_DK, "torso_lt": Pal.SEA, "collar": Pal.FOG,
-		"legs": Pal.NIGHT, "boots": Pal.WOOD_DK,
-		"bag": true, "torso_w": 16, "leg_h": 10, "head_h": 16,
+		"hair": Color(Pal.WOOD_DK).darkened(0.3),
+		"hat": "explorer", "hat_color": Pal.SEA_DK, "hat_dark": Pal.SAND_DK,
+		"torso": Pal.PAPER, "torso_lt": Pal.FOAM, "collar": Pal.PAPER_DIM,
+		"vest": Pal.SEA_DK, "vest_panel": Pal.SEA, "vest_seam": Pal.CORAL,
+		"legs": Pal.SLATE, "shorts": true,
+		"boots": Pal.NIGHT, "sole": Pal.SAND_LT,
+		"pack": true, "compass": true,
+		"torso_w": 16, "leg_h": 10, "head_h": 16,
 	}
 
 
@@ -152,6 +160,28 @@ static func _draw_front(c: Image, cfg: Dictionary, dir: int, torso_top: int, hea
 		Pix.rect(c, tx + torso_w - 3, torso_top + 2, 2, 4, cfg["scarf"])
 	elif facing_down:
 		Pix.rect(c, tx + 2, torso_top, torso_w - 4, 2, cfg["collar"])
+	# --- 不對稱旅行背心（襯衫外層：閉合線偏右＋海藍側片＋珊瑚縫線） ---
+	if cfg.has("vest"):
+		var vest: Color = cfg["vest"]
+		var vest_dk := Color(vest).darkened(0.25)
+		if facing_down:
+			Pix.rect(c, tx, torso_top + 2, torso_w - 5, torso_h - 2, vest)
+			Pix.rect(c, tx, torso_top + 2, 2, torso_h - 2, cfg["vest_panel"])
+			Pix.vline(c, tx + torso_w - 6, torso_top + 2, torso_h - 2, cfg["vest_seam"])
+			Pix.rect(c, tx + 2, torso_top, torso_w - 4, 2, cfg["collar"])
+			Pix.px(c, tx + 2, torso_top + torso_h - 4, vest_dk)
+			Pix.px(c, tx + 5, torso_top + torso_h - 4, vest_dk)
+		else:
+			Pix.rect(c, tx, torso_top + 2, torso_w, torso_h - 2, vest)
+			Pix.rect(c, tx, torso_top + 2, 2, torso_h - 2, cfg["vest_panel"])
+			Pix.rect(c, tx + torso_w - 2, torso_top + 2, 2, torso_h - 2, vest_dk)
+	# --- 腰帶＋黃銅潮汐羅盤 ---
+	if bool(cfg.get("compass", false)):
+		Pix.hline(c, tx, torso_top + torso_h - 1, torso_w, Pal.SEA_DK)
+		if facing_down:
+			Pix.px(c, tx + torso_w / 2, torso_top + torso_h - 1, Pal.AMBER)
+			Pix.rect(c, tx + torso_w - 4, torso_top + torso_h - 2, 2, 2, Pal.AMBER)
+			Pix.px(c, tx + torso_w - 4, torso_top + torso_h - 2, Pal.AMBER_LT)
 	# --- 手臂（前後擺相位相反、非鏡射） ---
 	var arm_h := torso_h - 2
 	Pix.rect(c, tx - 2, torso_top + 2 + maxi(0, swing), 2, arm_h - absi(swing), torso)
@@ -174,6 +204,29 @@ static func _draw_front(c: Image, cfg: Dictionary, dir: int, torso_top: int, hea
 			Pix.rect(c, 10, torso_top + 2, 12, 8, Pal.WOOD_LT)
 			Pix.rect(c, 10, torso_top + 2, 12, 2, Pal.WOOD)
 			Pix.rect(c, 15, torso_top + 6, 2, 2, Pal.AMBER)
+	# --- 苔綠防水捲口背包（正面見雙肩帶＋旅伴牌；背面見包體） ---
+	if bool(cfg.get("pack", false)):
+		if facing_down:
+			Pix.vline(c, tx + 2, torso_top + 2, torso_h - 4, Pal.SEA_DK)
+			Pix.vline(c, tx + torso_w - 3, torso_top + 2, torso_h - 4, Pal.SEA_DK)
+			# 旅伴牌：木片＋銅環，掛在右肩帶
+			Pix.rect(c, tx + torso_w - 4, torso_top + 5, 2, 3, Pal.WOOD)
+			Pix.px(c, tx + torso_w - 4, torso_top + 4, Pal.AMBER)
+		else:
+			var moss_dk := Color(Pal.MOSS).darkened(0.25)
+			Pix.rect(c, 10, torso_top + 1, 12, 10, Pal.MOSS)
+			Pix.rect(c, 10, torso_top + 1, 12, 2, Pal.LEAF)
+			Pix.hline(c, 10, torso_top + 3, 12, moss_dk)
+			Pix.rect(c, 10, torso_top + 9, 12, 2, Pal.SAND)
+			Pix.vline(c, 13, torso_top + 4, 5, moss_dk)
+			Pix.vline(c, 18, torso_top + 4, 5, moss_dk)
+			Pix.px(c, 16, torso_top + 2, Pal.CORAL)
+			# 浪花＋嫩芽徽（銅浪＋芽）
+			Pix.px(c, 15, torso_top + 6, Pal.AMBER)
+			Pix.px(c, 16, torso_top + 6, Pal.SPROUT)
+			# 側袋（照護工具）與底部捲毯
+			Pix.rect(c, 21, torso_top + 4, 2, 5, Pal.LEAF)
+			Pix.rect(c, 11, torso_top + 11, 10, 2, Pal.WOOD)
 	# --- 頭 ---
 	var head_w := 16
 	var hx := 8
@@ -238,6 +291,24 @@ static func _draw_side(c: Image, cfg: Dictionary, dir: int, torso_top: int, head
 		Pix.rect(c, tx, torso_top, torso_w, 3, cfg["scarf"])
 	if cfg.has("apron"):
 		Pix.rect(c, tx + 2, torso_top + 4, torso_w - 4, torso_h - 2, cfg["apron"])
+	# --- 側面背心＋海藍側片 ---
+	if cfg.has("vest"):
+		Pix.rect(c, tx, torso_top + 2, torso_w, torso_h - 2, cfg["vest"])
+		var panel_x := tx + (1 if not flip else torso_w - 3)
+		Pix.rect(c, panel_x, torso_top + 3, 2, torso_h - 4, cfg["vest_panel"])
+	if bool(cfg.get("compass", false)):
+		Pix.hline(c, tx, torso_top + torso_h - 1, torso_w, Pal.SEA_DK)
+		Pix.px(c, tx + (torso_w - 2 if not flip else 1), torso_top + torso_h - 1, Pal.AMBER)
+	# --- 側面捲口背包（背在背側） ---
+	if bool(cfg.get("pack", false)):
+		var pack_x := (tx + torso_w - 1) if not flip else (tx - 5)
+		var moss_dk := Color(Pal.MOSS).darkened(0.25)
+		Pix.rect(c, pack_x, torso_top + 1, 6, 9, Pal.MOSS)
+		Pix.rect(c, pack_x, torso_top + 1, 6, 2, Pal.LEAF)
+		Pix.hline(c, pack_x, torso_top + 3, 6, moss_dk)
+		Pix.rect(c, pack_x, torso_top + 8, 6, 2, Pal.SAND)
+		Pix.px(c, pack_x + (5 if not flip else 0), torso_top + 4, Pal.CORAL)
+		Pix.rect(c, pack_x + 1, torso_top + 10, 4, 2, Pal.WOOD)
 	# --- 單臂（擺動） ---
 	var arm_x := 16 + (2 if flip else -4)
 	Pix.rect(c, arm_x, torso_top + 2, 3, torso_h - 4, torso)
@@ -272,6 +343,15 @@ static func _leg(c: Image, cfg: Dictionary, x: int, top: int, w: int, h: int, li
 	var height := h - (2 if lifted else 0)
 	if height <= 0:
 		return
+	if bool(cfg.get("shorts", false)) and height >= 8:
+		# 及膝短褲＋露出小腿＋越野鞋（沙色鞋底、珊瑚提耳）
+		Pix.rect(c, x, top, w, 4, cfg["legs"])
+		Pix.px(c, x, top, Color(cfg["legs"]).lightened(0.15))
+		Pix.rect(c, x, top + 4, w, height - 7, cfg["skin"])
+		Pix.rect(c, x, top + height - 3, w, 2, cfg["boots"])
+		Pix.rect(c, x, top + height - 1, w, 1, cfg.get("sole", Pal.SAND_LT))
+		Pix.px(c, x + w - 1, top + height - 3, Pal.CORAL)
+		return
 	Pix.rect(c, x, top, w, height - 2, cfg["legs"])
 	Pix.px(c, x, top, Color(cfg["legs"]).lightened(0.15))
 	Pix.rect(c, x, top + height - 2, w, 2, cfg["boots"])
@@ -279,6 +359,31 @@ static func _leg(c: Image, cfg: Dictionary, x: int, top: int, w: int, h: int, li
 
 static func _hat(c: Image, cfg: Dictionary, dir: int, hx: int, head_top: int, head_w: int) -> void:
 	match String(cfg.get("hat", "")):
+		"explorer":
+			# 短簷探險帽：海青帽冠＋沙色短簷＋珊瑚縫線＋黃銅浪芽徽；
+			# 帽下露出被海風吹亂的髮束
+			Pix.rect(c, hx, head_top - 1, head_w, 4, cfg["hat_color"])
+			Pix.hline(c, hx, head_top - 1, head_w, Color(cfg["hat_color"]).lightened(0.15))
+			Pix.hline(c, hx, head_top + 2, head_w, Pal.CORAL)
+			if dir == Dir.DOWN:
+				Pix.rect(c, hx - 1, head_top + 3, head_w + 2, 2, cfg["hat_dark"])
+				Pix.rect(c, hx + head_w / 2 - 1, head_top, 2, 2, Pal.AMBER)
+				Pix.px(c, hx + head_w / 2, head_top, Pal.SPROUT)
+				Pix.px(c, hx - 1, head_top + 5, cfg["hair"])
+				Pix.px(c, hx + head_w, head_top + 5, cfg["hair"])
+			elif dir == Dir.LEFT:
+				Pix.rect(c, hx - 4, head_top + 3, 8, 2, cfg["hat_dark"])
+				Pix.px(c, hx + 2, head_top + 1, Pal.AMBER)
+				Pix.px(c, hx + head_w - 1, head_top + 4, cfg["hair"])
+			elif dir == Dir.RIGHT:
+				Pix.rect(c, hx + head_w - 4, head_top + 3, 8, 2, cfg["hat_dark"])
+				Pix.px(c, hx + head_w - 3, head_top + 1, Pal.AMBER)
+				Pix.px(c, hx, head_top + 4, cfg["hair"])
+			else:
+				# 背面：後方調整帶＋兩簇亂髮
+				Pix.rect(c, hx + head_w / 2 - 2, head_top + 1, 4, 2, Color(cfg["hat_color"]).darkened(0.3))
+				Pix.px(c, hx + 2, head_top + 4, cfg["hair"])
+				Pix.px(c, hx + head_w - 3, head_top + 5, cfg["hair"])
 		"cap":
 			Pix.rect(c, hx, head_top - 1, head_w, 4, cfg["hat_color"])
 			Pix.hline(c, hx, head_top - 1, head_w, Color(cfg["hat_color"]).lightened(0.15))

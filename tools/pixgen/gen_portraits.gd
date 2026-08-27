@@ -9,10 +9,13 @@ const H := 48
 
 
 static func generate() -> void:
+	# 主角：島嶼旅人——海青探險帽（沙簷＋珊瑚縫線＋銅浪芽徽）、
+	# 米白襯衫領＋深藍綠背心（海藍側片）、琥珀綠眼睛、深棕黑亂髮
 	var player_cfg := {
-		"skin": Pal.SKIN, "skin_dk": Pal.SKIN_DK, "hair": Pal.WOOD_DK,
-		"hat": "cap", "hat_color": Pal.CORAL, "hat_dark": Pal.BRICK_DK,
-		"coat": Pal.SEA_DK, "coat_lt": Pal.SEA, "collar": Pal.FOG, "strap": Pal.WOOD_DK,
+		"skin": Pal.SKIN, "skin_dk": Pal.SKIN_DK, "hair": Color(Pal.WOOD_DK).darkened(0.3),
+		"hat": "explorer", "hat_color": Pal.SEA_DK, "hat_dark": Pal.SAND_DK,
+		"coat": Pal.SEA_DK, "coat_lt": Pal.SEA, "collar": Pal.PAPER,
+		"strap": Color(Pal.MOSS).darkened(0.2), "seam": Pal.CORAL, "iris": Pal.SPROUT,
 	}
 	var rei_cfg := {
 		"skin": Pal.SKIN, "skin_dk": Pal.SKIN_DK, "hair": Pal.NIGHT,
@@ -35,6 +38,11 @@ static func _portrait(char_name: String, cfg: Dictionary, expr: String) -> void:
 	var c := Pix.img(W, H)
 	_bust(c, cfg)
 	_face(c, cfg, expr)
+	# 琥珀綠瞳孔（睜眼表情才畫）
+	if cfg.has("iris") and expr in ["neutral", "focused", "surprised", "worried", "determined", "thinking"]:
+		if expr != "thinking":
+			Pix.px(c, 14, 22, cfg["iris"])
+		Pix.px(c, 26, 22, cfg["iris"])
 	Pix.outline_sprite(c)
 	Pix.save(c, "res://assets/portraits/%s_%s.png" % [char_name, expr])
 
@@ -44,10 +52,13 @@ static func _bust(c: Image, cfg: Dictionary) -> void:
 	var skin: Color = cfg["skin"]
 	var skin_dk: Color = cfg["skin_dk"]
 	var hair: Color = cfg["hair"]
-	# 肩與胸（大衣）
+	# 肩與胸（外層）
 	Pix.rect(c, 4, 36, 32, 12, cfg["coat"])
 	Pix.rect(c, 4, 36, 12, 12, cfg["coat_lt"])
 	Pix.hline(c, 4, 36, 32, cfg["coat_lt"])
+	if cfg.has("seam"):
+		# 背心不對稱閉合縫線（珊瑚橘）
+		Pix.vline(c, 25, 37, 11, cfg["seam"])
 	# 領口
 	Pix.rect(c, 15, 35, 10, 4, cfg["collar"])
 	if cfg.has("scarf"):
@@ -72,6 +83,21 @@ static func _bust(c: Image, cfg: Dictionary) -> void:
 		Pix.hline(c, 24, 28, 3, skin_dk)
 	# 髮／帽
 	match String(cfg.get("hat", "")):
+		"explorer":
+			# 短簷探險帽：海青帽冠＋珊瑚縫線＋沙色短簷＋黃銅浪芽徽
+			Pix.ellipse(c, 20, 11, 11, 5.5, cfg["hat_color"])
+			Pix.hline(c, 9, 8, 22, Color(cfg["hat_color"]).lightened(0.15))
+			Pix.hline(c, 9, 13, 22, Pal.CORAL)
+			Pix.rect(c, 7, 14, 26, 2, cfg["hat_dark"])
+			Pix.rect(c, 19, 8, 3, 3, Pal.AMBER)
+			Pix.px(c, 20, 8, Pal.SPROUT)
+			# 帽下海風亂髮：不對稱斜瀏海＋側簇＋翹起髮尾
+			Pix.rect(c, 9, 16, 4, 7, hair)
+			Pix.rect(c, 27, 16, 4, 6, hair)
+			Pix.rect(c, 13, 16, 7, 2, hair)
+			Pix.px(c, 20, 16, hair)
+			Pix.px(c, 8, 15, hair)
+			Pix.px(c, 31, 17, hair)
 		"cap":
 			Pix.ellipse(c, 20, 12, 11, 6, cfg["hat_color"])
 			Pix.rect(c, 8, 12, 24, 3, cfg["hat_dark"])

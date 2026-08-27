@@ -121,7 +121,9 @@ static func build(map: MapData, parent: Node3D) -> Dictionary:
 			elif ROOF.has(deco):
 				_roof_prism(st, map, cell, base, deco)
 			elif deco == "chimney":
-				_box(st, cell, base + 2.0, base + 2.7, "chimney", "chimney", 0.8, 0.4)
+				# 煙囪格自己也要有屋面，煙囪柱從屋脊冒出
+				_roof_prism(st, map, cell, base, "roof_tin_a")
+				_box(st, cell, base + 1.9, base + 2.6, "chimney", "chimney", 0.8, 0.4)
 			elif BOX.has(deco):
 				_box(st, cell, base, base + float(BOX[deco]), deco, deco, 0.85, 0.86)
 	st.generate_normals()
@@ -250,8 +252,10 @@ static func _roof_prism(st: SurfaceTool, map: MapData, cell: Vector2i, base: flo
 	var eave_h := base + 1.3
 	var ridge_h := base + 2.15 if tile.ends_with("_ridge") else base + 2.0
 	var over := 0.2
-	var left_roof := ROOF.has(map.deco_name(cell + Vector2i(-1, 0)))
-	var right_roof := ROOF.has(map.deco_name(cell + Vector2i(1, 0)))
+	var left_deco := map.deco_name(cell + Vector2i(-1, 0))
+	var right_deco := map.deco_name(cell + Vector2i(1, 0))
+	var left_roof := ROOF.has(left_deco) or left_deco == "chimney"
+	var right_roof := ROOF.has(right_deco) or right_deco == "chimney"
 	var x0 := float(cell.x) - (0.0 if left_roof else over)
 	var x1 := float(cell.x) + 1.0 + (0.0 if right_roof else over)
 	var z0 := float(cell.y) - over
@@ -400,10 +404,11 @@ static func _water_plane(parent: Node3D, cells: Array[Vector2i], y: float, map: 
 		var z := float(cell.y)
 		_water_quad(st, x, x + 1.0, z, z + 1.0, y)
 	if extend_sea:
-		# 港外大海：向南與東西延伸的巨大海面
-		_water_quad(st, -12.0, float(map.width) + 12.0, float(map.height), float(map.height) + 16.0, y)
-		_water_quad(st, -12.0, 0.0, float(map.height) - 2.0, float(map.height), y)
-		_water_quad(st, float(map.width), float(map.width) + 12.0, float(map.height) - 2.0, float(map.height), y)
+		# 島外大海：四面延伸的巨大海面——島是海上的台地，不是浮在天上的板子
+		_water_quad(st, -14.0, float(map.width) + 14.0, float(map.height), float(map.height) + 18.0, y)
+		_water_quad(st, -14.0, 0.0, -14.0, float(map.height), y)
+		_water_quad(st, float(map.width), float(map.width) + 14.0, -14.0, float(map.height), y)
+		_water_quad(st, 0.0, float(map.width), -14.0, 0.0, y)
 	st.generate_normals()
 	var mesh_instance := MeshInstance3D.new()
 	mesh_instance.mesh = st.commit()

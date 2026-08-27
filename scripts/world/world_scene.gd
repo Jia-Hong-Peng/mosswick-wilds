@@ -883,15 +883,24 @@ func _spawn_dust() -> void:
 func _spawn_smoke() -> void:
 	for cell in _map.smoke_cells:
 		var smoke := CPUParticles3D.new()
-		smoke.position = Vector3(float(cell.x) + 0.5, 2.5 + float(_map.elevation(cell)) * StageBuilder.LEVEL_H, float(cell.y) + 0.5)
-		smoke.amount = 10 if AudioManager.quality_high else 5
-		smoke.lifetime = 3.5
-		smoke.direction = Vector3(0.2, 1, 0)
-		smoke.spread = 12.0
-		smoke.gravity = Vector3(0.3, 0.5, 0)
-		smoke.initial_velocity_min = 0.3
-		smoke.initial_velocity_max = 0.6
-		smoke.mesh = _particle_mesh(Color(Pal.FOG.r, Pal.FOG.g, Pal.FOG.b, 0.5))
+		smoke.position = Vector3(float(cell.x) + 0.5, 2.7 + float(_map.elevation(cell)) * StageBuilder.LEVEL_H, float(cell.y) + 0.5)
+		smoke.amount = 8 if AudioManager.quality_high else 4
+		smoke.lifetime = 4.5
+		smoke.preprocess = 2.0
+		smoke.direction = Vector3(0.15, 1, 0)
+		smoke.spread = 16.0
+		smoke.gravity = Vector3(0.12, 0.2, 0)
+		smoke.initial_velocity_min = 0.15
+		smoke.initial_velocity_max = 0.3
+		# 柔霧點（大而淡），避免在天空上讀成虛線刮痕
+		var mesh := QuadMesh.new()
+		mesh.size = Vector2(0.22, 0.22)
+		var material := StandardMaterial3D.new()
+		material.albedo_color = Color(Pal.FOG.r, Pal.FOG.g, Pal.FOG.b, 0.3)
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+		mesh.material = material
+		smoke.mesh = mesh
 		add_child(smoke)
 
 
