@@ -54,6 +54,7 @@ func setup(world: Node3D, player: Node3D, of_starter: String, start_cell: Vector
 	_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	_sprite.shaded = true
 	_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	_sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	_sprite.position = Vector3(0, 0.75, 0)
 	add_child(_sprite)
 	var shadow := MeshInstance3D.new()

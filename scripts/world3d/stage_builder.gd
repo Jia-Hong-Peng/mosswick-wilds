@@ -79,11 +79,15 @@ static func build(map: MapData, parent: Node3D) -> Dictionary:
 				"foam":
 					heights[cell] = h - 0.06
 					_top(st, cell, h - 0.06, "foam", 1.0)
+				"stairs":
+					heights[cell] = _stairs(st, map, cell)
 				"":
 					heights[cell] = h
 				_:
 					heights[cell] = h
-					_top(st, cell, h, ground, 1.0)
+					# 手作感：每格頂面帶細微明度差（棋盤僵硬感 → 手鋪石板／草皮）
+					var jitter := 1.0 - 0.05 * float((cell.x * 31 + cell.y * 17) % 4) / 3.0
+					_top(st, cell, h, ground, jitter)
 	# ---------- 側裙（高低差與地圖邊緣） ----------
 	for y in range(map.height):
 		for x in range(map.width):
@@ -115,9 +119,9 @@ static func build(map: MapData, parent: Node3D) -> Dictionary:
 				if deco == "brick_window":
 					lights.append(_center(cell) + Vector3(0, 0.9, 0.65))
 			elif ROOF.has(deco):
-				_box(st, cell, base + 1.30, base + float(ROOF[deco]), deco, deco, 0.85)
+				_roof_prism(st, map, cell, base, deco)
 			elif deco == "chimney":
-				_box(st, cell, base + 1.75, base + 2.45, "chimney", "chimney", 0.8, 0.4)
+				_box(st, cell, base + 2.0, base + 2.7, "chimney", "chimney", 0.8, 0.4)
 			elif BOX.has(deco):
 				_box(st, cell, base, base + float(BOX[deco]), deco, deco, 0.85, 0.86)
 	st.generate_normals()
@@ -232,14 +236,100 @@ static func _box(st: SurfaceTool, cell: Vector2i, y0: float, y1: float, side_til
 	var z1 := cz + half
 	# 頂
 	_quad(st, Vector3(x0, y1, z0), Vector3(x1, y1, z0), Vector3(x1, y1, z1), Vector3(x0, y1, z1), top_uv, top_shade)
-	# 南（面向鏡頭，最亮）
+	# ¾ 斜角（鏡頭在東南）：南面最亮、東面次亮、西面暗、北面最暗——
+	# 面向明暗差拉大，立體感靠明暗讀出來
 	_quad(st, Vector3(x0, y1, z1), Vector3(x1, y1, z1), Vector3(x1, y0, z1), Vector3(x0, y0, z1), uv, 1.0)
-	# 北
-	_quad(st, Vector3(x1, y1, z0), Vector3(x0, y1, z0), Vector3(x0, y0, z0), Vector3(x1, y0, z0), uv, 0.55)
-	# 東
-	_quad(st, Vector3(x1, y1, z1), Vector3(x1, y1, z0), Vector3(x1, y0, z0), Vector3(x1, y0, z1), uv, 0.72)
-	# 西
-	_quad(st, Vector3(x0, y1, z0), Vector3(x0, y1, z1), Vector3(x0, y0, z1), Vector3(x0, y0, z0), uv, 0.82)
+	_quad(st, Vector3(x1, y1, z0), Vector3(x0, y1, z0), Vector3(x0, y0, z0), Vector3(x1, y0, z0), uv, 0.45)
+	_quad(st, Vector3(x1, y1, z1), Vector3(x1, y1, z0), Vector3(x1, y0, z0), Vector3(x1, y0, z1), uv, 0.86)
+	_quad(st, Vector3(x0, y1, z0), Vector3(x0, y1, z1), Vector3(x0, y0, z1), Vector3(x0, y0, z0), uv, 0.6)
+
+
+## 斜屋頂：東西向屋脊的山形雙坡＋屋簷懸挑＋山牆端面。
+## 斜角鏡頭下讀得出屋面坡度與屋簷厚度——「建築不是平面圖片」的關鍵。
+static func _roof_prism(st: SurfaceTool, map: MapData, cell: Vector2i, base: float, tile: String) -> void:
+	var eave_h := base + 1.3
+	var ridge_h := base + 2.15 if tile.ends_with("_ridge") else base + 2.0
+	var over := 0.2
+	var left_roof := ROOF.has(map.deco_name(cell + Vector2i(-1, 0)))
+	var right_roof := ROOF.has(map.deco_name(cell + Vector2i(1, 0)))
+	var x0 := float(cell.x) - (0.0 if left_roof else over)
+	var x1 := float(cell.x) + 1.0 + (0.0 if right_roof else over)
+	var z0 := float(cell.y) - over
+	var z1 := float(cell.y) + 1.0 + over
+	var cz := float(cell.y) + 0.5
+	var uv := _uv_rect(tile)
+	# 南坡（受光）／北坡（背光；補反面讓越過屋脊的視線也看得到坡面）
+	_quad(st, Vector3(x0, eave_h, z1), Vector3(x1, eave_h, z1), Vector3(x1, ridge_h, cz), Vector3(x0, ridge_h, cz), uv, 1.0)
+	_quad(st, Vector3(x1, eave_h, z0), Vector3(x0, eave_h, z0), Vector3(x0, ridge_h, cz), Vector3(x1, ridge_h, cz), uv, 0.5)
+	_quad(st, Vector3(x0, eave_h, z0), Vector3(x1, eave_h, z0), Vector3(x1, ridge_h, cz), Vector3(x0, ridge_h, cz), uv, 0.55)
+	# 屋簷底板：朝下的簷底（只在由下往上看時可見）
+	_quad(st, Vector3(x0, eave_h, z1), Vector3(x1, eave_h, z1), Vector3(x1, eave_h, z0), Vector3(x0, eave_h, z0), _uv_rect("roof_eave"), 0.42)
+	# 山牆端面
+	var wall_uv := _uv_rect("plaster_wall")
+	if not left_roof:
+		_tri(st, Vector3(x0, eave_h, z0), Vector3(x0, eave_h, z1), Vector3(x0, ridge_h, cz), wall_uv, 0.62)
+	if not right_roof:
+		_tri(st, Vector3(x1, eave_h, z1), Vector3(x1, eave_h, z0), Vector3(x1, ridge_h, cz), wall_uv, 0.82)
+
+
+static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, uv: Rect2, shade: float) -> void:
+	var color := Color(shade, shade, shade)
+	var uvs: Array[Vector2] = [
+		Vector2(uv.position.x, uv.end.y),
+		Vector2(uv.end.x, uv.end.y),
+		Vector2((uv.position.x + uv.end.x) * 0.5, uv.position.y),
+	]
+	var verts: Array[Vector3] = [a, b, c]
+	for i in range(3):
+		st.set_color(color)
+		st.set_uv(uvs[i])
+		st.add_vertex(verts[i])
+
+
+## 階梯：朝較高鄰格方向的三階實體（頂面＋立面）。
+## 回傳角色行走的錨定高度（中點，走起來像踏上台階）。
+static func _stairs(st: SurfaceTool, map: MapData, cell: Vector2i) -> float:
+	var low := float(map.elevation(cell)) * LEVEL_H
+	var high := low + LEVEL_H
+	var dir := Vector2i(0, -1)
+	for offset: Vector2i in [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]:
+		var neighbor := cell + offset
+		if map.in_bounds(neighbor) and map.elevation(neighbor) > map.elevation(cell):
+			dir = offset
+			high = float(map.elevation(neighbor)) * LEVEL_H
+			break
+	var uv := _uv_rect("stairs")
+	var riser_uv := _uv_rect("stone_floor_b")
+	var x0 := float(cell.x)
+	var z0 := float(cell.y)
+	var steps := 3
+	for i in range(steps):
+		var f0 := float(i) / float(steps)
+		var f1 := float(i + 1) / float(steps)
+		var y_top := low + (high - low) * f1
+		var y_bot := low + (high - low) * f0
+		var shade := 0.98 - f0 * 0.12
+		if dir == Vector2i(0, -1):
+			var za := z0 + 1.0 - f1
+			var zb := z0 + 1.0 - f0
+			_quad(st, Vector3(x0, y_top, za), Vector3(x0 + 1, y_top, za), Vector3(x0 + 1, y_top, zb), Vector3(x0, y_top, zb), uv, shade)
+			_quad(st, Vector3(x0, y_top, zb), Vector3(x0 + 1, y_top, zb), Vector3(x0 + 1, y_bot, zb), Vector3(x0, y_bot, zb), riser_uv, 0.72)
+		elif dir == Vector2i(0, 1):
+			var za := z0 + f0
+			var zb := z0 + f1
+			_quad(st, Vector3(x0, y_top, za), Vector3(x0 + 1, y_top, za), Vector3(x0 + 1, y_top, zb), Vector3(x0, y_top, zb), uv, shade)
+			_quad(st, Vector3(x0 + 1, y_top, za), Vector3(x0, y_top, za), Vector3(x0, y_bot, za), Vector3(x0 + 1, y_bot, za), riser_uv, 0.5)
+		elif dir == Vector2i(-1, 0):
+			var xa := x0 + 1.0 - f1
+			var xb := x0 + 1.0 - f0
+			_quad(st, Vector3(xa, y_top, z0), Vector3(xb, y_top, z0), Vector3(xb, y_top, z0 + 1), Vector3(xa, y_top, z0 + 1), uv, shade)
+			_quad(st, Vector3(xb, y_top, z0 + 1), Vector3(xb, y_top, z0), Vector3(xb, y_bot, z0), Vector3(xb, y_bot, z0 + 1), riser_uv, 0.82)
+		else:
+			var xa := x0 + f0
+			var xb := x0 + f1
+			_quad(st, Vector3(xa, y_top, z0), Vector3(xb, y_top, z0), Vector3(xb, y_top, z0 + 1), Vector3(xa, y_top, z0 + 1), uv, shade)
+			_quad(st, Vector3(xa, y_top, z0), Vector3(xa, y_top, z0 + 1), Vector3(xa, y_bot, z0 + 1), Vector3(xa, y_bot, z0), riser_uv, 0.6)
+	return (low + high) * 0.5
 
 
 static func _atlas_material() -> StandardMaterial3D:
@@ -264,6 +354,7 @@ static func _atlas_standee(parent: Node3D, cell: Vector2i, h: float, tile_name: 
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.position = _center(cell) + Vector3(0, h + 0.5, 0)
 	parent.add_child(sprite)
 	_blob_shadow(parent, _center(cell) + Vector3(0, h, 0), 0.35)
@@ -276,6 +367,7 @@ static func _tree_standee(parent: Node3D, cell: Vector2i, h: float, flip: bool) 
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.position = _center(cell) + Vector3(0, h + 1.0, 0)
 	parent.add_child(sprite)
 	_blob_shadow(parent, _center(cell) + Vector3(0, h, 0), 0.5)
@@ -345,21 +437,33 @@ static func _water_quad(st: SurfaceTool, x0: float, x1: float, z0: float, z1: fl
 
 static func _backdrop(parent: Node3D, map: MapData) -> void:
 	# 北側遠山（兩層、不同距離與明度）
+	# 遠山壓在地平線上、低透明度——只當空氣透視的淡影，不搶畫面
 	for layer in range(2):
 		var hills := Sprite3D.new()
 		hills.texture = load("res://assets/world3d/far_hills.png")
-		hills.pixel_size = (0.10 + float(layer) * 0.05)
+		hills.pixel_size = 0.07 + float(layer) * 0.03
 		hills.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 		hills.shaded = false
-		hills.modulate = Color(1, 1, 1, 0.9 - float(layer) * 0.25)
-		hills.position = Vector3(float(map.width) / 2.0, 2.2 + float(layer) * 1.2, -4.0 - float(layer) * 6.0)
+		hills.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+		hills.modulate = Color(1, 1, 1, 0.5 - float(layer) * 0.15)
+		hills.position = Vector3(float(map.width) / 2.0 - float(layer) * 5.0, 1.2 + float(layer) * 0.5, -7.0 - float(layer) * 6.0)
 		parent.add_child(hills)
+	# 西側一層淡遠山（¾ 斜角會看到西北角）
+	var west_hills := Sprite3D.new()
+	west_hills.texture = load("res://assets/world3d/far_hills.png")
+	west_hills.pixel_size = 0.07
+	west_hills.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	west_hills.shaded = false
+	west_hills.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	west_hills.modulate = Color(1, 1, 1, 0.38)
+	west_hills.position = Vector3(-11.0, 1.1, float(map.height) * 0.35)
+	parent.add_child(west_hills)
 	# 南側遠海帶（霧色漸層）
 	var sea := Sprite3D.new()
 	sea.texture = load("res://assets/world3d/far_sea.png")
 	sea.pixel_size = 0.14
 	sea.shaded = false
+	sea.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sea.modulate = Color(1, 1, 1, 0.85)
-	sea.position = Vector3(float(map.width) / 2.0, 1.2, float(map.height) + 13.0)
-	sea.rotation_degrees.x = -20.0
+	sea.position = Vector3(float(map.width) / 2.0 + 6.0, 1.2, float(map.height) + 13.0)
 	parent.add_child(sea)

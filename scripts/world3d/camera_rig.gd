@@ -1,9 +1,11 @@
 class_name CameraRig
 extends Node3D
-## 立體舞台攝影機：正交、俯角 36°、無 yaw；短平滑跟隨＋地圖邊界夾制。
-## 遊玩期間不旋轉；演出僅允許短距離推鏡（set_zoom）。
+## 立體舞台攝影機：正交、¾ 斜角（水平 45°、俯角 35°）、遊玩期間不旋轉。
+## 斜角讓建築同時露出正面、側面與屋頂——微縮模型構圖的關鍵。
+## 短平滑跟隨＋地圖邊界寬鬆夾制；演出僅允許短距離推鏡（set_zoom）。
 
-const PITCH := -36.0
+const YAW := 45.0
+const PITCH := -35.0
 const DIST := 26.0
 const BASE_SIZE := 8.8
 
@@ -17,6 +19,7 @@ var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	rotation_degrees.y = YAW
 	camera = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.size = BASE_SIZE
@@ -67,9 +70,11 @@ func jump_to(world_point: Vector3) -> void:
 	position = _clamped(world_point)
 
 
+## 斜角視野的邊界夾制：以寬鬆邊距讓構圖自然收束，不硬貼地圖框。
 func _clamped(target: Vector3) -> Vector3:
-	var view_w := camera.size * 16.0 / 9.0 if camera != null else 15.6
-	var view_d := (camera.size if camera != null else BASE_SIZE) * 1.35
-	var x := clampf(target.x, view_w * 0.42, maxf(view_w * 0.42, _bounds.x - view_w * 0.42))
-	var z := clampf(target.z, view_d * 0.34, maxf(view_d * 0.34, _bounds.y - view_d * 0.28))
+	var view := camera.size if camera != null else BASE_SIZE
+	var mx := view * 0.62
+	var mz := view * 0.52
+	var x := clampf(target.x, mx, maxf(mx, _bounds.x - mx))
+	var z := clampf(target.z, mz, maxf(mz, _bounds.y - mz * 0.4))
 	return Vector3(x, 0, z)

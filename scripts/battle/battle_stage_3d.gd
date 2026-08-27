@@ -34,11 +34,11 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 			env.fog_light_color = Color(0.72, 0.8, 0.78)
 			env.fog_density = 0.012
 		"haven":
-			env.background_color = Color("c6d6c8")
-			env.ambient_light_color = Color(0.62, 0.66, 0.64)
-			env.ambient_light_energy = 0.9
-			env.fog_light_color = Color(0.78, 0.82, 0.76)
-			env.fog_density = 0.008
+			env.background_color = Color("a8bfb6")
+			env.ambient_light_color = Color(0.5, 0.58, 0.56)
+			env.ambient_light_energy = 0.8
+			env.fog_light_color = Color(0.74, 0.8, 0.76)
+			env.fog_density = 0.01
 		_:
 			env.background_color = Color("c2d2c8")
 			env.ambient_light_color = Color(0.6, 0.67, 0.7)
@@ -65,13 +65,16 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	for y in range(8):
-		for x in range(10):
+		for x in range(-2, 12):
 			var tile: String = kinds[rng.randi_range(0, kinds.size() - 1)]
 			var shade := 1.0 - float(y) * 0.03
 			_ground_quad(st, float(x), float(y), tile, shade)
-	# 舞台邊緣裙牆
-	for x in range(10):
-		_skirt(st, float(x), 8.0, "cliff_face" if kind != "station" else "wall_stone_in")
+	# 舞台邊緣裙牆（南緣＋東西側緣——斜角鏡頭會看到側面）
+	var skirt_tile := "cliff_face" if kind != "station" else "wall_stone_in"
+	for x in range(-2, 12):
+		_skirt(st, float(x), 8.0, skirt_tile)
+	for y in range(8):
+		_side_skirt(st, 12.0, float(y), skirt_tile)
 	# 箱型背景物（與地面共用網格，逐面貼 UV——AtlasTexture 不能直接當 3D 材質）
 	match kind:
 		"village":
@@ -141,10 +144,12 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 	result["enemy_pos"] = Vector3(8.1, 0.0, 1.7)
 	var camera := Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.rotation_degrees = Vector3(-30, 0, 0)
+	# 輕微斜角（yaw 14°）：戰鬥舞台同樣維持立體劇場感
+	camera.rotation_degrees = Vector3(-30, 14, 0)
 	# 對準構圖中心沿視線後退定位
 	var target := Vector3(5.2, 1.62, 4.0)
-	camera.position = target + Vector3(0, sin(deg_to_rad(30.0)), cos(deg_to_rad(30.0))) * 14.0
+	var back := Basis.from_euler(Vector3(deg_to_rad(-30.0), deg_to_rad(14.0), 0)) * Vector3(0, 0, 1)
+	camera.position = target + back * 14.0
 	root.add_child(camera)
 	camera.make_current()
 	result["camera"] = camera
@@ -167,6 +172,18 @@ static func _ground_quad(st: SurfaceTool, x: float, z: float, tile: String, shad
 		st.add_vertex(verts[i])
 
 
+## 東側緣裙牆（x 固定、沿 z 方向一格）
+static func _side_skirt(st: SurfaceTool, x: float, z: float, tile: String) -> void:
+	var pos := TileCatalog.pos(tile)
+	var uv := Rect2(float(pos.x) / 16.0, float(pos.y) / 6.0, 1.0 / 16.0, 1.0 / 6.0)
+	var uvs: Array[Vector2] = [uv.position, Vector2(uv.end.x, uv.position.y), uv.end, Vector2(uv.position.x, uv.end.y)]
+	var verts: Array[Vector3] = [Vector3(x, 0, z + 1), Vector3(x, 0, z), Vector3(x, -1.4, z), Vector3(x, -1.4, z + 1)]
+	for i: int in [0, 1, 2, 0, 2, 3]:
+		st.set_color(Color(0.5, 0.5, 0.5))
+		st.set_uv(uvs[i])
+		st.add_vertex(verts[i])
+
+
 static func _skirt(st: SurfaceTool, x: float, z: float, tile: String) -> void:
 	var pos := TileCatalog.pos(tile)
 	var uv := Rect2(float(pos.x) / 16.0, float(pos.y) / 6.0, 1.0 / 16.0, 1.0 / 6.0)
@@ -185,6 +202,7 @@ static func _standee(root: Node3D, texture: Texture2D, at: Vector3, pixel: float
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.position = at
 	root.add_child(sprite)
 
@@ -199,6 +217,7 @@ static func _atlas_standee(root: Node3D, tile: String, at: Vector3) -> void:
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.position = at
 	root.add_child(sprite)
 
@@ -236,6 +255,7 @@ static func make_creature(root: Node3D, texture: Texture2D, at: Vector3, pixel: 
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.position = at + Vector3(0, 32.0 * pixel, 0)
 	root.add_child(sprite)
 	var shadow := MeshInstance3D.new()

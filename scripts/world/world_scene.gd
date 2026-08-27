@@ -45,7 +45,7 @@ func _ready() -> void:
 	_spawn_player()
 	_spawn_smoke()
 	_spawn_fog()
-	_spawn_godrays()
+	_spawn_dust()
 	_grade = ScreenGrade.new()
 	add_child(_grade)
 	_build_ui()
@@ -78,21 +78,24 @@ func _build_environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.background_color = Color("c6d6c8")
-	env.ambient_light_color = Color(0.6, 0.66, 0.68)
-	env.ambient_light_energy = 0.85
+	# 戲劇光影：環境光壓暗、偏冷海青（陰影帶藍綠），
+	# 讓暖色晨光與局部燈火拉出冷暖對比——畫面不得均勻照亮
+	env.background_color = Color("9db8b4")
+	env.ambient_light_color = Color(0.47, 0.56, 0.58)
+	env.ambient_light_energy = 0.78
 	env.fog_enabled = true
-	env.fog_sky_affect = 0.3
-	env.fog_light_color = Color(0.76, 0.82, 0.79)
-	env.fog_density = 0.008
+	env.fog_sky_affect = 0.35
+	env.fog_light_color = Color(0.72, 0.8, 0.78)
+	env.fog_density = 0.011
 	var world_env := WorldEnvironment.new()
 	world_env.environment = env
 	add_child(world_env)
 	_sun = DirectionalLight3D.new()
-	_sun.rotation_degrees = Vector3(-52, 32, 0)
-	# 認養日的晨光：暖而低的方向光
-	_sun.light_color = Color(1.0, 0.94, 0.82)
-	_sun.light_energy = 1.25
+	# 晨光斜射：偏東南（與 ¾ 鏡頭方向一致，南／東面受光）；
+	# 仰角略高讓影子不吞掉整個庭院
+	_sun.rotation_degrees = Vector3(-52, 26, 0)
+	_sun.light_color = Color(1.0, 0.9, 0.72)
+	_sun.light_energy = 1.35
 	_sun.shadow_enabled = AudioManager.quality_high
 	_sun.directional_shadow_max_distance = 40.0
 	add_child(_sun)
@@ -112,27 +115,12 @@ func _place_lights(emitters: Array[Vector3]) -> void:
 		add_child(halo)
 		if i < MAX_DYNAMIC_LIGHTS:
 			var light := OmniLight3D.new()
-			light.light_color = Color(1.0, 0.78, 0.45)
-			light.light_energy = 1.5
-			light.omni_range = 3.6
+			light.light_color = Color(1.0, 0.72, 0.38)
+			light.light_energy = 1.9
+			light.omni_range = 4.2
 			light.shadow_enabled = false
 			light.position = at
 			add_child(light)
-
-
-func _spawn_godrays() -> void:
-	if not AudioManager.quality_high:
-		return
-	var texture: Texture2D = load("res://assets/world3d/godray.png")
-	for i in range(2):
-		var ray := Sprite3D.new()
-		ray.texture = texture
-		ray.pixel_size = 1.0 / 14.0
-		ray.shaded = false
-		ray.modulate = Color(1, 1, 1, 0.55)
-		ray.rotation_degrees = Vector3(-14, 0, 16)
-		ray.position = Vector3(float(_map.width) * (0.3 + 0.35 * float(i)), 3.4, float(_map.height) * 0.35)
-		add_child(ray)
 
 
 # ====== 進場流程 ======
@@ -847,6 +835,49 @@ func _spawn_player() -> void:
 	_rig = CameraRig.new()
 	add_child(_rig)
 	_rig.setup(_player, Vector2(float(_map.width), float(_map.height)))
+	_spawn_foreground_occluders()
+
+
+## 前景框景：鏡頭角落掛預先模糊的葉片（假性移軸的「近前景柔焦」層）。
+## 掛在攝影機上、不阻礙操作；Low 品質不放。
+func _spawn_foreground_occluders() -> void:
+	if not AudioManager.quality_high:
+		return
+	var texture: Texture2D = load("res://assets/world3d/foreground_leaves.png")
+	for i in range(2):
+		var leaves := Sprite3D.new()
+		leaves.texture = texture
+		# 正交鏡頭下距離不縮小——尺寸要小、只露出畫面角落一角
+		leaves.pixel_size = 1.0 / 26.0
+		leaves.shaded = false
+		leaves.modulate = Color(1, 1, 1, 0.5)
+		leaves.flip_h = i == 1
+		leaves.position = Vector3(-7.4 if i == 0 else 7.4, -4.4, -2.5)
+		leaves.rotation_degrees.z = 14.0 if i == 0 else -14.0
+		_rig.camera.add_child(leaves)
+		var sway := create_tween().set_loops()
+		sway.tween_property(leaves, "rotation_degrees:z", (14.0 if i == 0 else -14.0) + 1.5, 2.8).set_trans(Tween.TRANS_SINE)
+		sway.tween_property(leaves, "rotation_degrees:z", (14.0 if i == 0 else -14.0) - 1.5, 2.8).set_trans(Tween.TRANS_SINE)
+
+
+## 金色光塵：晨光裡緩慢漂浮的微粒（High 品質）
+func _spawn_dust() -> void:
+	if not AudioManager.quality_high:
+		return
+	var dust := CPUParticles3D.new()
+	dust.amount = 26
+	dust.lifetime = 7.0
+	dust.preprocess = 7.0
+	dust.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	dust.emission_box_extents = Vector3(float(_map.width) * 0.5, 1.6, float(_map.height) * 0.5)
+	dust.position = Vector3(float(_map.width) * 0.5, 1.8, float(_map.height) * 0.5)
+	dust.direction = Vector3(0.3, 0.15, 0)
+	dust.spread = 20.0
+	dust.gravity = Vector3.ZERO
+	dust.initial_velocity_min = 0.08
+	dust.initial_velocity_max = 0.2
+	dust.mesh = _particle_mesh(Color(1.0, 0.88, 0.6, 0.5))
+	add_child(dust)
 
 
 func _spawn_smoke() -> void:

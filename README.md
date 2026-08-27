@@ -48,9 +48,12 @@ X / Escape    : 取消・跳過演出　　M : 旅行手冊
 ## 視覺：原創 2.5D 像素立體劇場
 
 2D 像素角色 × 3D 立體場景。Compatibility Renderer／WebGL 2.0 限定實作：
-正交無旋轉攝影機（俯角 36°）、地形＋建築＋道具合併單一 ArrayMesh（頂點色烘焙明暗）、
-Sprite3D 立牌角色（Nearest／Alpha Scissor／腳底 blob 陰影）、
-1 方向光＋≤3 局部暖光（其餘假光光暈）、分層霧面片、捲動噪聲水面（無 SSR）、
+固定 ¾ 斜角正交攝影機（水平 45°、俯角 35°，遊玩不旋轉）、
+斜屋頂（山形雙坡＋屋簷懸挑＋山牆）、階梯與高台實體幾何、
+地形＋建築＋道具合併單一 ArrayMesh（頂點色烘焙面向明暗＋逐格色差）、
+Sprite3D 立牌角色（Nearest／Alpha Scissor／Y 軸 Billboard／腳底 blob 陰影）、
+冷色環境光 × 暖色晨光（含即時建築投影，High）＋≤3 局部暖燈、
+分層霧面片＋金色光塵＋前景柔焦框景、捲動噪聲水面（無 SSR）、
 輕量單通道帶狀柔焦（假移軸）＋暗角。詳見
 `docs/hd2d-reference-analysis.md`／`docs/web-shader-inventory.md`／`docs/web-hd2d-performance.md`。
 
