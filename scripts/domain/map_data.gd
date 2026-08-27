@@ -45,6 +45,7 @@ var triggers: Array[Dictionary] = []
 var auto_dialogues: Array[Dictionary] = []
 var ambience: String = "none"
 var ambience_restored: String = ""
+var elevation_rows: PackedStringArray = []
 
 
 static func from_dict(map_id: String, data: Dictionary) -> MapData:
@@ -87,6 +88,8 @@ static func from_dict(map_id: String, data: Dictionary) -> MapData:
 		map.auto_dialogues.append(Dictionary(entry))
 	map.ambience = String(data.get("ambience", "none"))
 	map.ambience_restored = String(data.get("ambience_restored", ""))
+	for row: Variant in Array(data.get("elevation", [])):
+		map.elevation_rows.append(String(row))
 	return map
 
 
@@ -151,3 +154,11 @@ func spawn_cell() -> Vector2i:
 
 func spawn_facing() -> Vector2i:
 	return Directions.from_name(String(spawn.get("facing", "down")))
+
+
+## 高度層（0–3；未提供 elevation 網格時全 0）。2.5D 舞台的台地資料。
+func elevation(cell: Vector2i) -> int:
+	if not in_bounds(cell) or cell.y >= elevation_rows.size():
+		return 0
+	var symbol := elevation_rows[cell.y][cell.x]
+	return clampi(int(String(symbol)), 0, 3)

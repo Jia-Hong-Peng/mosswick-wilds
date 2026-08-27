@@ -6,46 +6,73 @@
 		"accuracy": 1.0,
 		"description": "壓低重心撞上去，樸實可靠。"
 	},
-	"moss_burst": {
-		"display_name": "苔絮爆",
-		"element": "forest",
-		"power": 45,
-		"accuracy": 0.95,
-		"description": "抖開背上的厚苔，炸出一團帶雨氣的孢絮。"
-	},
-	"horn_jab": {
-		"display_name": "幼角突刺",
-		"element": "neutral",
+	"leaf_slap": {
+		"display_name": "葉拍",
+		"element": "grass",
 		"power": 40,
 		"accuracy": 1.0,
-		"description": "用蕨芽般的幼角迅速一挑。"
+		"description": "側身用葉形滑翔膜俐落地拍上去。"
 	},
-	"tide_dive": {
-		"display_name": "潮汐俯衝",
-		"element": "tide",
-		"power": 45,
-		"accuracy": 0.95,
-		"description": "貼著浪線俯衝，翼緣捲起一道水沫。"
-	},
-	"wing_snap": {
-		"display_name": "翼擊",
-		"element": "neutral",
-		"power": 40,
+	"tangle_sprout": {
+		"display_name": "纏芽",
+		"element": "grass",
+		"power": 0,
 		"accuracy": 1.0,
-		"description": "側身用翼骨俐落地拍打。"
+		"effect": "slow",
+		"description": "撒出會抓地的嫩藤纏住對方腳步，降低牠的速度，衝撞也慢了下來。"
 	},
-	"static_pulse": {
-		"display_name": "靜電脈衝",
-		"element": "signal",
-		"power": 45,
-		"accuracy": 0.95,
-		"description": "天線鬚放出一圈細碎的靜電雜訊。"
-	},
-	"shell_ram": {
-		"display_name": "殼衝",
-		"element": "neutral",
-		"power": 40,
+	"leaf_veil": {
+		"display_name": "葉幕",
+		"element": "grass",
+		"power": 0,
 		"accuracy": 1.0,
-		"description": "縮進殼裡整顆撞過去。"
+		"effect": "shield",
+		"description": "展開滑翔膜擋在身前，短時間大幅降低受到的傷害。"
+	},
+	"heat_hoof": {
+		"display_name": "熱蹄",
+		"element": "fire",
+		"power": 45,
+		"accuracy": 1.0,
+		"description": "蹄尖帶著地熱的溫度，近距離重重踏出一擊。"
+	},
+	"ember_charge": {
+		"display_name": "燼角衝",
+		"element": "fire",
+		"power": 35,
+		"accuracy": 1.0,
+		"effect": "break",
+		"description": "壓低炭黑短角衝撞，撬開對方的防禦；自己的腳步會慢上一拍。"
+	},
+	"warm_flame": {
+		"display_name": "暖火",
+		"element": "fire",
+		"power": 0,
+		"accuracy": 1.0,
+		"effect": "warm",
+		"description": "角縫的火光轉旺，小幅恢復狀態，下一次攻擊更有力。"
+	},
+	"tide_feather": {
+		"display_name": "潮羽",
+		"element": "water",
+		"power": 38,
+		"accuracy": 1.0,
+		"description": "貼地掠過，用翼緣的水花快速劃過對方。"
+	},
+	"mist_step": {
+		"display_name": "霧步",
+		"element": "water",
+		"power": 0,
+		"accuracy": 1.0,
+		"effect": "dodge",
+		"description": "踏起一圈薄霧，速度與閃避提高，還能抓住多出來的一步。"
+	},
+	"return_tide": {
+		"display_name": "回潮",
+		"element": "water",
+		"power": 0,
+		"accuracy": 1.0,
+		"effect": "cleanse",
+		"description": "喚一道退了又回的小潮，洗去一項負面狀態並小幅恢復體力。"
 	}
 }

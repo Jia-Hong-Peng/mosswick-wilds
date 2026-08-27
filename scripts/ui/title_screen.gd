@@ -1,17 +1,19 @@
 extends Control
-## 標題畫面：分層港村黃昏背景＋手冊風選單。
-## 新的觀測／繼續觀測（無存檔時停用）／音量。
+## 標題畫面：分層港村晨光背景＋手冊風選單。
+## 開始旅程／繼續旅程（無存檔時停用）／音量／輔助設定／畫質。
 
 const MENU_NEW_GAME := 0
 const MENU_CONTINUE := 1
 const MENU_VOLUME := 2
 const MENU_FLASH := 3
 const MENU_SHAKE := 4
-const MENU_COUNT := 5
+const MENU_QUALITY := 5
+const MENU_COUNT := 6
 
 var _cursor := 0
 var _has_save := false
 var _rows: Array[Dictionary] = []
+var _root: Control
 
 
 func _ready() -> void:
@@ -66,16 +68,21 @@ func _activate() -> void:
 			AudioManager.set_reduce_shake(not AudioManager.reduce_shake)
 			AudioManager.play_confirm()
 			_refresh()
+		MENU_QUALITY:
+			AudioManager.set_quality_high(not AudioManager.quality_high)
+			AudioManager.play_confirm()
+			_refresh()
 
 
 func _refresh() -> void:
 	var volume_percent := int(roundf(AudioManager.master_volume * 100.0))
 	var texts: Array[String] = [
-		"新的觀測",
-		"繼續觀測",
+		"開始旅程",
+		"繼續旅程",
 		"音量　◂ %d%% ▸" % volume_percent,
 		"減少閃爍：%s" % ("開" if AudioManager.reduce_flash else "關"),
 		"減少震動：%s" % ("開" if AudioManager.reduce_shake else "關"),
+		"畫質：%s" % ("高" if AudioManager.quality_high else "低"),
 	]
 	for i in range(_rows.size()):
 		var row := _rows[i]
@@ -88,14 +95,20 @@ func _refresh() -> void:
 
 func _build_ui() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# 640×360 視窗下沿用 320×180 設計座標：整體 ×2
+	_root = Control.new()
+	_root.size = Vector2(320, 180)
+	_root.scale = Vector2(2, 2)
+	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_root)
 	var bg := TextureRect.new()
 	bg.texture = load("res://assets/ui/title_bg.png")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	_root.add_child(bg)
 
 	# 標題：靠左置於海霧上方，避開右側村落剪影
 	var title := Label.new()
-	title.text = "潮 霧 群 島"
+	title.text = "潮 森 群 島"
 	title.position = Vector2(0, 20)
 	title.size = Vector2(220, 26)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -104,10 +117,10 @@ func _build_ui() -> void:
 	title.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.FOG, 0.9))
 	title.add_theme_constant_override("shadow_offset_x", 1)
 	title.add_theme_constant_override("shadow_offset_y", 1)
-	add_child(title)
+	_root.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "TIDEMIST ISLES ── 霧港村的回聲觀測"
+	subtitle.text = "TIDEGROVE ISLES ── 第一位旅伴"
 	subtitle.position = Vector2(0, 46)
 	subtitle.size = Vector2(220, 14)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -116,14 +129,14 @@ func _build_ui() -> void:
 	subtitle.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.FOG, 0.85))
 	subtitle.add_theme_constant_override("shadow_offset_x", 1)
 	subtitle.add_theme_constant_override("shadow_offset_y", 1)
-	add_child(subtitle)
+	_root.add_child(subtitle)
 
-	# 選單：手冊面板（左下，避開右側村落剪影）
+	# 選單：手冊面板（左下，避開右側村落剪影；六列故略上移）
 	var panel := PanelContainer.new()
-	panel.position = Vector2(20, 88)
+	panel.position = Vector2(20, 66)
 	panel.custom_minimum_size = Vector2(128, 0)
 	panel.add_theme_stylebox_override("panel", UiTheme.panel_style())
-	add_child(panel)
+	_root.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 2)
 	panel.add_child(box)
@@ -139,7 +152,7 @@ func _build_ui() -> void:
 	var hint_style := UiTheme.dark_panel_style()
 	hint_style.set_content_margin_all(2)
 	hint_panel.add_theme_stylebox_override("panel", hint_style)
-	add_child(hint_panel)
+	_root.add_child(hint_panel)
 	var hints := Label.new()
 	hints.text = "方向鍵/WASD 移動　Z/Enter 確認　X/Esc 取消　M 選單"
 	hints.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -152,4 +165,4 @@ func _build_ui() -> void:
 	version.position = Vector2(284, 4)
 	version.add_theme_font_size_override("font_size", 12)
 	version.add_theme_color_override("font_color", Pal.alpha(Pal.NIGHT, 0.6))
-	add_child(version)
+	_root.add_child(version)

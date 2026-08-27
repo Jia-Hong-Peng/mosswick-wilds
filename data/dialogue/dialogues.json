@@ -1,65 +1,85 @@
 {
-	"opening_harbor": {
+	"opening_haven": {
 		"pages": [
-			{ "speaker": "阿海伯", "left": "haibo:doubt", "speaker_side": "left", "fx": "station_flash", "text": "浮標還在動——聲音卻不見了。" },
-			{ "speaker": "沈芮", "right": "rei:urgent", "speaker_side": "right", "text": "整個港的回聲正在被抽走。訊號源，是舊潮汐觀測站。" },
-			{ "speaker": "沈芮", "right": "rei:neutral", "speaker_side": "right", "text": "你去。到村口先「觀測」，跟著回聲走。" }
+			{ "speaker": "旁白", "text": "潮芽伴獸之家。海風穿過半開的木門，院子裡有三雙眼睛看向你。" },
+			{ "speaker": "葵姨", "left": "kui:neutral", "speaker_side": "left", "text": "別急著挑最強的。" },
+			{ "speaker": "葵姨", "left": "kui:observing", "speaker_side": "left", "text": "先看看，哪一隻願意跟你走。" }
 		]
 	},
-	"gate_blocked": {
+
+	"npc_kui": {
 		"variants": [
 			{
-				"if_flag": "level1_complete",
-				"pages": [ { "speaker": "路標", "text": "潮霧古道→　觀測站的方向，今天很安靜。" } ]
+				"if_flag": "chapter_done",
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "路上要是遇到怕生的伴獸，就想想今天。去吧。" }
+				]
+			},
+			{
+				"if_flag": "travel_pack_taken",
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:neutral", "speaker_side": "left", "text": "東邊的閘門出去就是港口道。走之前，跟牠說一聲。" }
+				]
+			},
+			{
+				"if_flag": "adopted_sproutwing",
+				"set_flag": "travel_pack_taken",
+				"grant_items": { "travel_pack": 1, "herbal_balm": 2 },
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:relieved", "speaker_side": "left", "text": "牠很少主動把種子交給別人。好好收著。" },
+					{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "這是旅行包——毛刷、食盆、青草膏。想叫牠的時候，面對牠按下確認鍵就行。" }
+				]
+			},
+			{
+				"if_flag": "adopted_emberhorn",
+				"set_flag": "travel_pack_taken",
+				"grant_items": { "travel_pack": 1, "herbal_balm": 2 },
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:relieved", "speaker_side": "left", "text": "牠第一次對人低下角。別讓牠失望。" },
+					{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "這是旅行包——毛刷、食盆、青草膏。想叫牠的時候，面對牠按下確認鍵就行。" }
+				]
+			},
+			{
+				"if_flag": "adopted_tidecrest",
+				"set_flag": "travel_pack_taken",
+				"grant_items": { "travel_pack": 1, "herbal_balm": 2 },
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:relieved", "speaker_side": "left", "text": "牠把認養表還給你了？那牠是認真的。" },
+					{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "這是旅行包——毛刷、食盆、青草膏。想叫牠的時候，面對牠按下確認鍵就行。" }
+				]
 			},
 			{
 				"pages": [
-					{ "speaker": "沈芮", "right": "rei:thinking", "speaker_side": "right", "text": "先觀測。回聲會告訴你方向——按下觀測鍵看看村口。" }
+					{ "speaker": "葵姨", "left": "kui:observing", "speaker_side": "left", "text": "西邊的葉堆、中間的暖石台、東邊的水池。慢慢看，牠們也在看你。" }
 				]
 			}
 		]
 	},
-	"clue_tide": {
-		"pages": [
-			{ "speaker": "潮痕", "left": "player:focused", "speaker_side": "left", "text": "沙上的潮痕全都退向低處海灣——這是自然的方向。" }
-		]
-	},
-	"clue_signal": {
-		"pages": [
-			{ "speaker": "電波刮痕", "left": "player:surprised", "speaker_side": "left", "text": "斷續的電波刮痕，一路往上坡去。這訊號不自然。" }
-		]
-	},
-	"clue_ripple": {
-		"pages": [
-			{ "speaker": "無聲波紋", "left": "player:worried", "speaker_side": "left", "text": "水面有波紋，卻沒有聲音。回聲被什麼吃掉了。" }
-		]
-	},
-	"gate_choice": {
+
+	"pen_sproutwing": {
 		"variants": [
 			{
-				"if_flag": "path_chosen",
-				"pages": [ { "speaker": "路標", "text": "潮霧古道→　沿著上坡的電波刮痕走。" } ]
+				"if_flag": "starter_chosen",
+				"pages": [
+					{ "speaker": "旁白", "right": "sproutwing:neutral", "speaker_side": "right", "text": "芽翼鼯窩回葉堆深處，只露出一雙眼睛，目送你和你的夥伴。" }
+				]
 			},
 			{
-				"if_flag": "clues_ready",
+				"if_flag": "met_sproutwing",
 				"pages": [
-					{ "speaker": "路標", "left": "player:focused", "speaker_side": "left", "text": "路在這裡分成兩條。回聲，也分成兩種。" }
+					{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "text": "芽翼鼯坐在你腳邊，前爪還按著那顆小種子。" }
 				],
 				"choice": {
-					"prompt": "跟著哪個方向走？",
+					"prompt": "要認養「芽翼鼯」嗎？牠將成為你的第一位旅行夥伴。",
 					"options": [
 						{
-							"text": "上坡・電波刮痕",
-							"action": "choose_signal_path",
-							"pages_after": [
-								{ "speaker": "沈芮", "right": "rei:relieved", "speaker_side": "right", "text": "（無線電）對，往上坡。牠出手前會先「吸氣」——盯著天線看。" }
-							]
+							"text": "認養",
+							"action": "adopt_sproutwing"
 						},
 						{
-							"text": "沿岸・自然潮痕",
-							"action": "choose_tide_path",
+							"text": "再想一下",
 							"pages_after": [
-								{ "speaker": "旁白", "left": "player:surprised", "speaker_side": "left", "text": "一隻潮翼被突來的寂靜嚇得炸了毛，朝你衝過來！" }
+								{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "芽翼鼯歪著頭，把種子收回滑翔膜裡，繼續等。" }
 							]
 						}
 					]
@@ -67,227 +87,315 @@
 			},
 			{
 				"pages": [
-					{ "speaker": "路標", "left": "player:neutral", "speaker_side": "left", "text": "字被鹽風磨掉了。先觀測，找兩條以上的線索再判斷。" }
-				]
-			}
-		]
-	},
-	"tutorial_after": {
-		"pages": [
-			{ "speaker": "旁白", "text": "潮翼安靜下來，朝上坡的方向叫了一聲。" },
-			{ "speaker": "沈芮", "right": "rei:neutral", "speaker_side": "right", "text": "（無線電）看來海不是源頭。上坡，跟著電波刮痕。" }
-		]
-	},
-	"point_antenna": {
-		"pages": [
-			{ "speaker": "傾倒的中繼天線", "text": "三十年前的中繼天線，鏽出了洞。今天，它在微微發燙。" }
-		]
-	},
-	"point_supply": {
-		"variants": [
-			{
-				"if_flag_not": "found_supply",
-				"set_flag": "found_supply",
-				"grant_items": { "herbal_balm": 1 },
-				"pages": [
-					{ "speaker": "補給箱", "text": "巡山員的補給箱：青草膏 ×1。" }
-				]
-			},
-			{
-				"pages": [ { "speaker": "補給箱", "text": "空箱子。下次帶點東西來補上。" } ]
-			}
-		]
-	},
-	"point_watchpost": {
-		"variants": [
-			{
-				"if_flag_not": "boss_hint",
-				"set_flag": "boss_hint",
-				"pages": [
-					{ "speaker": "觀測位", "left": "player:focused", "speaker_side": "left", "fx": "observe_pulse", "text": "站上石台，回聲一下子清楚起來——" },
-					{ "speaker": "觀測位", "left": "player:determined", "speaker_side": "left", "text": "強波之前，長鬚會先發紅、往後繃。記住這個前兆。" }
-				]
-			},
-			{
-				"pages": [ { "speaker": "觀測位", "text": "長鬚發紅＝強波。你已經記下了。" } ]
-			}
-		]
-	},
-	"point_quake": {
-		"pages": [
-			{ "speaker": "旁白", "fx": "quake", "text": "腳下的碎石在震。聲音，一層一層變少了。" }
-		]
-	},
-	"station_entry": {
-		"pages": [
-			{ "speaker": "旁白", "fx": "lights_on", "text": "設備自己醒了。指示燈一盞、一盞亮起。" },
-			{ "speaker": "旁白", "fx": "silence", "text": "浪聲、風聲、你的腳步聲……逐層消失。" },
-			{ "speaker": "旁白", "fx": "gather", "text": "電波在房間中央絞成一團——有東西被裹在裡面。" },
-			{ "speaker": "旁白", "left": "player:worried", "speaker_side": "left", "fx": "boss_reveal", "text": "磁殼仔！牠不是奪走聲音的兇手——牠被三十年的殘留訊號纏住了。" }
-		]
-	},
-	"boss_confront": {
-		"pages": [
-			{ "speaker": "旁白", "left": "player:determined", "speaker_side": "left", "text": "磁殼仔的天線指向你，雜訊漲成一面牆——" }
-		],
-		"choice": {
-			"prompt": "上前，替牠解開訊號？",
-			"options": [
-				{ "text": "上前", "action": "start_boss", "pages_after": [] },
-				{ "text": "再準備一下", "pages_after": [ { "speaker": "旁白", "text": "你退開半步。牠的天線仍指著你。" } ] }
-			]
-		}
-	},
-	"point_station_console": {
-		"variants": [
-			{
-				"if_flag": "level1_complete",
-				"pages": [ { "speaker": "主控台", "text": "殘留訊號像退潮一樣淺了。滾筒紙上，曲線終於連成一條。" } ]
-			},
-			{
-				"pages": [ { "speaker": "主控台", "text": "儀表全數超標。三十年沒人關掉的東西，一直在這裡響。" } ]
-			}
-		]
-	},
-	"point_station_tapes": {
-		"pages": [
-			{ "speaker": "磁帶架", "text": "散落的磁帶。最後一卷寫著：「７號站　最終記錄　勿播」。" }
-		]
-	},
-	"ending_scene": {
-		"set_flag": "level1_complete",
-		"grant_items": { "stable_echo": 1 },
-		"pages": [
-			{ "speaker": "旁白", "fx": "bell", "text": "——鐺。浮標的鐘聲，回來了。" },
-			{ "speaker": "阿海伯", "left": "haibo:smile", "speaker_side": "left", "text": "聽見沒？海又開口了。" },
-			{ "speaker": "沈芮", "right": "rei:relieved", "speaker_side": "right", "text": "觀測站安靜了。牠只是想把耳朵還給我們。" },
-			{ "speaker": "觀測手冊", "text": "取得「穩定回聲」。進度已寫入觀測手冊。" }
-		]
-	},
-	"ending_epilogue": {
-		"pages": [
-			{ "speaker": "旁白", "text": "當晚，觀測器又輕輕響了一聲。" },
-			{ "speaker": "旁白", "left": "player:worried", "speaker_side": "left", "text": "同樣的訊號——來自遠方的島。這一次，它有節拍。" }
-		],
-		"choice": {
-			"prompt": "",
-			"options": [
-				{ "text": "繼續探索", "action": "continue_explore", "pages_after": [] },
-				{ "text": "返回標題", "action": "return_title", "pages_after": [] }
-			]
-		}
-	},
-	"npc_rei_field": {
-		"variants": [
-			{
-				"if_flag": "level1_complete",
-				"pages": [
-					{ "speaker": "沈芮", "right": "rei:relieved", "speaker_side": "right", "text": "港口的聲音回來了。下一站——換我們去聽別的島。" }
-				]
-			},
-			{
-				"pages": [
-					{ "speaker": "沈芮", "right": "rei:thinking", "speaker_side": "right", "text": "別停在這。牠出手前會先吸氣——盯著天線。" }
-				]
-			}
-		]
-	},
-	"npc_haibo": {
-		"variants": [
-			{
-				"if_flag": "level1_complete",
-				"pages": [
-					{ "speaker": "阿海伯", "left": "haibo:smile", "speaker_side": "left", "text": "鐘聲一響，阮這把老骨頭都輕了三斤。" }
+					{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "葉堆裡有一雙眼睛。芽翼鼯躲在一片大葉子後面，正偷偷觀察你。" },
+					{ "speaker": "葵姨", "left": "kui:observing", "right": "sproutwing:nervous", "speaker_side": "left", "text": "草系，謹慎型。打起來是防守和牽制的路子。牠不喜歡突然靠近的人。" }
 				],
 				"choice": {
-					"prompt": "喝杯熱茶？",
+					"prompt": "要怎麼接近芽翼鼯？",
 					"options": [
-						{ "text": "好，麻煩了", "action": "heal_party", "pages_after": [ { "speaker": "阿海伯", "left": "haibo:smile", "speaker_side": "left", "text": "免客氣。慢慢喝，海風正好。" } ] },
-						{ "text": "下次吧", "pages_after": [ { "speaker": "阿海伯", "left": "haibo:neutral", "speaker_side": "left", "text": "好啦，茶壺替你溫著。" } ] }
-					]
-				}
-			},
-			{
-				"pages": [
-					{ "speaker": "阿海伯", "left": "haibo:sad", "speaker_side": "left", "text": "修了四十年浮標，頭一次看它啞掉……" }
-				],
-				"choice": {
-					"prompt": "喝杯熱茶再走？",
-					"options": [
-						{ "text": "好，麻煩了", "action": "heal_party", "pages_after": [ { "speaker": "阿海伯", "left": "haibo:neutral", "speaker_side": "left", "text": "免客氣。路上小心霧。" } ] },
-						{ "text": "下次吧", "pages_after": [ { "speaker": "阿海伯", "left": "haibo:neutral", "speaker_side": "left", "text": "好啦，茶壺替你溫著。" } ] }
+						{
+							"text": "蹲低，等牠自己過來",
+							"set_flag": "met_sproutwing",
+							"pages_after": [
+								{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "fx": "cry_sproutwing", "text": "你蹲下來，不動。葉片沙沙響了幾聲——牠一小步一小步挪出來，嗅了嗅你的手。" },
+								{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "text": "然後，牠把一顆小小的種子，放到你的掌心。" }
+							]
+						},
+						{
+							"text": "直接伸手去摸",
+							"pages_after": [
+								{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "唰——牠整個縮回葉片後面，只剩尾巴上的種子在發抖。看來得換個方式。" }
+							]
+						}
 					]
 				}
 			}
 		]
 	},
-	"npc_xiaoman": {
+
+	"pen_emberhorn": {
 		"variants": [
 			{
-				"if_flag": "level1_complete",
-				"pages": [ { "speaker": "小滿", "text": "鐘響了！你聽、你聽！" } ]
+				"if_flag": "starter_chosen",
+				"pages": [
+					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "燼角羌別過頭去，假裝沒在看你們。角縫的光卻亮了一下。" }
+				]
 			},
 			{
-				"pages": [ { "speaker": "小滿", "text": "海今天好安靜……安靜得怪怪的。" } ]
+				"if_flag": "met_emberhorn",
+				"pages": [
+					{ "speaker": "旁白", "right": "emberhorn:determined", "speaker_side": "right", "text": "燼角羌站在暖石上，角尖朝著你，等你開口。" }
+				],
+				"choice": {
+					"prompt": "要認養「燼角羌」嗎？牠將成為你的第一位旅行夥伴。",
+					"options": [
+						{
+							"text": "認養",
+							"action": "adopt_emberhorn"
+						},
+						{
+							"text": "再想一下",
+							"pages_after": [
+								{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "燼角羌哼了一聲，轉身回到暖石上——耳朵卻還朝著你這邊。" }
+							]
+						}
+					]
+				}
+			},
+			{
+				"pages": [
+					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "暖石台上，燼角羌抬起頭，額上兩枚短角的縫隙透著橙光。牠在打量你。" },
+					{ "speaker": "葵姨", "left": "kui:observing", "right": "emberhorn:neutral", "speaker_side": "left", "text": "火系，好勝型。爆發和破防的路子。牠最討厭被當成需要保護的幼獸。" }
+				],
+				"choice": {
+					"prompt": "要怎麼接近燼角羌？",
+					"options": [
+						{
+							"text": "正面走近，站定不退",
+							"set_flag": "met_emberhorn",
+							"pages_after": [
+								{ "speaker": "旁白", "right": "emberhorn:curious", "speaker_side": "right", "fx": "cry_emberhorn", "text": "牠踏著蹄逼近，用額頭輕輕撞上你的膝蓋——你穩穩接住了這一下。" },
+								{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "text": "燼角羌後退半步，第一次，對你低下了牠的短角。" }
+							]
+						},
+						{
+							"text": "趁牠後退時逼近",
+							"pages_after": [
+								{ "speaker": "旁白", "right": "emberhorn:nervous", "speaker_side": "right", "text": "牠猛地跺蹄，蹄印燙出一點紅光，瞪著你。追上去只會讓牠更不服氣。" }
+							]
+						}
+					]
+				}
 			}
 		]
 	},
-	"sign_plaza": {
-		"pages": [
-			{ "speaker": "告示牌", "text": "霧港村　　東：潮霧古道／舊觀測站　　北坡：封閉中" }
-		]
-	},
-	"point_console": {
-		"pages": [
-			{ "speaker": "觀測設備", "text": "指示燈亂閃，滾筒紙畫出缺了角的曲線。訊號，來自東邊上坡。" }
-		]
-	},
-	"point_blocked_road": {
-		"pages": [
-			{ "speaker": "封路的倒木", "text": "上塔的石階被鋸倒的木頭擋住。牌子寫著：「迴聲網計畫　暫停維護」。" }
-		]
-	},
-	"point_sea": {
+
+	"pen_tidecrest": {
 		"variants": [
 			{
-				"if_flag": "level1_complete",
-				"pages": [ { "speaker": "棧橋盡頭", "text": "浪拍在浮標上，一下，又一下。然後——鐺。世界齊全了。" } ]
+				"if_flag": "starter_chosen",
+				"pages": [
+					{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "潮冠鷺在池邊踩水，看到你們，朝你的夥伴用力點了點頭。" }
+				]
 			},
 			{
-				"pages": [ { "speaker": "棧橋盡頭", "text": "浪還在拍打浮標。該有的鐘聲，卻一聲也沒有。" } ]
+				"if_flag": "met_tidecrest",
+				"pages": [
+					{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "潮冠鷺站在你旁邊，羽冠上還滴著水，一副「快點快點」的樣子。" }
+				],
+				"choice": {
+					"prompt": "要認養「潮冠鷺」嗎？牠將成為你的第一位旅行夥伴。",
+					"options": [
+						{
+							"text": "認養",
+							"action": "adopt_tidecrest"
+						},
+						{
+							"text": "再想一下",
+							"pages_after": [
+								{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "潮冠鷺歪著頭想了想，跑回池邊——又回頭看你一眼。" }
+							]
+						}
+					]
+				}
+			},
+			{
+				"pages": [
+					{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "淺水池邊，潮冠鷺一個箭步衝過來——叼走了你手上的認養表！" },
+					{ "speaker": "葵姨", "left": "kui:concerned", "right": "tidecrest:happy", "speaker_side": "left", "text": "水系，好奇型。速度和擾亂的路子。追牠？你追不上的。" }
+				],
+				"choice": {
+					"prompt": "怎麼把認養表拿回來？",
+					"options": [
+						{
+							"text": "蹲在池邊，用倒影引牠",
+							"set_flag": "met_tidecrest",
+							"pages_after": [
+								{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "fx": "cry_tidecrest", "text": "你朝水面輕輕撥了一下。倒影晃起來——牠立刻湊過來盯著看，看得入了神。" },
+								{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "然後牠想起什麼似的，把認養表輕輕放回你手裡，站到你旁邊等著。" }
+							]
+						},
+						{
+							"text": "直接追上去",
+							"pages_after": [
+								{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "牠叼著表繞著水池跑了三圈，跑得比你快多了，玩得非常開心。" }
+							]
+						}
+					]
+				}
 			}
 		]
 	},
-	"point_store": {
+
+	"ceremony_sproutwing": {
 		"pages": [
-			{ "speaker": "店門", "text": "手寫牌：「補貨中。要買什麼，對外面那個戴草帽的喊就好。」" }
+			{ "speaker": "葵姨", "left": "kui:neutral", "right": "sproutwing:curious", "speaker_side": "left", "text": "想清楚了？認養不是把牠帶走——是接下來的每一天。" },
+			{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "text": "你在認養證上寫下名字。葵姨蓋了章，蹲下來，朝葉堆的方向點點頭。" }
 		]
 	},
-	"point_bed": {
+	"ceremony_emberhorn": {
 		"pages": [
-			{ "speaker": "床鋪", "text": "被子曬過太陽的味道。" }
-		],
-		"choice": {
-			"prompt": "躺一下嗎？",
-			"options": [
-				{ "text": "小睡片刻", "action": "heal_party", "pages_after": [ { "speaker": "床鋪", "text": "醒來時霧薄了一點。隊伍的精神都恢復了。" } ] },
-				{ "text": "還不睏", "pages_after": [ { "speaker": "床鋪", "text": "先把該做的事做完吧。" } ] }
-			]
-		}
-	},
-	"point_books": {
-		"pages": [
-			{ "speaker": "書架", "text": "《群島潮汐表》、《迴靈圖鑑・殘卷》，和一卷沒貼標籤的磁帶。" }
+			{ "speaker": "葵姨", "left": "kui:neutral", "right": "emberhorn:determined", "speaker_side": "left", "text": "想清楚了？認養不是把牠帶走——是接下來的每一天。" },
+			{ "speaker": "旁白", "right": "emberhorn:determined", "speaker_side": "right", "text": "你在認養證上寫下名字。葵姨蓋了章，退開一步，把路讓給暖石台。" }
 		]
 	},
-	"point_instruments": {
+	"ceremony_tidecrest": {
 		"pages": [
-			{ "speaker": "觀測儀", "text": "滾筒紙上的回聲曲線：三週來每晚缺一角，缺口一天比一天寬。" }
+			{ "speaker": "葵姨", "left": "kui:neutral", "right": "tidecrest:happy", "speaker_side": "left", "text": "想清楚了？認養不是把牠帶走——是接下來的每一天。" },
+			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "你在認養證上寫下名字。葵姨蓋了章，朝水池吹了聲口哨。" }
 		]
 	},
-	"point_tapes": {
+
+	"ceremony_tag_sproutwing": {
 		"pages": [
-			{ "speaker": "磁帶架", "text": "標著年份的磁帶排到三十年前，就斷了。" }
+			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替牠戴上旅伴牌。木片和陶片碰在一起，輕輕響了一聲。" },
+			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "text": "芽翼鼯──草系・防守與牽制。從今天起，是你的第一位旅伴。" }
+		]
+	},
+	"ceremony_tag_emberhorn": {
+		"pages": [
+			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替牠戴上旅伴牌。掛上的那一刻，角縫的橙光第一次亮了起來。" },
+			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "text": "燼角羌──火系・爆發與破防。從今天起，是你的第一位旅伴。" }
+		]
+	},
+	"ceremony_tag_tidecrest": {
+		"pages": [
+			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替牠戴上旅伴牌。牠低頭盯著牌子上的倒影，看了很久。" },
+			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "潮冠鷺──水系・速度與擾亂。從今天起，是你的第一位旅伴。" }
+		]
+	},
+
+	"partner_talk": {
+		"variants": [
+			{
+				"if_flag": "adopted_sproutwing",
+				"pages": [
+					{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "fx": "cry_sproutwing", "text": "芽翼鼯輕輕叫了一聲，跳上你的旅行包，抓穩了。" }
+				]
+			},
+			{
+				"if_flag": "adopted_emberhorn",
+				"pages": [
+					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "fx": "cry_emberhorn", "text": "燼角羌短短應了一聲，用角尖朝前方指了指：走吧。" }
+				]
+			},
+			{
+				"if_flag": "adopted_tidecrest",
+				"pages": [
+					{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "fx": "cry_tidecrest", "text": "潮冠鷺開心地拍了拍翅膀，水珠灑了你一臉。" }
+				]
+			}
+		]
+	},
+
+	"yard_gate": {
+		"variants": [
+			{
+				"if_flag": "chapter_done",
+				"pages": [
+					{ "speaker": "旁白", "text": "閘門開著。港口道的風帶著鹽味，往下一座島的船正在補給。" }
+				]
+			},
+			{
+				"if_flag": "crisis_started",
+				"pages": [
+					{ "speaker": "旁白", "text": "撞破的圍欄還沒修好。院子裡的大家都平安。" }
+				]
+			},
+			{
+				"if_flag": "travel_pack_taken",
+				"set_flag": "crisis_started",
+				"pages": [
+					{ "speaker": "旁白", "fx": "crash", "text": "轟——！身後傳來木頭碎裂的巨響！" },
+					{ "speaker": "葵姨", "left": "kui:concerned", "speaker_side": "left", "text": "岩背獾！港口施工的巨響嚇著牠了——牠撞破圍欄衝進院子了！" },
+					{ "speaker": "旁白", "left": "player:surprised", "speaker_side": "left", "text": "牠背甲上刮著傷，眼睛因恐慌睜得很大。牠不是來狩獵的——牠只是嚇壞了。葵姨抱起幼獸往屋裡退。" },
+					{ "speaker": "旁白", "text": "你的夥伴回頭看了你一眼。" }
+				],
+				"choice": {
+					"prompt": "牠在等你的決定。",
+					"options": [
+						{
+							"text": "（點頭）我們一起。",
+							"action": "start_crisis",
+							"pages_after": [
+								{ "speaker": "旁白", "left": "player:determined", "speaker_side": "left", "text": "夥伴主動站到你身前。這是你們第一次，一起面對同一件事。" }
+							]
+						}
+					]
+				}
+			},
+			{
+				"if_flag": "starter_chosen",
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:neutral", "speaker_side": "left", "text": "先來我這裡拿旅行包，再出發也不遲。" }
+				]
+			},
+			{
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:observing", "speaker_side": "left", "text": "急什麼？先去看看那三隻。旅程需要一位夥伴。" }
+				]
+			}
+		]
+	},
+
+	"ending_calm": {
+		"pages": [
+			{ "speaker": "旁白", "text": "岩背獾的呼吸慢慢平了下來。牠縮起的背甲，一點一點鬆開。" },
+			{ "speaker": "葵姨", "left": "kui:concerned", "speaker_side": "left", "text": "背甲卡著施工的金屬片——難怪牠疼得亂撞。……好了，取下來了。" },
+			{ "speaker": "旁白", "left": "player:happy", "speaker_side": "left", "text": "岩背獾朝你們低了低頭，轉身，慢慢走回山林的方向。" }
+		]
+	},
+
+	"ending_check": {
+		"variants": [
+			{
+				"if_flag": "adopted_sproutwing",
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:relieved", "right": "sproutwing:happy", "speaker_side": "left", "text": "沒受傷。牠把你護得很好——這隻謹慎的小傢伙，剛剛可是第一個站出去的。" }
+				]
+			},
+			{
+				"if_flag": "adopted_emberhorn",
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:relieved", "right": "emberhorn:happy", "speaker_side": "left", "text": "沒受傷。看牠得意的，角縫的光到現在都還亮著。" }
+				]
+			},
+			{
+				"if_flag": "adopted_tidecrest",
+				"pages": [
+					{ "speaker": "葵姨", "left": "kui:relieved", "right": "tidecrest:happy", "speaker_side": "left", "text": "沒受傷。牠還在你腳邊繞圈——好了好了，知道你跑得快。" }
+				]
+			}
+		]
+	},
+
+	"ending_farewell": {
+		"pages": [
+			{ "speaker": "葵姨", "left": "kui:neutral", "speaker_side": "left", "text": "旅行證、群島的地圖。閘門我開了，港口道直通碼頭。" },
+			{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "去吧。牠會跟著你。" }
+		]
+	},
+
+	"ending_last_words": {
+		"pages": [
+			{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "看來，不只是你選了牠。" },
+			{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "牠也選了你。" }
+		]
+	},
+
+	"board_notice": {
+		"variants": [
+			{
+				"if_flag": "chapter_done",
+				"pages": [
+					{ "speaker": "公告板", "text": "【尋】失蹤伴獸啟事——照片被雨水暈開了，只看得清一雙不同顏色的眼睛。" }
+				]
+			},
+			{
+				"pages": [
+					{ "speaker": "公告板", "text": "本週航班：往霧杉島，每日一班。攜伴獸請出示旅伴牌。" }
+				]
+			}
 		]
 	}
 }

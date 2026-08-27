@@ -5,25 +5,25 @@
 		"amount": 25,
 		"usable_in_battle": true,
 		"usable_in_field": true,
-		"description": "阿海伯店裡的萬用青草膏，島上人家一罐傳三代。恢復 25 點 HP。",
+		"description": "潮芽伴獸之家常備的萬用青草膏，聞起來像雨後的院子。恢復 25 點 HP。",
 		"icon_path": "res://assets/ui/item_herbal_balm.png"
 	},
-	"echo_box": {
-		"display_name": "共鳴匣",
-		"kind": "capture",
-		"amount": 0,
-		"usable_in_battle": true,
-		"usable_in_field": false,
-		"description": "觀測所配發的黃銅錄音匣。對放下戒心的迴靈錄下牠的回聲，牠會跟著回聲同行。",
-		"icon_path": "res://assets/ui/item_echo_box.png"
-	},
-	"stable_echo": {
-		"display_name": "穩定回聲",
+	"travel_pack": {
+		"display_name": "旅行包",
 		"kind": "key",
 		"amount": 0,
 		"usable_in_battle": false,
 		"usable_in_field": false,
-		"description": "從觀測站帶回的第一段完整回聲。放在耳邊，聽得見退潮，和很遠的鐘。",
-		"icon_path": "res://assets/ui/item_stable_echo.png"
+		"description": "葵姨準備的帆布旅行包：毛刷、食盆、備用牽繩，還有一格特地留給夥伴愛撿的小東西。",
+		"icon_path": "res://assets/ui/item_travel_pack.png"
+	},
+	"travel_tag": {
+		"display_name": "旅伴牌",
+		"kind": "key",
+		"amount": 0,
+		"usable_in_battle": false,
+		"usable_in_field": false,
+		"description": "木材、陶片與金屬做成的小識別牌，刻著認養人與夥伴的名字。戰鬥開始時會亮起簡短的光紋。",
+		"icon_path": "res://assets/ui/item_travel_tag.png"
 	}
 }

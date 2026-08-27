@@ -3,7 +3,7 @@ extends Node
 ## strategy (write .tmp → verify → swap). Corrupt files never crash the game;
 ## the .tmp file doubles as a recovery fallback.
 
-const SCHEMA_VERSION := 3
+const SCHEMA_VERSION := 4
 const SAVE_PATH := "user://save.json"
 const TMP_SUFFIX := ".tmp"
 
@@ -32,6 +32,10 @@ func collect_payload() -> Dictionary:
 			"y": GameState.player_cell.y,
 			"facing": Directions.to_name(GameState.player_facing),
 		},
+		"starter": {
+			"id": GameState.starter_id,
+			"nickname": GameState.starter_nickname,
+		},
 		"party": PartyService.to_dicts(),
 		"inventory": InventoryService.to_dict(),
 		"flags": EventFlagStore.to_dict(),
@@ -50,9 +54,17 @@ func apply_payload(payload: Dictionary) -> void:
 		Vector2i(int(player_data.get("x", 1)), int(player_data.get("y", 1))),
 		Directions.from_name(String(player_data.get("facing", "down")))
 	)
+	var starter := Dictionary(payload.get("starter", {}))
+	GameState.starter_id = String(starter.get("id", ""))
+	GameState.starter_nickname = String(starter.get("nickname", ""))
 	PartyService.load_from(Array(payload.get("party", [])), DataRegistry)
 	InventoryService.load_from(Dictionary(payload.get("inventory", {})))
 	EventFlagStore.load_from(Dictionary(payload.get("flags", {})))
+	# 暱稱重新套用（隊伍成員由 creature_id 重建，display_name 不入檔）
+	if not GameState.starter_nickname.is_empty():
+		for member in PartyService.members:
+			if member.creature_id == GameState.starter_id:
+				member.display_name = GameState.starter_nickname
 	var settings := Dictionary(payload.get("settings", {}))
 	AudioManager.set_master_volume(float(settings.get("master_volume", AudioManager.master_volume)))
 	AudioManager.reduce_flash = bool(settings.get("reduce_flash", AudioManager.reduce_flash))
@@ -118,8 +130,27 @@ static func migrate(data: Dictionary) -> Dictionary:
 	if version == 2:
 		data = _migrate_v2_to_v3(data)
 		version = 3
+	if version == 3:
+		data = _migrate_v3_to_v4(data)
+		version = 4
 	data["schema_version"] = version
 	return data
+
+
+## v3 → v4：世界觀重製（回聲觀測 → 潮森群島認養）。舊隊伍的迴靈與
+## 回聲旗標已無對應內容，無法合理轉換——安全返回新遊戲開場，
+## 只保留玩家的設定值（音量與 Accessibility）。
+static func _migrate_v3_to_v4(data: Dictionary) -> Dictionary:
+	return {
+		"schema_version": 4,
+		"map_id": "haven",
+		"player": {"x": 10, "y": 3, "facing": "down"},
+		"starter": {"id": "", "nickname": ""},
+		"party": [],
+		"inventory": {},
+		"flags": {},
+		"settings": Dictionary(data.get("settings", {})),
+	}
 
 
 ## v2 → v3：settings 補 Accessibility 欄位（預設關閉）

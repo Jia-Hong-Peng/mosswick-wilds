@@ -1,37 +1,41 @@
 extends Node
-## Autoload QA：`-- --tour` 從 New Game 完整自動通關（含計時與截圖）；
-## `-- --tour-wrong` 走錯誤路線觸發教學遭遇後結束。未帶參數時完全不作用。
-## 僅供 QA：會直接讀取場景內部狀態（_view/_service）驅動頭目戰。
+## Autoload QA：`-- --tour` 從 New Game 完整自動通關（認養芽翼鼯、草系解法）；
+## `-- --tour-fire` 認養燼角羌（爆發解法）；`-- --tour-water` 認養潮冠鷺（速度解法）；
+## `-- --tour-continue` 驗證通關存檔的 Continue。未帶參數時完全不作用。
+## 僅供 QA：會直接讀取場景內部狀態（_view/_service）驅動危機戰。
 
 var enabled := false
-var wrong_mode := false
+var starter := "sproutwing"
 var continue_mode := false
 var _t0 := 0
 
 
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
-	wrong_mode = "--tour-wrong" in args
 	continue_mode = "--tour-continue" in args
-	enabled = ("--tour" in args) or wrong_mode or continue_mode
+	if "--tour-fire" in args:
+		starter = "emberhorn"
+	elif "--tour-water" in args:
+		starter = "tidecrest"
+	enabled = ("--tour" in args) or ("--tour-fire" in args) or ("--tour-water" in args) or continue_mode
 	if enabled and continue_mode:
 		_run_continue()
 	elif enabled:
 		_run()
 
 
-## Continue 驗證：讀取通關存檔，確認世界回到「恢復後」狀態
+## Continue 驗證：讀取通關存檔，確認御三家與章節狀態正確恢復
 func _run_continue() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://build/qa"))
 	_t0 = Time.get_ticks_msec()
 	await _wait(14)
-	await _press("move_down")  # 游標到「繼續觀測」
+	await _press("move_down")  # 游標到「繼續旅程」
 	await _press("confirm")
-	await _wait(40)
-	_mark("Continue → 完成狀態：level1_complete=%s stable_echo=%d" % [
-		str(EventFlagStore.has_flag("level1_complete")), InventoryService.count("stable_echo")])
+	await _wait(45)
+	_mark("Continue → starter=%s nickname=%s chapter_done=%s party=%d" % [
+		GameState.starter_id, GameState.starter_nickname,
+		str(EventFlagStore.has_flag("chapter_done")), PartyService.size()])
 	_shot("continue_restored")
-	# 與村民對話應為通關後變體
 	get_tree().quit()
 
 
@@ -104,146 +108,232 @@ func _pump_dialogue(shot_at_page: int = -1, shot_name: String = "") -> void:
 	await _wait(6)
 
 
-func _run() -> void:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://build/qa"))
-	_t0 = Time.get_ticks_msec()
-	await _wait(14)
-	if not wrong_mode:
-		_shot("title")
-	# New Game
-	await _press("confirm")
-	await _wait(30)
-	_mark("new game → 霧港村")
-	# 開場（3 框）
-	await _wait(20)
-	if not wrong_mode:
-		await _pump_dialogue(2, "dialogue_opening")
-	else:
-		await _pump_dialogue()
-	_mark("開場結束，目標已交付")
-	# 走到村口並觀測（spawn 3,6 → 東行）
-	await _walk("move_right", 5)
-	await _press("observe")
-	_mark("第一次使用核心玩法：回聲觀測")
-	if not wrong_mode:
-		await _wait(10)
-		_shot("observe_mode")
-	# 線索一：無聲波紋（8,10）——沿水道西岸 x7 南下，面右調查
-	await _walk("move_left", 1)
-	await _walk("move_down", 4)
-	await _face("move_right")
-	await _press("confirm")
-	await _pump_dialogue()
-	_mark("線索一：無聲波紋")
-	# 線索二：電波刮痕（21,5)——回主路東行到村口
-	await _walk("move_up", 4)
-	await _walk("move_right", 14)
-	await _face("move_up")
-	await _press("confirm")
-	if not wrong_mode:
-		await _pump_dialogue(1, "observe_clue")
-	else:
-		await _pump_dialogue()
-	_mark("兩條線索到手")
-	# 關閉觀測，走到路口做出判斷（路標 20,5，站 20,6）
-	await _press("observe")
-	await _walk("move_left", 1)
-	await _face("move_up")
-	await _press("confirm")
-	await _wait(8)
-	if wrong_mode:
-		# 錯誤路線：翻頁 → 選第二項（沿岸）→ 教學遭遇
-		await _press("confirm")
-		await _wait(6)
-		await _press("move_down")
-		await _press("confirm")
-		await _pump_dialogue()
-		await _wait(40)
-		_shot("tutorial_encounter")
-		_mark("教學遭遇進場")
-		# 打完教學戰（普攻到底）
-		await _finish_normal_battle()
-		await _wait(30)
-		await _pump_dialogue()
-		_shot("tutorial_after")
-		_mark("錯誤路線已導正——tour-wrong 結束")
-		get_tree().quit()
-		return
-	# 正解：上坡・電波刮痕（第一個選項）
-	await _press("confirm")
-	await _pump_dialogue()
-	_mark("路徑判讀完成（正解）")
-	# 出村 → 潮霧古道（出口 23,6）
-	await _walk("move_right", 3)
-	await _wait(30)
-	_mark("進入潮霧古道")
-	# 補給箱（5,5）：東行至 x6、上一步、面左
-	await _walk("move_right", 5)
-	await _walk("move_up", 1)
-	await _face("move_left")
-	await _press("confirm")
-	await _pump_dialogue()
-	# 上到主稜線 y3
-	await _walk("move_up", 2)
-	await _walk("move_right", 3)
-	await _face("move_up")
-	await _press("confirm")
-	await _pump_dialogue()
-	_shot("trail_landmark")
-	# 續東：異常加劇（11,3 自動）→ 觀測位（12,4）
-	await _walk("move_right", 2)
-	await _pump_dialogue()
-	await _walk("move_right", 1)
-	await _face("move_down")
-	await _press("confirm")
-	await _pump_dialogue()
-	_mark("可選觀測完成：取得頭目前兆")
-	# 進站（15,3）
-	await _walk("move_right", 3)
-	await _wait(30)
-	_mark("抵達廢棄潮汐觀測站")
-	# 進場演出（4 框）
-	await _wait(20)
-	await _pump_dialogue(4, "station_reveal")
-	# 走向中央（6,5 觸發對峙）→ 翻頁 → 上前
-	await _walk("move_right", 4)
-	await _wait(10)
-	await _press("confirm")
-	await _wait(6)
-	await _press("confirm")
-	await _wait(45)
-	_mark("頭目戰開始")
-	await _run_boss()
-	# 結局：等港口結尾對話開始（色彩回歸演出後）
-	await _wait_dialogue_start()
-	await _pump_dialogue(1, "ending_bell")
-	_mark("結尾演出完成、自動存檔")
-	await _wait(45)
-	_shot("chapter_card")
-	await _press("confirm")
-	# 伏筆（黑幕）
-	await _wait_dialogue_start()
-	await _wait(25)
-	_shot("epilogue")
-	await _pump_dialogue()
-	await _wait(55)
-	_shot("ending_free_roam")
-	_mark("完整通關（含繼續探索）")
-	get_tree().quit()
-
-
 func _wait_dialogue_start() -> void:
 	var guard := 0
-	while not DialogueManager.active and guard < 400:
+	while not DialogueManager.active and guard < 500:
 		guard += 1
 		await get_tree().process_frame
 
 
-## 頭目戰：讀取場景狀態按最優策略行動
-func _run_boss() -> void:
+func _run() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://build/qa"))
+	_t0 = Time.get_ticks_msec()
+	var default_run := starter == "sproutwing"
+	await _wait(14)
+	if default_run:
+		_shot("title")
+	# 開始旅程
+	await _press("confirm")
+	await _wait(35)
+	_mark("new game → 潮芽伴獸之家")
+	# 開場運鏡：拍一張後跳過
+	await _wait(45)
+	if default_run:
+		_shot("opening_pan")
+	await _press("confirm")
+	await _wait(25)
+	# 開場對話（葵姨）
+	await _wait_dialogue_start()
+	if default_run:
+		await _pump_dialogue(2, "opening_kui")
+	else:
+		await _pump_dialogue()
+	_mark("開場結束：認養日開始")
+	# ---- 認養互動 ----
+	match starter:
+		"sproutwing":
+			await _goto_sproutwing_pen()
+		"emberhorn":
+			await _goto_emberhorn_pen()
+		"tidecrest":
+			await _goto_tidecrest_pen()
+	# 第一次互動：介紹＋接近方式（選正確的第一項）
+	await _press("confirm")
+	await _wait(8)
+	await _pump_choice_first()
+	if default_run:
+		_shot("adopt_interact")
+	await _pump_dialogue()
+	_mark("互動完成：%s 接受了你" % starter)
+	# 第二次互動：認養確認（選「認養」）
+	await _press("confirm")
+	await _wait(8)
+	await _pump_choice_first()
+	await _pump_dialogue()
+	# 認養儀式（兩段對話＋暱稱視窗）
+	await _wait(20)
+	await _pump_dialogue()  # ceremony_<id>
+	await _wait(50)          # 幼獸跳向玩家
+	await _pump_dialogue(1, "adopt_ceremony" if default_run else "adopt_ceremony_%s" % starter)
+	await _wait(20)
+	# 暱稱視窗：Esc 保留原名
+	await _press("cancel")
+	await _wait(40)
+	_mark("認養完成：%s 入隊（保留原名）" % starter)
+	if default_run:
+		_shot("adopt_done")
+	# ---- 第一次同行 ----
+	await _return_to_main_path()
+	# 與夥伴互動一次（夥伴會跟在附近；面向下方嘗試）
+	await _wait(30)
+	await _try_partner_talk()
+	# 找葵姨拿旅行包（11,9）：站 (11,8) 面下
+	await _walk_to_row8_x(11)
+	await _face("move_down")
+	await _press("confirm")
+	await _pump_dialogue()
+	_mark("取得旅行包")
+	if default_run:
+		_shot("first_walk")
+	# ---- 危機 ----
+	await _walk_to_row8_x(21)
+	await _walk("move_down", 3)  # (21,11) 閘門 → 危機觸發
+	await _wait(10)
+	await _wait_dialogue_start()
+	await _pump_until_choice(3, "crisis_intro" if default_run else "")
+	await _pump_choice_first()  # （點頭）我們一起。
+	await _pump_dialogue()
+	await _wait(50)
+	_mark("危機戰開始（岩背獾）")
+	await _run_crisis()
+	# ---- 結局 ----
+	await _wait_dialogue_start()
+	await _pump_dialogue(2, "ending_calm" if default_run else "")
+	await _wait(30)
+	await _wait_dialogue_start()
+	await _pump_dialogue()  # ending_check
+	await _wait_dialogue_start()
+	await _pump_dialogue()  # ending_farewell
+	_mark("告別完成：閘門開啟")
+	# 導演步行＋鏡頭拉遠＋最後兩句
+	await _wait_dialogue_start()
+	if default_run:
+		await _pump_dialogue(1, "ending_walk")
+	else:
+		await _pump_dialogue()
+	# 章節卡
+	await _wait(60)
+	_shot("chapter_card" if default_run else "chapter_card_%s" % starter)
+	await _press("confirm")
+	# 伏筆（公告板特寫）
+	await _wait(160)
+	if default_run:
+		_shot("teaser")
+	await _wait(120)
+	# 結尾選單：繼續探索
+	if default_run:
+		_shot("end_menu")
+	await _press("confirm")
+	await _wait(60)
+	if default_run:
+		_shot("free_roam")
+	_mark("完整通關（含繼續探索）")
+	get_tree().quit()
+
+
+# ---- 認養路線（spawn 10,3） ----
+
+func _goto_sproutwing_pen() -> void:
+	await _walk("move_down", 5)   # (10,8)
+	await _walk("move_left", 6)   # (4,8)
+	await _walk("move_up", 3)     # (4,5)
+	await _face("move_left")      # 面向 (3,5)
+
+
+func _goto_emberhorn_pen() -> void:
+	await _walk("move_down", 5)   # (10,8)
+	await _walk("move_right", 5)  # (15,8)
+	await _walk("move_up", 3)     # (15,6)... (15,7)(15,6)
+	await _face("move_up")        # 面向 (15,5)
+
+
+func _goto_tidecrest_pen() -> void:
+	await _walk("move_down", 5)   # (10,8)
+	await _walk("move_right", 10)  # (20,8)
+	await _walk("move_up", 1)     # (20,7)
+	await _face("move_up")        # 面向 (20,6)
+
+
+func _return_to_main_path() -> void:
+	# 回到大路（列 8）
+	while GameState.player_cell.y < 8:
+		await _walk("move_down", 1)
+	while GameState.player_cell.y > 8:
+		await _walk("move_up", 1)
+
+
+func _walk_to_row8_x(target_x: int) -> void:
+	await _return_to_main_path()
+	while GameState.player_cell.x < target_x:
+		await _walk("move_right", 1)
+	while GameState.player_cell.x > target_x:
+		await _walk("move_left", 1)
+
+
+func _try_partner_talk() -> void:
+	# 讀取跟隨者位置，轉向面對後互動
+	var scene := get_tree().current_scene
+	var follower: Variant = scene.get("_follower") if scene != null else null
+	if follower == null:
+		_mark("與夥伴互動：找不到夥伴（略過）")
+		return
+	# 等夥伴停在相鄰格
+	for i in range(90):
+		var gap: Vector2i = Vector2i(follower.get("cell")) - GameState.player_cell
+		if absi(gap.x) + absi(gap.y) == 1:
+			break
+		await get_tree().process_frame
+	var delta: Vector2i = Vector2i(follower.get("cell")) - GameState.player_cell
+	var dir_name: StringName = "move_down"
+	if delta == Vector2i.UP:
+		dir_name = "move_up"
+	elif delta == Vector2i.LEFT:
+		dir_name = "move_left"
+	elif delta == Vector2i.RIGHT:
+		dir_name = "move_right"
+	if GameState.player_facing != delta:
+		await _face(dir_name)
+	await _press("confirm")
+	await _wait(8)
+	if DialogueManager.active:
+		await _pump_dialogue()
+		_mark("與夥伴互動成功")
+	else:
+		_mark("與夥伴互動：未觸發（略過）")
+
+
+## 走到選項出現為止（對話頁數不定時使用）
+func _pump_until_choice(shot_at_page: int = -1, shot_name: String = "") -> void:
 	var guard := 0
-	var shot_phase1 := false
-	var shot_phase2 := false
+	var page := 0
+	while DialogueManager.active and not DialogueManager._awaiting_choice and guard < 40:
+		guard += 1
+		page += 1
+		if page == shot_at_page and shot_name != "":
+			await _wait(6)
+			_shot(shot_name)
+		await _press("confirm", 2)
+		await _wait(6)
+
+
+func _pump_choice_first() -> void:
+	# 對話選項：確保游標在第一項後確認
+	var guard := 0
+	while DialogueManager.active and not DialogueManager._awaiting_choice and guard < 40:
+		guard += 1
+		await _press("confirm", 2)
+		await _wait(6)
+	if DialogueManager.active:
+		await _press("confirm", 2)
+		await _wait(8)
+
+
+## 危機戰：依御三家策略行動（讀場景內部狀態）
+func _run_crisis() -> void:
+	var guard := 0
+	var shot_battle := false
+	var shot_soothe := false
+	var default_run := starter == "sproutwing"
 	while guard < 400:
 		guard += 1
 		var scene := get_tree().current_scene
@@ -254,10 +344,9 @@ func _run_boss() -> void:
 			if again == null or again.get("_service") == null:
 				break
 			continue
-		var service: BossBattleService = service_ref
-		if service.outcome != BossBattleService.Outcome.ONGOING:
-			_mark("頭目戰收尾（回合數 %d）" % service.turn_count)
-			# 等共鳴演出播完、按到場景切換為止
+		var service: CrisisBattleService = service_ref
+		if service.outcome != CrisisBattleService.Outcome.ONGOING:
+			_mark("危機戰收尾（回合數 %d、outcome=%d）" % [service.turn_count, service.outcome])
 			for i in range(60):
 				if get_tree().current_scene != scene:
 					break
@@ -269,46 +358,62 @@ func _run_boss() -> void:
 			await _press("confirm", 2)
 			await _wait(4)
 			continue
-		# 指令階段
-		if not shot_phase1:
-			shot_phase1 = true
-			_shot("boss_phase1")
-		if service.phase == 2 and not shot_phase2:
-			shot_phase2 = true
-			_shot("boss_phase2")
-		var target := 0
-		if service.disrupted:
-			target = 3  # 啟動共鳴
-		elif service.next_move() == BossBattleService.Move.STRONGWAVE:
-			target = 1  # 穩流防禦
-		elif service.next_move() == BossBattleService.Move.CHARGE:
-			target = 2  # 逆頻干擾
-		else:
-			target = 0  # 技能
-		var cursor := int(scene.get("_cursor"))
-		while cursor != target:
-			await _press("move_down" if cursor < target else "move_up")
-			cursor = int(scene.get("_cursor"))
-		if service.disrupted and target == 3:
-			_shot("boss_resonance_window")
-		await _press("confirm")
+		if not shot_battle:
+			shot_battle = true
+			_shot("crisis_battle" if default_run else "crisis_battle_%s" % starter)
+		# 指令決策
+		if service.at_floor():
+			if not shot_soothe and default_run:
+				shot_soothe = true
+				_shot("soothe_window")
+			await _select_command(scene, 1)  # 安撫
+			continue
+		var skill_index := _pick_skill(service)
+		await _select_command(scene, 0)  # 技能
 		await _wait(6)
-		if target == 0:
-			await _press("confirm")  # 技能清單第一招
-			await _wait(6)
-	_mark("boss loop guard exceeded")
+		await _select_menu_row(scene, skill_index)
+	_mark("crisis loop guard exceeded")
 
 
-## 教學遭遇：普攻連打直到離開戰鬥場景
-func _finish_normal_battle() -> void:
-	var guard := 0
-	while guard < 200:
-		guard += 1
-		var scene := get_tree().current_scene
-		if scene == null:
-			return
-		var battle_ref: Variant = scene.get("_battle")
-		if battle_ref == null:
-			return
-		await _press("confirm", 2)
-		await _wait(6)
+## 御三家策略：
+## 芽翼鼯＝縮甲時上纏芽、衝撞前葉幕、其餘葉拍；
+## 燼角羌＝縮甲後燼角衝撬開、其餘熱蹄；
+## 潮冠鷺＝衝撞前霧步閃避（附帶連擊）、其餘潮羽。
+func _pick_skill(service: CrisisBattleService) -> int:
+	match starter:
+		"sproutwing":
+			if service.next_move() == CrisisBattleService.Move.RAM:
+				return 2  # 葉幕
+			if service.next_move() == CrisisBattleService.Move.SHELL:
+				return 1  # 纏芽（衝撞前上減速）
+			return 0      # 葉拍
+		"emberhorn":
+			if service.shelled and not service.shell_broken:
+				return 1  # 燼角衝
+			return 0      # 熱蹄
+		_:
+			if service.next_move() == CrisisBattleService.Move.RAM:
+				return 1  # 霧步
+			return 0      # 潮羽
+
+
+func _select_command(scene: Node, target: int) -> void:
+	var cursor := int(scene.get("_cursor"))
+	var tries := 0
+	while cursor != target and tries < 8:
+		tries += 1
+		await _press("move_down" if cursor < target else "move_up")
+		cursor = int(scene.get("_cursor"))
+	await _press("confirm")
+	await _wait(6)
+
+
+func _select_menu_row(scene: Node, target: int) -> void:
+	var cursor := int(scene.get("_cursor"))
+	var tries := 0
+	while cursor != target and tries < 8:
+		tries += 1
+		await _press("move_down" if cursor < target else "move_up")
+		cursor = int(scene.get("_cursor"))
+	await _press("confirm")
+	await _wait(6)

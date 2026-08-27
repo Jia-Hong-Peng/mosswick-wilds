@@ -1,0 +1,44 @@
+{
+	"sproutwing": {
+		"id": "sproutwing",
+		"display_name": "芽翼鼯",
+		"element": "grass",
+		"description": "展開前肢時像一片完整的葉子，尾巴末端是剛發芽的種子。",
+		"personality": "謹慎——會先躲在葉片後觀察你。",
+		"battle_keywords": ["防守", "牽制"],
+		"adoption_hint": "蹲低、等牠自己過來。",
+		"follow_behavior": "lag",
+		"ending_variant": "glide",
+		"pen_cell": { "x": 3, "y": 5 },
+		"cry": "cry_sproutwing",
+		"kui_comment": "牠很少主動把種子交給別人。好好收著。"
+	},
+	"emberhorn": {
+		"id": "emberhorn",
+		"display_name": "燼角羌",
+		"element": "fire",
+		"description": "額上兩枚未長成的炭黑短角，角縫透出柔和的橙光。",
+		"personality": "好勝——不喜歡被當成需要保護的幼獸。",
+		"battle_keywords": ["爆發", "破防"],
+		"adoption_hint": "正面走近，接住牠的試探。",
+		"follow_behavior": "lead",
+		"ending_variant": "torch",
+		"pen_cell": { "x": 15, "y": 5 },
+		"cry": "cry_emberhorn",
+		"kui_comment": "牠第一次對人低下角。別讓牠失望。"
+	},
+	"tidecrest": {
+		"id": "tidecrest",
+		"display_name": "潮冠鷺",
+		"element": "water",
+		"description": "頭頂羽冠捲成一道小浪，翅膀邊緣像透明的魚鰭。",
+		"personality": "好奇——會搶走你手上的認養表。",
+		"battle_keywords": ["速度", "閃避"],
+		"adoption_hint": "別追牠，用池邊的倒影引牠回來。",
+		"follow_behavior": "wander",
+		"ending_variant": "chase",
+		"pen_cell": { "x": 20, "y": 6 },
+		"cry": "cry_tidecrest",
+		"kui_comment": "牠把表還給你了？那牠是認真的。"
+	}
+}

@@ -12,6 +12,8 @@ func run(t: TestContext) -> void:
 	for path in paths:
 		var script: Variant = load(path)
 		t.check(script is GDScript, "script failed to load: " + path)
+		if script is GDScript:
+			t.check((script as GDScript).can_instantiate(), "script failed to compile: " + path)
 
 
 func _collect(dir_path: String, out_paths: Array[String]) -> void:

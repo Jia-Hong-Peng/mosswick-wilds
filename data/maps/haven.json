@@ -1,0 +1,115 @@
+{
+	"display_name": "潮芽伴獸之家",
+	"battle_bg": "haven",
+	"encounter_key": "",
+	"fog": false,
+	"ambience": "harbor_restored",
+	"auto_dialogue": [
+		{ "dialogue_id": "opening_haven", "fire_flag": "opening_done", "if_flag_not": "opening_done" }
+	],
+	"legend_ground": {
+		"g": "grass_a", "h": "grass_b", "j": "grass_c",
+		"p": "path_a", "q": "path_b", "d": "dirt",
+		"F": "stone_floor_a", "f": "stone_floor_b",
+		"s": "sand_a", "S": "sand_b", "b": "boardwalk",
+		"v": "water_shallow", "w": "water_deep", "o": "foam"
+	},
+	"legend_deco": {
+		"T": "tree_trunk", "1": "roof_tin_a", "2": "roof_tin_b", "8": "chimney",
+		"P": "plaster_wall", "V": "plaster_window", "D": "door_wood", "A": "antenna_dish",
+		"o": "pot_plant", "l": "lamp_post", "E": "bench", "L": "log_a",
+		"n": "fern", "x": "flowers_a", "y": "flowers_b", "B": "bush",
+		"r": "reed", "p": "pebbles", "s": "stone_wall", "e": "power_pole",
+		"c": "crate", "k": "barrel", "G": "sign_wood", "u": "buoy", "f": "flag"
+	},
+	"legend_overhead": {
+		"a": "canopy_a", "b": "canopy_b", "c": "canopy_c"
+	},
+	"ground": [
+		"gghgjhggghjggjhgghjghgjg",
+		"ghjgFFFFFFFFFFFFghjghghg",
+		"gjhgFFFFFFFFFFFFgjhghgjg",
+		"ghjgghjghgqpghjgghjghghj",
+		"gjddddhgjgpqghFfFfgvvvvg",
+		"ghddddjghgqphgfFfFhvvvvg",
+		"gjddddghgjpqghFfFfgvvvvg",
+		"ghjgghjghgqpghjgghjghghj",
+		"gjppppppppppqppppppppphg",
+		"ghjgghjghgjhghgjhghgjhgj",
+		"gjhghgjhghgghjghgjhghggj",
+		"ghjgghjghgjhghgjhghggphj",
+		"pppppppppppqppppppppppqp",
+		"ssSssSssSssbbsSssSsSssSs",
+		"ooooooooooobbooooooooooo",
+		"wwwwwwwwwwwbbwwwwwwwwwww"
+	],
+	"deco": [
+		"TTTT............TTTTTTTT",
+		"....121212121812........",
+		"....PVPVPVDPVPVPA.......",
+		"..o............E.o......",
+		"..L......l..l.....l.....",
+		"..x................r..r.",
+		".B................p.....",
+		".y..............x.......",
+		"........................",
+		"..........E.c.k.........",
+		"...y...............G....",
+		"sssssssssssssssssssss.ss",
+		"..e.............e.......",
+		".........c....k.........",
+		".....u............u.....",
+		"............f.......u..."
+	],
+	"overhead": [
+		"abca............bcabcabc",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................",
+		"........................"
+	],
+	"elevation": [
+		"111111111111111111111111",
+		"111111111111111111111111",
+		"111111111111111111111111",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000",
+		"000000000000000000000000"
+	],
+	"spawn": { "x": 10, "y": 3, "facing": "down" },
+	"warps": [],
+	"signs": [
+		{ "x": 19, "y": 10, "dialogue_id": "board_notice" }
+	],
+	"triggers": [
+		{ "x": 21, "y": 11, "dialogue_id": "yard_gate" }
+	],
+	"npcs": [
+		{ "id": "kui", "x": 11, "y": 9, "sprite": "res://assets/characters/npc_kui.png", "facing": "down", "dialogue_id": "npc_kui" },
+		{ "id": "pen_sproutwing", "x": 3, "y": 5, "sprite": "res://assets/creatures/sproutwing_world.png", "facing": "down", "dialogue_id": "pen_sproutwing", "if_flag_not": "adopted_sproutwing" },
+		{ "id": "pen_emberhorn", "x": 15, "y": 5, "sprite": "res://assets/creatures/emberhorn_world.png", "facing": "down", "dialogue_id": "pen_emberhorn", "if_flag_not": "adopted_emberhorn" },
+		{ "id": "pen_tidecrest", "x": 20, "y": 6, "sprite": "res://assets/creatures/tidecrest_world.png", "facing": "down", "dialogue_id": "pen_tidecrest", "if_flag_not": "adopted_tidecrest" }
+	],
+	"smoke": [ { "x": 13, "y": 1 } ]
+}

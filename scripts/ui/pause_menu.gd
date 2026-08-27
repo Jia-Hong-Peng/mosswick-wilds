@@ -1,5 +1,5 @@
 extends Control
-## 觀測手冊（M）：隊伍（含 HP 條與圖示）、背包（道具圖示）、記錄、闔上。
+## 旅行手冊（M）：隊伍（含 HP 條與圖示）、背包（道具圖示）、記錄、闔上。
 ## 開啟時推入 MENU 輸入情境，凍結世界移動。
 
 enum View { MAIN, PARTY, BAG, TARGET }
@@ -118,7 +118,7 @@ func _use_bag_item() -> void:
 		_refresh()
 		return
 	if PartyService.members.is_empty():
-		_message_label.text = "還沒有同行的迴靈。"
+		_message_label.text = "還沒有同行的伴獸。"
 		AudioManager.play_bump()
 		_refresh()
 		return
@@ -155,7 +155,7 @@ func _apply_item_to_target() -> void:
 
 func _do_save() -> void:
 	if SaveService.save_game():
-		_message_label.text = "已寫進觀測手冊。"
+		_message_label.text = "已寫進旅行手冊。"
 		AudioManager.play_item()
 	else:
 		_message_label.text = "記錄失敗……再試一次。"
@@ -190,14 +190,14 @@ func _refresh() -> void:
 		View.TARGET:
 			_title_label.text = "◈ 選擇對象"
 		_:
-			_title_label.text = "◈ 觀測手冊"
+			_title_label.text = "◈ 旅行手冊"
 	for child in _rows_box.get_children():
 		child.queue_free()
 	_rows.clear()
 	match _view:
 		View.PARTY, View.TARGET:
 			if PartyService.members.is_empty():
-				_add_text_row("（還沒有同行的迴靈）", null)
+				_add_text_row("（還沒有同行的伴獸）", null)
 			for member in PartyService.members:
 				_add_party_row(member)
 		View.BAG:

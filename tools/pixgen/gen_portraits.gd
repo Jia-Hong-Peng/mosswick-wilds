@@ -19,18 +19,16 @@ static func generate() -> void:
 		"hat": "bun", "coat": Pal.STEEL, "coat_lt": Pal.MIST, "collar": Pal.FOG,
 		"scarf": Pal.FOG, "glasses": true,
 	}
-	var haibo_cfg := {
-		"skin": Pal.SKIN_DK, "skin_dk": Pal.WOOD_LT, "hair": Pal.GRAY,
-		"hat": "straw", "hat_color": Pal.SAND_LT, "hat_dark": Pal.SAND_DK,
-		"coat": Pal.PAPER, "coat_lt": Pal.FOAM, "collar": Pal.PAPER_DIM,
-		"apron": Pal.BRICK, "old": true,
+	var kui_cfg := {
+		"skin": Pal.SKIN, "skin_dk": Pal.SKIN_DK, "hair": Pal.WOOD_DK,
+		"hat": "kerchief", "hat_color": Pal.AMBER, "hat_dark": Pal.AMBER_DK,
+		"coat": Pal.MOSS, "coat_lt": Pal.LEAF, "collar": Pal.PAPER,
+		"apron": Pal.SAND, "old": true,
 	}
-	for expr: String in ["neutral", "focused", "surprised", "worried", "determined"]:
+	for expr: String in ["neutral", "thinking", "surprised", "determined", "happy", "focused", "worried"]:
 		_portrait("player", player_cfg, expr)
-	for expr: String in ["neutral", "thinking", "urgent", "relieved"]:
-		_portrait("rei", rei_cfg, expr)
-	for expr: String in ["neutral", "doubt", "sad", "smile"]:
-		_portrait("haibo", haibo_cfg, expr)
+	for expr: String in ["neutral", "observing", "concerned", "relieved", "smiling"]:
+		_portrait("kui", kui_cfg, expr)
 
 
 static func _portrait(char_name: String, cfg: Dictionary, expr: String) -> void:
@@ -92,6 +90,15 @@ static func _bust(c: Image, cfg: Dictionary) -> void:
 			Pix.rect(c, 27, 11, 4, 12, hair)
 			Pix.ellipse(c, 31, 8, 4, 3.5, hair)
 			Pix.px(c, 30, 6, Color(hair).lightened(0.2))
+		"kerchief":
+			# 頭巾：包住頭頂、腦後打結
+			Pix.ellipse(c, 20, 11, 12, 7, cfg["hat_color"])
+			Pix.rect(c, 8, 12, 24, 3, cfg["hat_dark"])
+			Pix.hline(c, 10, 8, 20, Color(cfg["hat_color"]).lightened(0.15))
+			Pix.rect(c, 31, 13, 4, 5, cfg["hat_dark"])
+			Pix.px(c, 34, 18, cfg["hat_color"])
+			Pix.rect(c, 9, 15, 3, 8, hair)
+			Pix.rect(c, 28, 15, 3, 8, hair)
 		_:
 			Pix.ellipse(c, 20, 12, 11, 6, hair)
 
@@ -122,13 +129,19 @@ static func _face(c: Image, cfg: Dictionary, expr: String) -> void:
 			_eyes_open(c, lx, rx, ey, 4)
 			Pix.ellipse(c, 20, 31, 2, 2.4, ink)
 			Pix.px(c, 20, 30, Pal.BRICK_DK)
-		"worried":
+		"worried", "concerned":
 			_brow(c, lx, rx, ey - 5, 2)
 			_eyes_open(c, lx, rx, ey, 3)
 			Pix.hline(c, 18, 31, 5, ink)
 			Pix.px(c, 17, 30, ink)
 			Pix.px(c, 23, 30, ink)
 			Pix.px(c, 31, 14, Pal.SEA_PALE)
+		"observing":
+			# 認養師的觀察眼：平眉、半開眼、抿嘴
+			_brow(c, lx, rx, ey - 4, 0)
+			_eyes_open(c, lx, rx, ey, 2)
+			Pix.hline(c, 18, 30, 4, ink)
+			Pix.px(c, 23, 31, ink)
 		"determined":
 			_brow(c, lx, rx, ey - 4, -2)
 			_eyes_open(c, lx, rx, ey, 3)
@@ -167,7 +180,7 @@ static func _face(c: Image, cfg: Dictionary, expr: String) -> void:
 			Pix.hline(c, 18, 31, 5, ink)
 			Pix.px(c, 17, 30, ink)
 			Pix.px(c, 23, 30, ink)
-		"smile":
+		"smile", "smiling", "happy":
 			_brow(c, lx, rx, ey - 5, 1)
 			Pix.hline(c, lx - 2, ey, 5, ink)
 			Pix.hline(c, rx - 2, ey, 5, ink)

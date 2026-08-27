@@ -14,19 +14,16 @@ static func generate() -> void:
 	_round_button("res://assets/ui/btn_cancel_pressed.png", 22, Pal.SEA, Pal.SEA_LT, true)
 	_menu_button("res://assets/ui/btn_menu.png", false)
 	_menu_button("res://assets/ui/btn_menu_pressed.png", true)
-	_elem_icon("res://assets/ui/elem_forest.png", "forest")
-	_elem_icon("res://assets/ui/elem_tide.png", "tide")
-	_elem_icon("res://assets/ui/elem_signal.png", "signal")
+	_elem_icon("res://assets/ui/elem_grass.png", "grass")
+	_elem_icon("res://assets/ui/elem_fire.png", "fire")
+	_elem_icon("res://assets/ui/elem_water.png", "water")
 	_elem_icon("res://assets/ui/elem_neutral.png", "neutral")
 	_item_balm("res://assets/ui/item_herbal_balm.png")
-	_item_echo_box("res://assets/ui/item_echo_box.png")
-	_item_stable_echo("res://assets/ui/item_stable_echo.png")
+	_item_travel_pack("res://assets/ui/item_travel_pack.png")
+	_item_travel_tag("res://assets/ui/item_travel_tag.png")
 	_shadow("res://assets/ui/contact_shadow.png")
 	_fog_blob("res://assets/ui/fog_blob.png")
-	_clue_sprites()
 	_battle_props()
-	_observe_button("res://assets/ui/btn_observe.png", false)
-	_observe_button("res://assets/ui/btn_observe_pressed.png", true)
 	_app_icon("res://assets/ui/icon.png")
 
 
@@ -103,7 +100,7 @@ static func _elem_icon(path: String, kind: String) -> void:
 	var c := Pix.img(12, 12)
 	Pix.ellipse(c, 5.5, 5.5, 5.5, 5.5, Pal.INK)
 	match kind:
-		"forest":
+		"grass":
 			Pix.ellipse(c, 5.5, 5.5, 4.5, 4.5, Pal.MOSS)
 			# 葉片
 			for i in range(4):
@@ -111,21 +108,22 @@ static func _elem_icon(path: String, kind: String) -> void:
 			Pix.px(c, 4, 5, Pal.LEAF_LT)
 			Pix.px(c, 5, 4, Pal.LEAF_LT)
 			Pix.px(c, 7, 4, Pal.LEAF)
-		"tide":
+		"water":
 			Pix.ellipse(c, 5.5, 5.5, 4.5, 4.5, Pal.SEA)
 			Pix.hline(c, 3, 5, 3, Pal.FOAM)
 			Pix.px(c, 6, 4, Pal.FOAM)
 			Pix.hline(c, 5, 8, 3, Pal.SEA_PALE)
 			Pix.px(c, 8, 7, Pal.SEA_PALE)
-		"signal":
-			Pix.ellipse(c, 5.5, 5.5, 4.5, 4.5, Pal.NIGHT)
-			# 電波弧
-			Pix.px(c, 4, 7, Pal.AMBER)
-			Pix.px(c, 5, 6, Pal.AMBER)
-			Pix.px(c, 6, 5, Pal.AMBER_LT)
-			Pix.px(c, 7, 4, Pal.AMBER_LT)
-			Pix.px(c, 3, 5, Pal.AMBER_DK)
-			Pix.px(c, 8, 8, Pal.AMBER_DK)
+		"fire":
+			Pix.ellipse(c, 5.5, 5.5, 4.5, 4.5, Pal.BRICK)
+			# 火焰
+			Pix.px(c, 5, 3, Pal.AMBER_LT)
+			Pix.px(c, 4, 4, Pal.AMBER)
+			Pix.px(c, 5, 4, Pal.AMBER_LT)
+			Pix.px(c, 6, 4, Pal.AMBER)
+			Pix.rect(c, 4, 5, 4, 3, Pal.CORAL)
+			Pix.px(c, 5, 6, Pal.AMBER_LT)
+			Pix.px(c, 5, 8, Pal.AMBER_DK)
 		"neutral":
 			Pix.ellipse(c, 5.5, 5.5, 4.5, 4.5, Pal.MIST_DK)
 			Pix.ellipse(c, 5.5, 5.5, 2.0, 2.0, Pal.MIST_LT)
@@ -148,33 +146,41 @@ static func _item_balm(path: String) -> void:
 	Pix.save(c, path)
 
 
-static func _item_echo_box(path: String) -> void:
+static func _item_travel_pack(path: String) -> void:
 	var c := Pix.img(16, 16)
-	# 共鳴匣：黃銅錄音小匣
-	Pix.rect(c, 3, 5, 10, 8, Pal.INK)
-	Pix.rect(c, 4, 6, 8, 6, Pal.AMBER_DK)
-	Pix.rect(c, 4, 6, 8, 2, Pal.AMBER)
-	Pix.px(c, 5, 6, Pal.AMBER_LT)
-	# 轉盤與訊號燈
-	Pix.ellipse(c, 7, 9.5, 1.6, 1.6, Pal.WOOD_DK)
-	Pix.px(c, 7, 9, Pal.SAND_LT)
-	Pix.px(c, 11, 7, Pal.CORAL)
-	# 提帶
+	# 旅行包：帆布包＋皮帶扣
+	Pix.rect(c, 3, 5, 10, 9, Pal.INK)
+	Pix.rect(c, 4, 6, 8, 7, Pal.SAND)
+	Pix.rect(c, 4, 6, 8, 2, Pal.SAND_LT)
+	# 掀蓋與皮帶
+	Pix.rect(c, 4, 8, 8, 1, Pal.WOOD_DK)
+	Pix.vline(c, 7, 6, 6, Pal.WOOD)
+	Pix.px(c, 7, 9, Pal.AMBER)
+	# 提把
 	Pix.hline(c, 6, 3, 5, Pal.WOOD_DK)
 	Pix.px(c, 5, 4, Pal.WOOD_DK)
 	Pix.px(c, 11, 4, Pal.WOOD_DK)
+	# 側袋小毛刷
+	Pix.px(c, 12, 7, Pal.CORAL)
 	Pix.save(c, path)
 
 
-static func _item_stable_echo(path: String) -> void:
+static func _item_travel_tag(path: String) -> void:
 	var c := Pix.img(16, 16)
-	# 穩定回聲：琥珀同心環，中心一點海藍
-	Pix.ellipse(c, 8, 8, 7, 7, Pal.INK)
-	Pix.ellipse(c, 8, 8, 6, 6, Pal.AMBER_DK)
-	Pix.ellipse(c, 8, 8, 4.5, 4.5, Pal.AMBER)
-	Pix.ellipse(c, 8, 8, 3, 3, Pal.AMBER_LT)
-	Pix.ellipse(c, 8, 8, 1.4, 1.4, Pal.SEA_PALE)
-	Pix.px(c, 6, 6, Pal.FOAM)
+	# 旅伴牌：木材＋陶片＋金屬的小識別牌
+	Pix.rect(c, 4, 4, 8, 10, Pal.INK)
+	Pix.rect(c, 5, 5, 6, 8, Pal.WOOD)
+	Pix.rect(c, 5, 5, 6, 2, Pal.WOOD_LT)
+	# 陶片鑲嵌
+	Pix.rect(c, 6, 8, 4, 3, Pal.SEA_PALE)
+	Pix.px(c, 7, 9, Pal.FOAM)
+	# 金屬環與繩
+	Pix.px(c, 7, 3, Pal.STEEL)
+	Pix.px(c, 8, 3, Pal.STEEL)
+	Pix.px(c, 7, 2, Pal.MIST_LT)
+	Pix.px(c, 8, 2, Pal.MIST_LT)
+	# 光紋一點
+	Pix.px(c, 9, 6, Pal.AMBER_LT)
 	Pix.save(c, path)
 
 

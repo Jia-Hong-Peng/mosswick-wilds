@@ -12,6 +12,7 @@ func _initialize() -> void:
 	GenPortraits.generate()
 	GenUi.generate()
 	GenBackgrounds.generate()
+	Gen3D.generate()
 	# 色盤圖搬到 docs/（docs 不在 res:// 掃描外，直接寫）
 	var src := ProjectSettings.globalize_path("res://docs_src/palette.png")
 	var dst := ProjectSettings.globalize_path("res://docs/palette.png")

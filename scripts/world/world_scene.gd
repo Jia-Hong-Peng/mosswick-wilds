@@ -1,41 +1,34 @@
-extends Node2D
-## 世界場景：三層 TileMap、NPC、玩家、粒子與霧之外，本版加入——
-## 回聲觀測模式（去彩度＋線索顯形＋環境音收窄）、地圖觸發器與自動對話、
-## 條件 warp、演出 FX（DialogueManager.fx_requested）、關卡結局導演、
-## 通關前後的世界狀態差異（色溫／鐘聲／對話變體）。
-
-const TILE_SIZE := 16
+extends Node3D
+## 2.5D 像素立體劇場・世界場景（潮芽伴獸之家）。
+## 導演職責：開場運鏡與章節卡、認養流程（互動→確認→儀式→暱稱→入隊）、
+## 夥伴跟隨、危機觸發、結局（安撫後的告別、三種結尾小動畫、伏筆、結尾選單）。
+## 呈現層：StageBuilder 3D 舞台＋Sprite3D 角色＋方向光/局部暖光＋
+## 分層霧面片＋God Ray＋螢幕分級（假移軸／通關暖調）。
 
 const PlayerScene := preload("res://scenes/characters/player.tscn")
 const NpcScene := preload("res://scenes/characters/npc.tscn")
 const DialogueBoxScene := preload("res://scenes/ui/dialogue_box.tscn")
 const PauseMenuScene := preload("res://scenes/ui/pause_menu.tscn")
 
-const OBSERVE_TINT := Color(0.6, 0.72, 0.8)
-const RESTORED_TINT := Color(1.0, 0.96, 0.86)
-const CLUE_TEXTURES := {
-	"tide": "res://assets/ui/clue_tide.png",
-	"signal": "res://assets/ui/clue_signal.png",
-	"ripple": "res://assets/ui/clue_ripple.png",
-}
-const CLUES_READY_COUNT := 2
+const MAX_DYNAMIC_LIGHTS := 3
+const GATE_CELL := Vector2i(21, 11)
 
 var _map: MapData
+var _heights := {}
 var _npcs_by_cell: Dictionary = {}
-var _encounters: EncounterSystem
-var _player: Node2D
+var _player: Node3D
+var _follower: Follower3D
 var _pause_menu: Control
 var _dialogue_box: Control
 var _ui_layer: CanvasLayer
+var _grade: ScreenGrade
+var _rig: CameraRig
+var _sun: DirectionalLight3D
 var _rng := RandomNumberGenerator.new()
 var _leaving := false
-var _fog_sprites: Array[Sprite2D] = []
-var _tint: CanvasModulate
-var _observing := false
-var _clue_sprites: Dictionary = {}
-var _clue_clock := 0.0
-var _boss_sprite: Sprite2D
+var _fog_sprites: Array[Sprite3D] = []
 var _ending_running := false
+var _ceremony_running := false
 
 
 func _ready() -> void:
@@ -44,49 +37,114 @@ func _ready() -> void:
 	if _map == null:
 		push_error("Unknown map id: " + GameState.current_map_id)
 		return
-	_tint = CanvasModulate.new()
-	_tint.color = _base_tint()
-	add_child(_tint)
-	_build_layers()
+	_build_environment()
+	var built := StageBuilder.build(_map, self)
+	_heights = built["heights"]
+	_place_lights(built["lights"])
 	_spawn_npcs()
 	_spawn_player()
 	_spawn_smoke()
 	_spawn_fog()
-	_spawn_clues()
-	_spawn_station_extras()
+	_spawn_godrays()
+	_grade = ScreenGrade.new()
+	add_child(_grade)
 	_build_ui()
-	_setup_encounters()
 	_apply_ambience()
+	_spawn_follower_if_adopted()
+	if EventFlagStore.has_flag("chapter_done"):
+		_grade.set_warm(1.0, 0.1)
 	InputRouter.set_base_context(InputRouter.Context.WORLD)
 	DialogueManager.fx_requested.connect(_on_fx)
+	DialogueManager.world_action_requested.connect(_on_adopt_requested)
 	_run_entry_flow.call_deferred()
 
 
 func _exit_tree() -> void:
 	if DialogueManager.fx_requested.is_connected(_on_fx):
 		DialogueManager.fx_requested.disconnect(_on_fx)
-	AudioManager.set_observe_filter(false)
+	if DialogueManager.world_action_requested.is_connected(_on_adopt_requested):
+		DialogueManager.world_action_requested.disconnect(_on_adopt_requested)
 
 
 func _process(delta: float) -> void:
 	_drift_fog(delta)
-	_animate_clues(delta)
-	var walkable_context := InputRouter.is_context(InputRouter.Context.WORLD) or InputRouter.is_context(InputRouter.Context.OBSERVE)
-	if walkable_context and Input.is_action_just_pressed("observe"):
-		_toggle_observe()
-		return
 	if InputRouter.is_context(InputRouter.Context.WORLD) and Input.is_action_just_pressed("menu"):
 		_pause_menu.open()
 
 
-# ====== 進場流程與自動對話 ======
+# ====== 環境與光 ======
+
+func _build_environment() -> void:
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.background_color = Color("c6d6c8")
+	env.ambient_light_color = Color(0.6, 0.66, 0.68)
+	env.ambient_light_energy = 0.85
+	env.fog_enabled = true
+	env.fog_sky_affect = 0.3
+	env.fog_light_color = Color(0.76, 0.82, 0.79)
+	env.fog_density = 0.008
+	var world_env := WorldEnvironment.new()
+	world_env.environment = env
+	add_child(world_env)
+	_sun = DirectionalLight3D.new()
+	_sun.rotation_degrees = Vector3(-52, 32, 0)
+	# 認養日的晨光：暖而低的方向光
+	_sun.light_color = Color(1.0, 0.94, 0.82)
+	_sun.light_energy = 1.25
+	_sun.shadow_enabled = AudioManager.quality_high
+	_sun.directional_shadow_max_distance = 40.0
+	add_child(_sun)
+
+
+## 局部暖光：動態燈 ≤3 盞（無陰影），其餘只放光暈面片（假光）
+func _place_lights(emitters: Array[Vector3]) -> void:
+	var halo_texture: Texture2D = load("res://assets/world3d/light_halo.png")
+	for i in range(emitters.size()):
+		var at := emitters[i]
+		var halo := Sprite3D.new()
+		halo.texture = halo_texture
+		halo.pixel_size = 1.0 / 24.0
+		halo.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		halo.shaded = false
+		halo.position = at
+		add_child(halo)
+		if i < MAX_DYNAMIC_LIGHTS:
+			var light := OmniLight3D.new()
+			light.light_color = Color(1.0, 0.78, 0.45)
+			light.light_energy = 1.5
+			light.omni_range = 3.6
+			light.shadow_enabled = false
+			light.position = at
+			add_child(light)
+
+
+func _spawn_godrays() -> void:
+	if not AudioManager.quality_high:
+		return
+	var texture: Texture2D = load("res://assets/world3d/godray.png")
+	for i in range(2):
+		var ray := Sprite3D.new()
+		ray.texture = texture
+		ray.pixel_size = 1.0 / 14.0
+		ray.shaded = false
+		ray.modulate = Color(1, 1, 1, 0.55)
+		ray.rotation_degrees = Vector3(-14, 0, 16)
+		ray.position = Vector3(float(_map.width) * (0.3 + 0.35 * float(i)), 3.4, float(_map.height) * 0.35)
+		add_child(ray)
+
+
+# ====== 進場流程 ======
 
 func _run_entry_flow() -> void:
-	await get_tree().create_timer(0.35).timeout
+	await get_tree().create_timer(0.3).timeout
 	if EventFlagStore.has_flag("ending_pending"):
 		EventFlagStore.clear_flag("ending_pending")
 		await _run_ending()
 		return
+	if not EventFlagStore.has_flag("opening_done"):
+		await _run_opening_pan()
 	for entry in _map.auto_dialogues:
 		if not _conditions_met(entry):
 			continue
@@ -96,9 +154,74 @@ func _run_entry_flow() -> void:
 			EventFlagStore.set_flag(String(entry["fire_flag"]))
 		DialogueManager.start(String(entry.get("dialogue_id", "")))
 		await DialogueManager.dialogue_finished
-		if String(entry.get("fire_flag", "")) == "opening_done":
-			_show_observe_hint()
 		break
+
+
+## 開場運鏡（0:00–0:20）：港口晨光 → 認養庭院掠過三個活動區 → 玩家。
+## 章節卡浮現；按確認可隨時跳過。
+func _run_opening_pan() -> void:
+	InputRouter.push_context(InputRouter.Context.MENU)
+	var marker := Node3D.new()
+	add_child(marker)
+	marker.position = Vector3(11.5, 0, 13.5)
+	_rig.follow_speed = 1.6
+	_rig.retarget(marker)
+	_rig.jump_to(marker.position)
+	# 章節卡
+	var card := VBoxContainer.new()
+	card.position = Vector2(96, 60)
+	card.add_theme_constant_override("separation", 4)
+	_ui_layer.add_child(card)
+	var title := Label.new()
+	title.text = "潮 森 群 島"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.custom_minimum_size = Vector2(128, 0)
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", Pal.PAPER)
+	title.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.INK, 0.8))
+	title.add_theme_constant_override("shadow_offset_x", 1)
+	title.add_theme_constant_override("shadow_offset_y", 1)
+	card.add_child(title)
+	var subtitle := Label.new()
+	subtitle.text = "第一章：第一位旅伴"
+	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	subtitle.custom_minimum_size = Vector2(128, 0)
+	subtitle.add_theme_font_size_override("font_size", 12)
+	subtitle.add_theme_color_override("font_color", Pal.FOAM)
+	subtitle.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.INK, 0.8))
+	subtitle.add_theme_constant_override("shadow_offset_x", 1)
+	subtitle.add_theme_constant_override("shadow_offset_y", 1)
+	card.add_child(subtitle)
+	card.modulate.a = 0.0
+	var card_tween := create_tween()
+	card_tween.tween_property(card, "modulate:a", 1.0, 0.8)
+	card_tween.tween_interval(2.6)
+	card_tween.tween_property(card, "modulate:a", 0.0, 0.8)
+	# 運鏡：碼頭 → 三個活動區 → 玩家
+	var waypoints: Array[Vector3] = [
+		Vector3(3.5, 0, 6.0),
+		Vector3(15.0, 0, 6.0),
+		Vector3(20.0, 0, 6.5),
+	]
+	var elapsed := 0.0
+	var waypoint_index := 0
+	marker.position = waypoints[0]
+	while elapsed < 7.0 and is_inside_tree():
+		await get_tree().process_frame
+		var delta := get_process_delta_time()
+		elapsed += delta
+		if elapsed > 2.2 * float(waypoint_index + 1) and waypoint_index < waypoints.size() - 1:
+			waypoint_index += 1
+			marker.position = waypoints[waypoint_index]
+		if Input.is_action_just_pressed("confirm"):
+			break
+	card_tween.kill()
+	card.queue_free()
+	marker.queue_free()
+	_rig.retarget(_player)
+	_rig.follow_speed = 7.0
+	InputRouter.pop_context()
+	await get_tree().create_timer(0.4).timeout
 
 
 func _conditions_met(entry: Dictionary) -> bool:
@@ -109,95 +232,169 @@ func _conditions_met(entry: Dictionary) -> bool:
 	return true
 
 
-func _show_observe_hint() -> void:
+# ====== 認養儀式 ======
+
+func _on_adopt_requested(starter_id: String) -> void:
+	if _ceremony_running:
+		return
+	_run_adoption(starter_id)
+
+
+func _run_adoption(starter_id: String) -> void:
+	_ceremony_running = true
+	InputRouter.push_context(InputRouter.Context.MENU)
+	var starter := DataRegistry.get_starter(starter_id)
+	var pen := Dictionary(starter.get("pen_cell", {}))
+	var pen_cell := Vector2i(int(pen.get("x", 0)), int(pen.get("y", 0)))
+	var pen_npc: Node3D = _npcs_by_cell.get(pen_cell)
+	# 1) 葵姨確認＋認養證
+	DialogueManager.start("ceremony_" + starter_id)
+	await DialogueManager.dialogue_finished
+	# 2) 幼獸主動走向玩家（小跳兩下＋叫聲）
+	AudioManager.play_cry(starter_id)
+	if pen_npc != null:
+		var tween := create_tween()
+		for i in range(2):
+			tween.tween_property(pen_npc, "position:y", pen_npc.position.y + 0.28, 0.14)
+			tween.tween_property(pen_npc, "position:y", pen_npc.position.y, 0.12)
+		await tween.finished
+	# 3) 旅伴牌
+	DialogueManager.start("ceremony_tag_" + starter_id)
+	await DialogueManager.dialogue_finished
+	# 4) 暱稱（可保留原名）
+	var nickname := await _ask_nickname(String(starter.get("display_name", "")))
+	# 5) 正式入隊＋自動存檔
+	GameState.adopt_starter(starter_id, nickname)
+	AudioManager.play_adopt_jingle()
+	_grade.flash(0.4, 0.35)
+	var celebrate_at := Vector3(float(pen_cell.x) + 0.5, height_of(pen_cell) + 0.8, float(pen_cell.y) + 0.5)
+	_burst_3d(celebrate_at, _starter_color(starter_id))
+	if pen_npc != null:
+		_npcs_by_cell.erase(pen_cell)
+		pen_npc.queue_free()
+	_spawn_follower(starter_id, pen_cell)
+	SaveService.save_game()
+	_show_toast("%s 加入了你的隊伍！（已自動記錄）" % PartyService.first_conscious().display_name)
+	InputRouter.pop_context()
+	_ceremony_running = false
+
+
+func _ask_nickname(default_name: String) -> String:
+	InputRouter.push_context(InputRouter.Context.MENU)
+	var panel := PanelContainer.new()
+	panel.position = Vector2(78, 58)
+	panel.custom_minimum_size = Vector2(164, 0)
+	panel.add_theme_stylebox_override("panel", UiTheme.panel_style())
+	_ui_layer.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	panel.add_child(box)
+	var prompt := Label.new()
+	prompt.text = "要幫「%s」取個暱稱嗎？" % default_name
+	prompt.add_theme_font_size_override("font_size", 12)
+	prompt.add_theme_color_override("font_color", UiTheme.text_color("normal"))
+	box.add_child(prompt)
+	var line := LineEdit.new()
+	line.placeholder_text = default_name
+	line.max_length = 8
+	line.add_theme_font_size_override("font_size", 12)
+	box.add_child(line)
+	var hint := Label.new()
+	hint.text = "Enter 確定　Esc 保留原名"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hint.add_theme_font_size_override("font_size", 12)
+	hint.add_theme_color_override("font_color", UiTheme.text_color("dim"))
+	box.add_child(hint)
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 6)
+	buttons.alignment = BoxContainer.ALIGNMENT_END
+	box.add_child(buttons)
+	var keep := Button.new()
+	keep.text = "保留原名"
+	keep.add_theme_font_size_override("font_size", 12)
+	buttons.add_child(keep)
+	var ok := Button.new()
+	ok.text = "確定"
+	ok.add_theme_font_size_override("font_size", 12)
+	buttons.add_child(ok)
+	line.grab_focus()
+	var result: Array[String] = []
+	line.text_submitted.connect(func(text: String) -> void: result.append(text))
+	ok.pressed.connect(func() -> void: result.append(line.text))
+	keep.pressed.connect(func() -> void: result.append(""))
+	while result.is_empty() and is_inside_tree():
+		await get_tree().process_frame
+		if Input.is_action_just_pressed("cancel"):
+			result.append("")
+	panel.queue_free()
+	InputRouter.pop_context()
+	AudioManager.play_confirm()
+	return result[0] if not result.is_empty() else ""
+
+
+func _starter_color(starter_id: String) -> Color:
+	match starter_id:
+		"sproutwing":
+			return Pal.LEAF_LT
+		"emberhorn":
+			return Pal.AMBER_LT
+		_:
+			return Pal.SEA_PALE
+
+
+func _spawn_follower_if_adopted() -> void:
+	if GameState.starter_id.is_empty() or not EventFlagStore.has_flag("starter_chosen"):
+		return
+	var beside := GameState.player_cell + Vector2i(0, 1)
+	if not is_cell_free(beside):
+		beside = GameState.player_cell + Vector2i(-1, 0)
+	if not is_cell_free(beside):
+		beside = GameState.player_cell + Vector2i(1, 0)
+	_spawn_follower(GameState.starter_id, beside)
+
+
+func _spawn_follower(starter_id: String, at_cell: Vector2i) -> void:
+	if _follower != null:
+		return
+	_follower = Follower3D.new()
+	add_child(_follower)
+	_follower.setup(self, _player, starter_id, at_cell)
+
+
+func _show_toast(text: String) -> void:
 	var tag := PanelContainer.new()
-	tag.position = Vector2(96, 56)
+	tag.position = Vector2(70, 20)
 	tag.add_theme_stylebox_override("panel", UiTheme.name_tag_style())
 	var label := Label.new()
-	label.text = "Ｃ／觀測鍵：回聲觀測"
+	label.text = text
 	label.add_theme_font_size_override("font_size", 12)
 	label.add_theme_color_override("font_color", Pal.FOAM)
 	tag.add_child(label)
 	_ui_layer.add_child(tag)
 	var tween := create_tween()
-	tween.tween_interval(2.6)
+	tween.tween_interval(2.4)
 	tween.tween_property(tag, "modulate:a", 0.0, 0.6)
 	tween.tween_callback(tag.queue_free)
-
-
-# ====== 回聲觀測 ======
-
-func _toggle_observe() -> void:
-	_observing = not _observing
-	if _observing:
-		AudioManager.play_observe_on()
-		AudioManager.set_observe_filter(true)
-		InputRouter.push_context(InputRouter.Context.OBSERVE)
-	else:
-		AudioManager.play_observe_off()
-		AudioManager.set_observe_filter(false)
-		InputRouter.pop_context()
-	var tween := create_tween()
-	tween.tween_property(_tint, "color", OBSERVE_TINT if _observing else _base_tint(), 0.35)
-	for cell: Vector2i in _clue_sprites:
-		var sprite := _clue_sprites[cell] as Sprite2D
-		sprite.visible = _observing
-
-
-func _spawn_clues() -> void:
-	for clue in _map.clues:
-		var cell := Vector2i(int(clue.get("x", 0)), int(clue.get("y", 0)))
-		var sprite := Sprite2D.new()
-		var texture_path := String(CLUE_TEXTURES.get(String(clue.get("type", "signal")), CLUE_TEXTURES["signal"]))
-		sprite.texture = load(texture_path)
-		sprite.hframes = 2
-		sprite.position = Vector2(cell * TILE_SIZE) + Vector2(8, 8)
-		sprite.visible = false
-		sprite.z_index = 3
-		if EventFlagStore.has_flag(String(clue.get("flag", ""))):
-			sprite.modulate.a = 0.4
-		add_child(sprite)
-		_clue_sprites[cell] = sprite
-
-
-func _animate_clues(delta: float) -> void:
-	if _clue_sprites.is_empty():
-		return
-	_clue_clock += delta
-	var frame := int(_clue_clock / 0.4) % 2
-	for cell: Vector2i in _clue_sprites:
-		(_clue_sprites[cell] as Sprite2D).frame = frame
-
-
-func _clue_at(cell: Vector2i) -> Dictionary:
-	for clue in _map.clues:
-		if int(clue.get("x", -1)) == cell.x and int(clue.get("y", -1)) == cell.y:
-			return clue
-	return {}
-
-
-func _examine_clue(clue: Dictionary, cell: Vector2i) -> void:
-	AudioManager.play_clue()
-	var flag := String(clue.get("flag", ""))
-	var newly := not EventFlagStore.has_flag(flag)
-	if newly and not flag.is_empty():
-		EventFlagStore.set_flag(flag)
-		if _clue_sprites.has(cell):
-			(_clue_sprites[cell] as Sprite2D).modulate.a = 0.4
-	DialogueManager.start(String(clue.get("dialogue_id", "")))
-	if newly:
-		var count := 0
-		for entry in _map.clues:
-			if EventFlagStore.has_flag(String(entry.get("flag", ""))):
-				count += 1
-		if count >= CLUES_READY_COUNT:
-			EventFlagStore.set_flag("clues_ready")
 
 
 # ====== 移動、互動與觸發 ======
 
 func try_step(from_cell: Vector2i, direction: Vector2i) -> Dictionary:
-	return GridMovement.attempt_move(_map, from_cell, direction, _npcs_by_cell)
+	var result := GridMovement.attempt_move(_map, from_cell, direction, _npcs_by_cell)
+	if bool(result.get("moved", false)) and _follower != null and Vector2i(result["cell"]) == _follower.cell:
+		return {"moved": false, "cell": from_cell}
+	return result
+
+
+## 跟隨者尋路用：這一格可不可以站（含 NPC 阻擋，不含玩家）。
+func is_cell_free(target: Vector2i) -> bool:
+	if not _map.in_bounds(target) or not _map.is_walkable(target):
+		return false
+	return not _npcs_by_cell.has(target)
+
+
+func height_of(cell: Vector2i) -> float:
+	return StageBuilder.height_at(_heights, cell)
 
 
 func ground_kind_at(cell: Vector2i) -> String:
@@ -213,6 +410,8 @@ func on_player_arrived(arrived_cell: Vector2i) -> void:
 	if _leaving:
 		return
 	GameState.player_cell = arrived_cell
+	if _ending_running or _ceremony_running:
+		return
 	var warp := _map.warp_at(arrived_cell)
 	if not warp.is_empty():
 		if warp.has("requires_flag") and not EventFlagStore.has_flag(String(warp["requires_flag"])):
@@ -222,19 +421,12 @@ func on_player_arrived(arrived_cell: Vector2i) -> void:
 		_leaving = true
 		AudioManager.play_door()
 		SceneRouter.goto_world_at(
-			String(warp.get("target_map", "harbor")),
+			String(warp.get("target_map", "haven")),
 			Vector2i(int(warp.get("target_x", 1)), int(warp.get("target_y", 1))),
 			Directions.from_name(String(warp.get("facing", "down")))
 		)
 		return
 	_fire_triggers(arrived_cell)
-	if _encounters != null and _map.is_grass(arrived_cell) and PartyService.has_conscious():
-		var roll := _encounters.roll_step()
-		if not roll.is_empty():
-			_leaving = true
-			AudioManager.play_encounter()
-			roll["bg"] = _map.battle_bg
-			SceneRouter.goto_battle(roll)
 
 
 func _fire_triggers(cell: Vector2i) -> void:
@@ -254,15 +446,16 @@ func _fire_triggers(cell: Vector2i) -> void:
 
 
 func on_player_interact(target_cell: Vector2i) -> void:
-	if DialogueManager.active:
+	if DialogueManager.active or _ceremony_running or _ending_running:
 		return
-	if _observing:
-		var clue := _clue_at(target_cell)
-		if not clue.is_empty():
-			_examine_clue(clue, target_cell)
-			return
+	if _follower != null and _follower.cell == target_cell:
+		_follower.face_towards(GameState.player_cell)
+		_follower.hop()
+		AudioManager.play_talk()
+		DialogueManager.start("partner_talk")
+		return
 	if _npcs_by_cell.has(target_cell):
-		var npc: Node2D = _npcs_by_cell[target_cell]
+		var npc: Node3D = _npcs_by_cell[target_cell]
 		npc.face_towards(GameState.player_cell)
 		AudioManager.play_talk()
 		DialogueManager.start(npc.dialogue_id)
@@ -277,130 +470,189 @@ func on_player_interact(target_cell: Vector2i) -> void:
 
 func _on_fx(fx_name: String) -> void:
 	match fx_name:
-		"station_flash":
-			_screen_flash(Pal.FOAM, 0.16)
-		"lights_on":
-			_fx_lights_on()
-		"silence":
-			AudioManager.set_ambience("none")
-			AudioManager.set_observe_filter(true)
-		"gather":
-			_fx_gather()
-		"boss_reveal":
-			_fx_boss_reveal()
-		"bell":
-			AudioManager.play_bell()
-			_screen_flash(Pal.alpha(Pal.AMBER_LT, 0.5), 0.2)
+		"crash":
+			AudioManager.play_crash()
+			_rig.shake(4.0, 0.5)
+		"tag_flash":
+			AudioManager.play_item()
+			_grade.flash(0.45, 0.3)
+		"cry_sproutwing", "cry_emberhorn", "cry_tidecrest":
+			AudioManager.play_cry(fx_name.trim_prefix("cry_"))
 		"quake":
-			_shake_world(3.0, 0.4)
-		"observe_pulse":
-			_fx_observe_pulse()
+			_rig.shake(3.0, 0.4)
 		_:
 			pass
 
 
-func _screen_flash(color: Color, duration: float) -> void:
-	if AudioManager.reduce_flash:
-		return
-	var flash := ColorRect.new()
-	flash.color = color
-	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_ui_layer.add_child(flash)
-	var tween := create_tween()
-	tween.tween_property(flash, "modulate:a", 0.0, duration)
-	tween.tween_callback(flash.queue_free)
-
-
-func _shake_world(strength: float, duration: float) -> void:
-	if AudioManager.reduce_shake:
-		return
-	var steps := int(duration / 0.05)
-	var tween := create_tween()
-	for i in range(steps):
-		tween.tween_property(self, "position", Vector2((strength if i % 2 == 0 else -strength), 0), 0.05)
-	tween.tween_property(self, "position", Vector2.ZERO, 0.05)
-
-
-func _fx_lights_on() -> void:
-	AudioManager.play_item()
-	var tween := create_tween()
-	tween.tween_property(_tint, "color", Color(1.1, 1.02, 0.85), 0.3)
-	tween.tween_property(_tint, "color", _base_tint(), 0.5)
-
-
-func _fx_gather() -> void:
-	AudioManager.play_jam()
-	_shake_world(2.0, 0.3)
-	var burst := CPUParticles2D.new()
-	burst.position = Vector2(_map.width * TILE_SIZE / 2.0, _map.height * TILE_SIZE / 2.0)
+func _burst_3d(at: Vector3, color: Color) -> void:
+	var burst := CPUParticles3D.new()
+	burst.position = at
 	burst.one_shot = true
 	burst.emitting = true
-	burst.amount = 20
+	burst.amount = 16 if AudioManager.quality_high else 8
 	burst.lifetime = 0.6
 	burst.explosiveness = 1.0
-	burst.spread = 180.0
-	burst.initial_velocity_min = 30.0
-	burst.initial_velocity_max = 60.0
-	burst.color = Pal.GLITCH_LT
+	burst.direction = Vector3.UP
+	burst.spread = 70.0
+	burst.initial_velocity_min = 1.5
+	burst.initial_velocity_max = 3.0
+	burst.gravity = Vector3(0, -2.0, 0)
+	burst.mesh = _particle_mesh(color)
 	add_child(burst)
-	get_tree().create_timer(1.0).timeout.connect(burst.queue_free)
+	get_tree().create_timer(1.2).timeout.connect(burst.queue_free)
 
 
-func _fx_boss_reveal() -> void:
-	AudioManager.play_encounter()
-	if _boss_sprite == null:
-		_boss_sprite = Sprite2D.new()
-		_boss_sprite.texture = load("res://assets/creatures/magshell_unbalanced.png")
-		_boss_sprite.hframes = 2
-		add_child(_boss_sprite)
-	var center := Vector2(_map.width * TILE_SIZE / 2.0, _map.height * TILE_SIZE / 2.0 - 6.0)
-	_boss_sprite.position = center + Vector2(0, -24)
-	_boss_sprite.modulate.a = 0.0
-	_boss_sprite.visible = true
-	var tween := create_tween().set_parallel(true)
-	tween.tween_property(_boss_sprite, "position", center, 0.3).set_ease(Tween.EASE_IN)
-	tween.tween_property(_boss_sprite, "modulate:a", 1.0, 0.25)
-	tween.chain().tween_callback(func() -> void: _shake_world(2.0, 0.25))
-
-
-func _fx_observe_pulse() -> void:
-	AudioManager.play_observe_on()
-	var tween := create_tween()
-	tween.tween_property(_tint, "color", OBSERVE_TINT, 0.4)
-	tween.tween_interval(0.8)
-	tween.tween_property(_tint, "color", _base_tint(), 0.5)
+func _particle_mesh(color: Color) -> QuadMesh:
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(0.06, 0.06)
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mesh.material = material
+	return mesh
 
 
 # ====== 關卡結局導演 ======
 
 func _run_ending() -> void:
 	_ending_running = true
-	# 1) 聲音與色彩回歸
+	InputRouter.push_context(InputRouter.Context.MENU)
 	AudioManager.stop_music()
-	AudioManager.set_ambience(_map.ambience_restored if _map.ambience_restored != "" else "harbor_restored")
-	var tween := create_tween()
-	tween.tween_property(_tint, "color", RESTORED_TINT, 1.6)
-	await get_tree().create_timer(1.0).timeout
-	# 2) 結尾對話（含鐘聲 FX 與「穩定回聲」給予）
-	DialogueManager.start("ending_scene")
+	_apply_ambience()
+	await get_tree().create_timer(0.8).timeout
+	# 1) 岩背獾平靜離場
+	var badger := Sprite3D.new()
+	badger.texture = load("res://assets/creatures/rockbadger_calm.png")
+	badger.pixel_size = 1.0 / 30.0
+	badger.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	badger.shaded = true
+	badger.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	badger.position = Vector3(7.5, height_of(Vector2i(7, 8)) + 0.7, 8.5)
+	add_child(badger)
+	DialogueManager.start("ending_calm")
 	await DialogueManager.dialogue_finished
-	# 3) 自動存檔
+	var leave_tween := create_tween().set_parallel(true)
+	leave_tween.tween_property(badger, "position", Vector3(1.0, badger.position.y, 4.0), 2.4)
+	leave_tween.tween_property(badger, "modulate:a", 0.0, 2.4)
+	leave_tween.chain().tween_callback(badger.queue_free)
+	await get_tree().create_timer(1.4).timeout
+	# 2) 葵姨檢查夥伴＋依個性反應
+	if _follower != null:
+		_follower.hop()
+	DialogueManager.start("ending_check")
+	await DialogueManager.dialogue_finished
+	# 3) 旅行證與地圖、閘門開啟
+	DialogueManager.start("ending_farewell")
+	await DialogueManager.dialogue_finished
+	EventFlagStore.set_flag("chapter_done")
+	_grade.set_warm(1.0, 1.8)
+	AudioManager.play_bell()
 	SaveService.save_game()
-	# 4) 章節完成卡
+	# 4) 走向港口道（夥伴依個性同行）
+	await _ending_walk()
+	# 5) 鏡頭拉遠：港口與下一座島嶼
+	var marker := Node3D.new()
+	add_child(marker)
+	marker.position = Vector3(14.0, 0, 13.0)
+	_rig.follow_speed = 1.8
+	_rig.retarget(marker)
+	_rig.set_zoom(11.0, 2.2)
+	DialogueManager.start("ending_last_words")
+	await DialogueManager.dialogue_finished
+	await get_tree().create_timer(0.8).timeout
+	# 6) 章節卡＋認養結果
+	AudioManager.play_level_complete()
 	await _show_chapter_card()
-	# 5) 伏筆（黑幕＋訊號）→ 繼續探索／返回標題
-	await _show_epilogue()
+	# 7) 伏筆：公告板上的失蹤啟事（5 秒、不解釋、切黑）
+	await _show_teaser()
+	# 8) 結尾選單
+	marker.queue_free()
+	_rig.retarget(_player)
+	_rig.follow_speed = 7.0
+	_rig.set_zoom(8.8, 0.5)
+	await _show_end_menu()
 	_ending_running = false
+	InputRouter.pop_context()
+
+
+## 玩家與夥伴走向閘門；三隻御三家有不同的同行演出。
+func _ending_walk() -> void:
+	if _follower != null:
+		_follower.scripted = true
+	var variant := ""
+	if _follower != null:
+		variant = String(DataRegistry.get_starter(_follower.starter_id).get("ending_variant", ""))
+	match variant:
+		"glide":
+			# 芽翼鼯：跳上玩家肩膀展開葉翼，一起走
+			AudioManager.play_cry("sproutwing")
+			var tween := create_tween().set_parallel(true)
+			tween.tween_property(_follower, "position", _player.position + Vector3(0, 0.9, 0), 0.5).set_ease(Tween.EASE_IN)
+			tween.tween_property(_follower, "scale", Vector3(0.7, 0.7, 0.7), 0.5)
+			await tween.finished
+			_burst_3d(_player.position + Vector3(0, 1.2, 0), Pal.LEAF_LT)
+			_follower.visible = false
+		"torch":
+			# 燼角羌：走在玩家前方，角上的火光映亮道路
+			AudioManager.play_cry("emberhorn")
+			var glow := OmniLight3D.new()
+			glow.light_color = Color(1.0, 0.62, 0.3)
+			glow.light_energy = 0.0
+			glow.omni_range = 3.2
+			_follower.add_child(glow)
+			var tween := create_tween()
+			tween.tween_property(glow, "light_energy", 1.6, 1.0)
+		"chase":
+			AudioManager.play_cry("tidecrest")
+	# 導演步行：回到大路（列 8）→ 向東到閘門 → 南下到港口道
+	await _walk_player_to(Vector2i(GATE_CELL.x, 8))
+	await _walk_player_to(Vector2i(GATE_CELL.x, 12))
+	if _follower != null and variant == "chase":
+		# 潮冠鷺：叼著地圖搶先跑出閘門，玩家追上
+		for i in range(2):
+			_follower.scripted_step(Vector2i.RIGHT)
+			while _follower.is_moving():
+				await get_tree().process_frame
+	await get_tree().create_timer(0.4).timeout
+
+
+func _walk_player_to(target: Vector2i) -> void:
+	var guard := 0
+	while GameState.player_cell != target and guard < 64 and is_inside_tree():
+		guard += 1
+		var diff := target - GameState.player_cell
+		var dir := Vector2i(signi(diff.x), 0) if diff.x != 0 else Vector2i(0, signi(diff.y))
+		if not _player.force_step(dir):
+			# 夥伴擋路：等牠停下、請牠讓開一步，再走
+			var retries := 0
+			while retries < 5 and _follower != null and _follower.cell == GameState.player_cell + dir:
+				retries += 1
+				while _follower.is_moving():
+					await get_tree().process_frame
+				for side: Vector2i in [Vector2i(dir.y, dir.x), Vector2i(-dir.y, -dir.x), dir]:
+					if _follower.scripted_step(side):
+						break
+				while _follower != null and _follower.is_moving():
+					await get_tree().process_frame
+			if not _player.force_step(dir):
+				break
+		while _player.is_moving():
+			await get_tree().process_frame
+		if _follower != null and _follower.visible:
+			var follower_gap: Vector2i = GameState.player_cell - _follower.cell
+			if absi(follower_gap.x) + absi(follower_gap.y) > 1:
+				var step := Vector2i(signi(follower_gap.x), 0) if follower_gap.x != 0 else Vector2i(0, signi(follower_gap.y))
+				_follower.scripted_step(step)
 
 
 func _show_chapter_card() -> void:
-	InputRouter.push_context(InputRouter.Context.MENU)
 	var dim := ColorRect.new()
 	dim.color = Pal.alpha(Pal.INK, 0.0)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui_layer.add_child(dim)
 	var card := PanelContainer.new()
-	card.position = Vector2(70, 62)
+	card.position = Vector2(70, 56)
 	card.custom_minimum_size = Vector2(180, 0)
 	card.add_theme_stylebox_override("panel", UiTheme.panel_style())
 	card.modulate.a = 0.0
@@ -409,7 +661,7 @@ func _show_chapter_card() -> void:
 	box.add_theme_constant_override("separation", 4)
 	card.add_child(box)
 	var chapter := Label.new()
-	chapter.text = "第一章：失聲的港灣"
+	chapter.text = "第一章：第一位旅伴"
 	chapter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	chapter.add_theme_font_size_override("font_size", 14)
 	chapter.add_theme_color_override("font_color", UiTheme.text_color("header"))
@@ -420,13 +672,22 @@ func _show_chapter_card() -> void:
 	done.add_theme_font_size_override("font_size", 14)
 	done.add_theme_color_override("font_color", UiTheme.text_color("accent"))
 	box.add_child(done)
+	var starter := DataRegistry.get_starter(GameState.starter_id)
+	var adopted_line := "你認養了：%s" % String(starter.get("display_name", ""))
+	if not GameState.starter_nickname.is_empty():
+		adopted_line += "（%s）" % GameState.starter_nickname
+	var adopted := Label.new()
+	adopted.text = adopted_line
+	adopted.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	adopted.add_theme_font_size_override("font_size", 12)
+	adopted.add_theme_color_override("font_color", UiTheme.text_color("normal"))
+	box.add_child(adopted)
 	var hint := Label.new()
 	hint.text = "Z 繼續"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hint.add_theme_font_size_override("font_size", 12)
 	hint.add_theme_color_override("font_color", UiTheme.text_color("dim"))
 	box.add_child(hint)
-	AudioManager.play_level_complete()
 	var tween := create_tween().set_parallel(true)
 	tween.tween_property(dim, "color:a", 0.45, 0.5)
 	tween.tween_property(card, "modulate:a", 1.0, 0.5)
@@ -434,48 +695,118 @@ func _show_chapter_card() -> void:
 	await _wait_confirm_press()
 	dim.queue_free()
 	card.queue_free()
-	InputRouter.pop_context()
 
 
-func _show_epilogue() -> void:
+func _show_teaser() -> void:
 	var black := ColorRect.new()
 	black.color = Pal.alpha(Pal.INK, 0.0)
 	black.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui_layer.add_child(black)
-	var tween := create_tween()
-	tween.tween_property(black, "color:a", 1.0, 0.8)
-	await tween.finished
-	# 遠方訊號：珊瑚色斷續閃爍（有節拍——不屬於自然）
-	var signal_box := HBoxContainer.new()
-	signal_box.position = Vector2(112, 70)
-	signal_box.add_theme_constant_override("separation", 6)
-	_ui_layer.add_child(signal_box)
-	var dots: Array[ColorRect] = []
-	for i in range(5):
-		var dot := ColorRect.new()
-		dot.custom_minimum_size = Vector2(14 if i % 2 == 0 else 8, 4)
-		dot.color = Pal.alpha(Pal.CORAL, 0.0)
-		signal_box.add_child(dot)
-		dots.append(dot)
-	var blink := create_tween().set_loops(4)
-	for i in range(dots.size()):
-		blink.tween_property(dots[i], "color:a", 1.0, 0.08)
-		blink.tween_interval(0.08)
-	blink.parallel().tween_property(signal_box, "modulate:a", 1.0, 0.1)
-	for dot in dots:
-		blink.tween_property(dot, "color:a", 0.15, 0.1)
+	var fade_in := create_tween()
+	fade_in.tween_property(black, "color:a", 1.0, 0.8)
+	await fade_in.finished
+	# 公告板特寫：被雨水暈開的失蹤啟事，只剩一雙不同顏色的眼睛
+	var paper := PanelContainer.new()
+	paper.position = Vector2(104, 44)
+	paper.custom_minimum_size = Vector2(112, 0)
+	paper.add_theme_stylebox_override("panel", UiTheme.panel_style())
+	paper.modulate.a = 0.0
+	_ui_layer.add_child(paper)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	paper.add_child(box)
+	var head := Label.new()
+	head.text = "【尋】失蹤伴獸"
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	head.add_theme_font_size_override("font_size", 12)
+	head.add_theme_color_override("font_color", UiTheme.text_color("header"))
+	box.add_child(head)
+	var photo := Panel.new()
+	photo.custom_minimum_size = Vector2(96, 42)
+	var photo_style := StyleBoxFlat.new()
+	photo_style.bg_color = Pal.alpha(Pal.SLATE, 0.5)
+	photo.add_theme_stylebox_override("panel", photo_style)
+	box.add_child(photo)
+	var eye_left := ColorRect.new()
+	eye_left.color = Pal.alpha(Pal.AMBER_LT, 0.0)
+	eye_left.position = Vector2(32, 18)
+	eye_left.size = Vector2(6, 4)
+	photo.add_child(eye_left)
+	var eye_right := ColorRect.new()
+	eye_right.color = Pal.alpha(Pal.SEA_PALE, 0.0)
+	eye_right.position = Vector2(56, 18)
+	eye_right.size = Vector2(6, 4)
+	photo.add_child(eye_right)
+	var note := Label.new()
+	note.text = "……字被雨水暈開了。"
+	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	note.add_theme_font_size_override("font_size", 12)
+	note.add_theme_color_override("font_color", UiTheme.text_color("dim"))
+	box.add_child(note)
+	var show_tween := create_tween()
+	show_tween.tween_property(paper, "modulate:a", 1.0, 0.7)
+	show_tween.tween_interval(0.9)
+	show_tween.tween_property(eye_left, "color:a", 0.9, 0.5)
+	show_tween.parallel().tween_property(eye_right, "color:a", 0.9, 0.5)
 	AudioManager.play_jam()
-	# 對話框提到黑幕之上
-	_ui_layer.move_child(_dialogue_box, _ui_layer.get_child_count() - 1)
-	DialogueManager.start("ending_epilogue")
-	await DialogueManager.dialogue_finished
-	# 若選擇繼續探索：淡出黑幕回到港口
-	if is_inside_tree():
-		blink.kill()
-		signal_box.queue_free()
-		var out := create_tween()
-		out.tween_property(black, "color:a", 0.0, 0.8)
-		out.tween_callback(black.queue_free)
+	await show_tween.finished
+	await get_tree().create_timer(2.4).timeout
+	var out := create_tween()
+	out.tween_property(paper, "modulate:a", 0.0, 0.7)
+	await out.finished
+	paper.queue_free()
+	black.set_meta("keep", true)
+	_teaser_black = black
+
+
+var _teaser_black: ColorRect
+
+
+func _show_end_menu() -> void:
+	var options: Array[String] = ["繼續探索", "重新選擇夥伴", "返回標題"]
+	var panel := PanelContainer.new()
+	panel.position = Vector2(96, 60)
+	panel.custom_minimum_size = Vector2(128, 0)
+	panel.add_theme_stylebox_override("panel", UiTheme.panel_style())
+	_ui_layer.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 2)
+	panel.add_child(box)
+	var rows: Array[Dictionary] = []
+	for text in options:
+		var row := UiTheme.make_row(text, null)
+		box.add_child(row["panel"])
+		rows.append(row)
+	var cursor := 0
+	var chosen := -1
+	while chosen < 0 and is_inside_tree():
+		for i in range(rows.size()):
+			UiTheme.set_row_state(rows[i], "focus" if i == cursor else "normal")
+		await get_tree().process_frame
+		if Input.is_action_just_pressed("move_up"):
+			cursor = (cursor - 1 + options.size()) % options.size()
+			AudioManager.play_talk()
+		elif Input.is_action_just_pressed("move_down"):
+			cursor = (cursor + 1) % options.size()
+			AudioManager.play_talk()
+		elif Input.is_action_just_pressed("confirm"):
+			AudioManager.play_confirm()
+			chosen = cursor
+	panel.queue_free()
+	match chosen:
+		0:
+			# 繼續探索：燈亮回來，自由走動
+			if _teaser_black != null:
+				var out := create_tween()
+				out.tween_property(_teaser_black, "color:a", 0.0, 0.8)
+				out.tween_callback(_teaser_black.queue_free)
+		1:
+			# 重新選擇夥伴：從認養日重新開始（跳過開場運鏡）
+			GameState.start_new_game()
+			EventFlagStore.set_flag("opening_done")
+			SceneRouter.goto_world()
+		2:
+			SceneRouter.goto_title()
 
 
 func _wait_confirm_press() -> void:
@@ -488,131 +819,59 @@ func _wait_confirm_press() -> void:
 
 # ====== 建構 ======
 
-func _base_tint() -> Color:
-	if EventFlagStore.has_flag("level1_complete") and _map.id == "harbor":
-		return RESTORED_TINT
-	return Color.WHITE
-
-
 func _apply_ambience() -> void:
-	var profile := _map.ambience
-	if EventFlagStore.has_flag("level1_complete") and _map.ambience_restored != "":
-		profile = _map.ambience_restored
-	AudioManager.set_ambience(profile)
-
-
-func _build_layers() -> void:
-	var tile_set := _build_tile_set()
-	_fill_layer(_make_layer(tile_set), _map.ground_rows, _map.legend_ground, true)
-	_fill_layer(_make_layer(tile_set), _map.deco_rows, _map.legend_deco, false)
-
-
-func add_overhead_layer() -> void:
-	var tile_set := _build_tile_set()
-	_fill_layer(_make_layer(tile_set), _map.overhead_rows, _map.legend_overhead, false)
-
-
-func _make_layer(tile_set: TileSet) -> TileMapLayer:
-	var layer := TileMapLayer.new()
-	layer.tile_set = tile_set
-	add_child(layer)
-	return layer
-
-
-func _build_tile_set() -> TileSet:
-	var source := TileSetAtlasSource.new()
-	source.texture = load(TileCatalog.ATLAS_PATH)
-	source.texture_region_size = Vector2i(TILE_SIZE, TILE_SIZE)
-	for tile_name: String in TileCatalog.TILES:
-		var pos := TileCatalog.pos(tile_name)
-		source.create_tile(pos)
-		var frames := TileCatalog.frames(tile_name)
-		if frames > 1:
-			source.set_tile_animation_columns(pos, frames)
-			source.set_tile_animation_frames_count(pos, frames)
-			for f in range(frames):
-				source.set_tile_animation_frame_duration(pos, f, 1.0 / TileCatalog.fps(tile_name))
-	var tile_set := TileSet.new()
-	tile_set.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
-	tile_set.add_source(source, 0)
-	return tile_set
-
-
-func _fill_layer(layer: TileMapLayer, rows: PackedStringArray, legend: Dictionary, required: bool) -> void:
-	for y in range(rows.size()):
-		var row := rows[y]
-		for x in range(row.length()):
-			var symbol := row[x]
-			if symbol == "." and not required:
-				continue
-			if _is_hidden_deco(Vector2i(x, y), legend, symbol):
-				continue
-			var tile_name := String(legend.get(symbol, ""))
-			if tile_name.is_empty() or not TileCatalog.has_tile(tile_name):
-				if required:
-					push_warning("Map %s: unknown ground symbol '%s'" % [_map.id, symbol])
-				continue
-			layer.set_cell(Vector2i(x, y), 0, TileCatalog.pos(tile_name))
-
-
-func _is_hidden_deco(cell: Vector2i, legend: Dictionary, symbol: String) -> bool:
-	if symbol == "." or legend.is_empty():
-		return false
-	for entry in _map.hidden_deco:
-		if int(entry.get("x", -1)) == cell.x and int(entry.get("y", -1)) == cell.y:
-			return EventFlagStore.has_flag(String(entry.get("flag", "")))
-	return false
+	AudioManager.set_ambience(_map.ambience)
 
 
 func _spawn_npcs() -> void:
 	for npc_data in _map.npcs:
 		if npc_data.has("if_flag_not") and EventFlagStore.has_flag(String(npc_data["if_flag_not"])):
 			continue
-		var npc: Node2D = NpcScene.instantiate()
+		var npc: Node3D = NpcScene.instantiate()
 		add_child(npc)
-		npc.setup(npc_data)
+		npc.setup(self, npc_data)
 		_npcs_by_cell[npc.cell] = npc
 
 
 func _spawn_player() -> void:
 	_player = PlayerScene.instantiate()
 	add_child(_player)
-	_player.setup(self, GameState.player_cell, GameState.player_facing, Vector2i(_map.width, _map.height) * TILE_SIZE)
-	add_overhead_layer()
+	_player.setup(self, GameState.player_cell, GameState.player_facing)
+	_rig = CameraRig.new()
+	add_child(_rig)
+	_rig.setup(_player, Vector2(float(_map.width), float(_map.height)))
 
 
 func _spawn_smoke() -> void:
 	for cell in _map.smoke_cells:
-		var smoke := CPUParticles2D.new()
-		smoke.position = Vector2(cell * TILE_SIZE) + Vector2(8, 2)
-		smoke.amount = 14
+		var smoke := CPUParticles3D.new()
+		smoke.position = Vector3(float(cell.x) + 0.5, 2.5 + float(_map.elevation(cell)) * StageBuilder.LEVEL_H, float(cell.y) + 0.5)
+		smoke.amount = 10 if AudioManager.quality_high else 5
 		smoke.lifetime = 3.5
-		smoke.direction = Vector2(0.25, -1)
-		smoke.spread = 14.0
-		smoke.gravity = Vector2(3, -8)
-		smoke.initial_velocity_min = 5.0
-		smoke.initial_velocity_max = 10.0
-		smoke.scale_amount_min = 2.0
-		smoke.scale_amount_max = 3.0
-		smoke.color = Color(Pal.FOG.r, Pal.FOG.g, Pal.FOG.b, 0.55)
-		smoke.z_index = 5
+		smoke.direction = Vector3(0.2, 1, 0)
+		smoke.spread = 12.0
+		smoke.gravity = Vector3(0.3, 0.5, 0)
+		smoke.initial_velocity_min = 0.3
+		smoke.initial_velocity_max = 0.6
+		smoke.mesh = _particle_mesh(Color(Pal.FOG.r, Pal.FOG.g, Pal.FOG.b, 0.5))
 		add_child(smoke)
 
 
 func _spawn_fog() -> void:
-	if not _map.fog:
-		return
-	var texture: Texture2D = load("res://assets/ui/fog_blob.png")
-	for i in range(5):
-		var fog := Sprite2D.new()
-		fog.texture = texture
-		fog.scale = Vector2(3, 3)
-		fog.modulate = Color(1, 1, 1, 0.55)
-		fog.position = Vector2(
-			_rng.randf_range(0, _map.width * TILE_SIZE),
-			_rng.randf_range(0, _map.height * TILE_SIZE)
-		)
-		fog.z_index = 10
+	var fog_texture: Texture2D = load("res://assets/ui/fog_blob.png")
+	var count := 3 if AudioManager.quality_high else 2
+	for i in range(count):
+		var fog := Sprite3D.new()
+		fog.texture = fog_texture
+		fog.pixel_size = 1.0 / 12.0
+		fog.shaded = false
+		fog.modulate = Color(1, 1, 1, 0.3)
+		fog.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		fog.position = Vector3(
+			_rng.randf_range(0, float(_map.width)),
+			0.5 + 0.35 * float(i % 3),
+			_rng.randf_range(0, float(_map.height)))
+		fog.set_meta("speed", 0.25 + float(i) * 0.1)
 		add_child(fog)
 		_fog_sprites.append(fog)
 
@@ -620,37 +879,17 @@ func _spawn_fog() -> void:
 func _drift_fog(delta: float) -> void:
 	if _fog_sprites.is_empty():
 		return
-	var map_w := float(_map.width * TILE_SIZE)
-	for i in range(_fog_sprites.size()):
-		var fog := _fog_sprites[i]
-		fog.position.x += delta * (4.0 + float(i) * 1.5)
-		if fog.position.x > map_w + 150.0:
-			fog.position.x = -150.0
-
-
-## 觀測站專屬：通關後中央出現「安定的磁殼仔」
-func _spawn_station_extras() -> void:
-	if _map.id != "tide_station":
-		return
-	if EventFlagStore.has_flag("level1_complete"):
-		var calm := Sprite2D.new()
-		calm.texture = load("res://assets/creatures/magshell_calm.png")
-		calm.position = Vector2(_map.width * TILE_SIZE / 2.0, _map.height * TILE_SIZE / 2.0 - 6.0)
-		add_child(calm)
-	elif EventFlagStore.has_flag("station_entered"):
-		_fx_boss_reveal.call_deferred()
-
-
-func _setup_encounters() -> void:
-	if _map.encounter_key.is_empty():
-		return
-	var table := DataRegistry.get_encounter_table(_map.encounter_key)
-	if not table.is_empty():
-		_encounters = EncounterSystem.new(table, _rng)
+	var map_w := float(_map.width)
+	for fog in _fog_sprites:
+		fog.position.x += delta * float(fog.get_meta("speed"))
+		if fog.position.x > map_w + 6.0:
+			fog.position.x = -6.0
 
 
 func _build_ui() -> void:
 	_ui_layer = CanvasLayer.new()
+	_ui_layer.layer = 1
+	_ui_layer.scale = Vector2(2, 2)
 	add_child(_ui_layer)
 	_dialogue_box = DialogueBoxScene.instantiate()
 	_ui_layer.add_child(_dialogue_box)

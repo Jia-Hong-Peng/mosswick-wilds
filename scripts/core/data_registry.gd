@@ -9,6 +9,7 @@ const ENCOUNTERS_PATH := "res://data/encounters/encounters.json"
 const MAP_INDEX_PATH := "res://data/maps/_index.json"
 const MAPS_DIR := "res://data/maps"
 const DIALOGUES_PATH := "res://data/dialogue/dialogues.json"
+const STARTERS_PATH := "res://data/starters/starters.json"
 
 var creatures: Dictionary = {}
 var skills: Dictionary = {}
@@ -16,6 +17,7 @@ var items: Dictionary = {}
 var encounter_tables: Dictionary = {}
 var maps: Dictionary = {}
 var dialogues: Dictionary = {}
+var starters: Dictionary = {}
 
 var _loaded := false
 
@@ -39,6 +41,7 @@ func ensure_loaded() -> void:
 		items[String(item_id)] = ItemDef.from_dict(String(item_id), Dictionary(item_data[item_id]))
 	encounter_tables = read_json_dict(ENCOUNTERS_PATH)
 	dialogues = read_json_dict(DIALOGUES_PATH)
+	starters = read_json_dict(STARTERS_PATH)
 	var index: Variant = read_json_any(MAP_INDEX_PATH)
 	if index is Array:
 		for map_id: Variant in Array(index):
@@ -89,6 +92,19 @@ func get_encounter_table(table_key: String) -> Dictionary:
 func get_dialogue(dialogue_id: String) -> Dictionary:
 	ensure_loaded()
 	return Dictionary(dialogues.get(dialogue_id, {}))
+
+
+func get_starter(starter_id: String) -> Dictionary:
+	ensure_loaded()
+	return Dictionary(starters.get(starter_id, {}))
+
+
+func starter_ids() -> Array[String]:
+	ensure_loaded()
+	var result: Array[String] = []
+	for key: Variant in starters:
+		result.append(String(key))
+	return result
 
 
 func make_creature(creature_id: String, at_level: int) -> CreatureInstance:

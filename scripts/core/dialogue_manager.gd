@@ -11,6 +11,7 @@ signal page_shown(page: Dictionary)
 signal choice_shown(prompt: String, options: PackedStringArray)
 signal fx_requested(fx_name: String)
 signal dialogue_finished
+signal world_action_requested(starter_id: String)
 
 var active := false
 var opened_frame := -1
@@ -135,13 +136,8 @@ func _apply_action(action: String) -> void:
 		"heal_party":
 			PartyService.heal_all()
 			AudioManager.play_heal()
-		"choose_signal_path":
-			EventFlagStore.set_flag("path_chosen")
-			EventFlagStore.set_flag("path_correct")
-		"choose_tide_path":
-			EventFlagStore.set_flag("path_chosen")
-			_post_action = "tutorial_battle"
-		"tutorial_battle", "start_boss", "return_title", "continue_explore":
+		"adopt_sproutwing", "adopt_emberhorn", "adopt_tidecrest", \
+		"start_crisis", "return_title", "continue_explore":
 			_post_action = action
 		"":
 			pass
@@ -164,11 +160,12 @@ func _finish() -> void:
 	_post_action = ""
 	dialogue_finished.emit()
 	match pending:
-		"tutorial_battle":
-			SceneRouter.goto_battle({"creature_id": "tidewing", "level": 3, "bg": "village", "scripted": "tutorial"})
-		"start_boss":
-			SceneRouter.goto_boss()
+		"start_crisis":
+			SceneRouter.goto_crisis()
 		"return_title":
 			SceneRouter.goto_title()
+		"adopt_sproutwing", "adopt_emberhorn", "adopt_tidecrest":
+			# 認養儀式由世界場景導演接手
+			world_action_requested.emit(pending.trim_prefix("adopt_"))
 		_:
 			pass

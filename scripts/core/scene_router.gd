@@ -4,7 +4,7 @@ extends Node
 const TITLE_SCENE := "res://scenes/main/title_screen.tscn"
 const WORLD_SCENE := "res://scenes/world/world_scene.tscn"
 const BATTLE_SCENE := "res://scenes/battle/battle_scene.tscn"
-const BOSS_SCENE := "res://scenes/battle/boss_battle_scene.tscn"
+const CRISIS_SCENE := "res://scenes/battle/crisis_battle_scene.tscn"
 
 
 func goto_title() -> void:
@@ -27,8 +27,8 @@ func goto_battle(encounter: Dictionary) -> void:
 	_change(BATTLE_SCENE)
 
 
-func goto_boss() -> void:
-	_change(BOSS_SCENE)
+func goto_crisis() -> void:
+	_change(CRISIS_SCENE)
 
 
 func _change(path: String) -> void:

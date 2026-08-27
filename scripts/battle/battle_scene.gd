@@ -1,12 +1,11 @@
-extends Control
-## 戰鬥呈現層。規則全在 BattleService（純領域）；本場景負責：
-## 依遭遇地點的分層背景、進場動畫、Idle 呼吸、攻擊前搖、受擊閃白＋位移、
-## 畫面震動、粒子、HP 平滑增減、捕捉動畫與結算面板。
-## 輸入用輪詢，鍵盤與觸控行為一致。
+extends Node3D
+## 戰鬥呈現層（2.5D 立體舞台版）。規則仍在 BattleService；
+## 3D 舞台由 BattleStage3D 依遭遇地生成；UI 完整沿用（CanvasLayer ×2）。
 
 enum View { EVENTS, COMMAND, SKILLS, ITEMS }
 
-const COMMANDS: Array[String] = ["較勁", "背包", "收錄", "離開"]
+const COMMANDS: Array[String] = ["較勁", "背包", "離開"]
+const CREATURE_PIXEL := 1.0 / 26.0
 
 var _battle: BattleService
 var _player: CreatureInstance
@@ -18,40 +17,48 @@ var _cursor := 0
 var _waiting_confirm := false
 var _finished := false
 var _running_events := false
-var _capture_pending := false
 
-var _stage: Control
-var _enemy_sprite: Sprite2D
-var _player_sprite: Sprite2D
-var _enemy_home := Vector2.ZERO
-var _player_home := Vector2.ZERO
+var _camera: Camera3D
+var _enemy_sprite: Sprite3D
+var _player_sprite: Sprite3D
+var _enemy_home := Vector3.ZERO
+var _player_home := Vector3.ZERO
 var _idle_clock := 0.0
+var _shake_rng := RandomNumberGenerator.new()
 
+var _canvas: CanvasLayer
+var _ui_root: Control
 var _message_label: Label
 var _more_label: Label
 var _menu_panel: PanelContainer
 var _menu_box: GridContainer
 var _menu_rows: Array[Dictionary] = []
 var _player_panel: PanelContainer
-var _enemy_name: Label
-var _enemy_bar: Dictionary
 var _player_name: Label
 var _player_bar: Dictionary
 var _player_hp_text: Label
-var _ui_root: Control
+var _enemy_name: Label
+var _enemy_bar: Dictionary
 
 
 func _ready() -> void:
 	InputRouter.set_base_context(InputRouter.Context.BATTLE)
 	_rng.randomize()
+	_shake_rng.randomize()
 	var encounter := GameState.pending_encounter
-	_enemy = DataRegistry.make_creature(String(encounter.get("creature_id", "mosshorn")), int(encounter.get("level", 3)))
+	_enemy = DataRegistry.make_creature(String(encounter.get("creature_id", "sproutwing")), int(encounter.get("level", 3)))
 	_player = PartyService.first_conscious()
 	if _enemy == null or _player == null:
 		SceneRouter.goto_world()
 		return
 	_battle = BattleService.new(_player, _enemy, DataRegistry.skills_for(_enemy), _rng)
-	_build_ui(String(encounter.get("bg", "village")))
+	var stage := BattleStage3D.build(self, String(encounter.get("bg", "village")))
+	_camera = stage["camera"]
+	_player_home = Vector3(stage["player_pos"])
+	_enemy_home = Vector3(stage["enemy_pos"])
+	_player_sprite = BattleStage3D.make_creature(self, load(_player.back_path), _player_home, CREATURE_PIXEL)
+	_enemy_sprite = BattleStage3D.make_creature(self, load(_enemy.sprite_path), _enemy_home, CREATURE_PIXEL, 2)
+	_build_ui()
 	_refresh_bars(false)
 	_entry_animation()
 
@@ -80,7 +87,7 @@ func _process(delta: float) -> void:
 		_open_command()
 
 
-# ---------- 選單 ----------
+# ---------- 選單（沿用） ----------
 
 func _row_count() -> int:
 	match _view:
@@ -135,14 +142,12 @@ func _refresh_menu() -> void:
 		UiTheme.set_row_state(_menu_rows[i], "focus" if i == _cursor else "normal")
 
 
-## 指令：2×2 嵌在訊息列右側
 func _layout_menu_grid() -> void:
 	_menu_box.columns = 2
 	_menu_panel.position = Vector2(208, 132)
 	_menu_panel.size = Vector2(108, 44)
 
 
-## 技能／道具：直式清單（蓋在敵方側，選完即收）
 func _layout_menu_list() -> void:
 	_menu_box.columns = 1
 	_menu_panel.position = Vector2(196, 54)
@@ -156,7 +161,7 @@ func _add_menu_row(text: String, icon: Texture2D) -> void:
 
 
 func _element_icon(element: String) -> Texture2D:
-	if element in ["forest", "tide", "signal", "neutral"]:
+	if element in ["grass", "fire", "water", "neutral"]:
 		return load("res://assets/ui/elem_%s.png" % element)
 	return null
 
@@ -183,8 +188,6 @@ func _activate() -> void:
 						_cursor = 0
 						_refresh_menu()
 				2:
-					_try_capture()
-				3:
 					_do_action(BattleService.ActionType.FLEE, {})
 		View.SKILLS:
 			var skills := DataRegistry.skills_for(_player)
@@ -193,21 +196,9 @@ func _activate() -> void:
 		View.ITEMS:
 			var items := _battle_items()
 			if _cursor < items.size():
-				var item := items[_cursor]
-				if item.kind == ItemDef.KIND_CAPTURE:
-					_do_action(BattleService.ActionType.CAPTURE, {"item": item, "party_full": PartyService.is_full()})
-				else:
-					_do_action(BattleService.ActionType.ITEM, {"item": item})
+				_do_action(BattleService.ActionType.ITEM, {"item": items[_cursor]})
 		_:
 			pass
-
-
-func _try_capture() -> void:
-	var orb := DataRegistry.get_item("echo_box")
-	if orb == null or InventoryService.count(orb.id) <= 0:
-		_flash_message("共鳴匣用完了。")
-		return
-	_do_action(BattleService.ActionType.CAPTURE, {"item": orb, "party_full": PartyService.is_full()})
 
 
 func _do_action(action: int, payload: Dictionary) -> void:
@@ -222,7 +213,7 @@ func _flash_message(text: String) -> void:
 	_message_label.text = text
 
 
-# ---------- 事件序列（非同步演出） ----------
+# ---------- 事件演出（3D） ----------
 
 func _run_events(events: Array[BattleService.BattleEvent]) -> void:
 	_running_events = true
@@ -236,8 +227,6 @@ func _run_events(events: Array[BattleService.BattleEvent]) -> void:
 			BattleService.EVENT_MESSAGE:
 				if event.data.has("attacker"):
 					await _lunge(String(event.data["attacker"]))
-				if _capture_pending and event.text.contains("掙脫"):
-					await _capture_break()
 				_message_label.text = event.text
 				await _wait_confirm()
 			BattleService.EVENT_ENEMY_HP:
@@ -245,16 +234,7 @@ func _run_events(events: Array[BattleService.BattleEvent]) -> void:
 			BattleService.EVENT_PLAYER_HP:
 				await _apply_hp_event(event, true)
 			BattleService.EVENT_CONSUME_ITEM:
-				var item_id := String(event.data.get("item_id", ""))
-				InventoryService.use_item(item_id)
-				var item := DataRegistry.get_item(item_id)
-				if item != null and item.kind == ItemDef.KIND_CAPTURE:
-					await _capture_throw()
-			BattleService.EVENT_CAPTURED:
-				await _capture_success()
-				PartyService.add_member(_enemy)
-				_message_label.text = event.text
-				await _wait_confirm()
+				InventoryService.use_item(String(event.data.get("item_id", "")))
 			BattleService.EVENT_END:
 				pass
 	_running_events = false
@@ -288,19 +268,19 @@ func _apply_hp_event(event: BattleService.BattleEvent, is_player: bool) -> void:
 	await get_tree().create_timer(0.28).timeout
 
 
-# ---------- 演出 ----------
-
 func _entry_animation() -> void:
-	_enemy_home = _enemy_sprite.position
-	_player_home = _player_sprite.position
-	_enemy_sprite.position.x += 110
-	_player_sprite.position.x -= 110
+	_enemy_sprite.position.x += 4.0
+	_player_sprite.position.x -= 4.0
 	_ui_root.modulate.a = 0.0
+	var enemy_target := _enemy_home + Vector3(0, _enemy_sprite.position.y - _enemy_home.y, 0)
+	var player_target := _player_home + Vector3(0, _player_sprite.position.y - _player_home.y, 0)
 	var tween := create_tween().set_parallel(true)
-	tween.tween_property(_enemy_sprite, "position:x", _enemy_home.x, 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	tween.tween_property(_player_sprite, "position:x", _player_home.x, 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(_enemy_sprite, "position:x", enemy_target.x, 0.4).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_player_sprite, "position:x", player_target.x, 0.4).set_ease(Tween.EASE_OUT)
 	tween.tween_property(_ui_root, "modulate:a", 1.0, 0.45)
 	await tween.finished
+	_enemy_home = _enemy_sprite.position
+	_player_home = _player_sprite.position
 	_run_events(_battle.intro_events())
 
 
@@ -308,16 +288,14 @@ func _animate_idle(delta: float) -> void:
 	if _enemy_sprite == null:
 		return
 	_idle_clock += delta
-	# 敵方：兩幀 Idle 呼吸；我方：1px 上下浮動
 	_enemy_sprite.frame = int(_idle_clock / 0.55) % 2
-	_player_sprite.offset.y = -1.0 if fmod(_idle_clock, 1.0) < 0.5 else 0.0
+	_player_sprite.offset.y = 1.0 if fmod(_idle_clock, 1.0) < 0.5 else 0.0
 
 
 func _lunge(side: String) -> void:
 	var sprite := _player_sprite if side == "player" else _enemy_sprite
 	var home := _player_home if side == "player" else _enemy_home
-	var push := Vector2(10, -4) if side == "player" else Vector2(-10, 4)
-	# 敵方：前搖幀（Anticipation）→ 攻擊幀 → 還原
+	var push := Vector3(0.6, 0, -0.4) if side == "player" else Vector3(-0.6, 0, 0.4)
 	var restore_texture: Texture2D = null
 	var restore_hframes := 1
 	if side == "enemy":
@@ -334,7 +312,7 @@ func _lunge(side: String) -> void:
 				sprite.texture = load(attack_path)
 	AudioManager.play_attack()
 	var tween := create_tween()
-	tween.tween_property(sprite, "position", home - push * 0.4, 0.1)
+	tween.tween_property(sprite, "position", home - push * 0.35, 0.1)
 	tween.tween_property(sprite, "position", home + push, 0.08)
 	tween.tween_property(sprite, "position", home, 0.12)
 	await tween.finished
@@ -350,103 +328,54 @@ func _hit_fx(is_player: bool) -> void:
 	var home := _player_home if is_player else _enemy_home
 	var normal_texture := sprite.texture
 	var normal_hframes := sprite.hframes
-	# 閃白剪影 + 受擊位移
 	if not creature.hit_path.is_empty():
 		sprite.texture = load(creature.hit_path)
 		sprite.hframes = 1
 		sprite.frame = 0
-	_burst_particles(sprite.position)
+	_burst(home + Vector3(0, 1.0, 0), Pal.FOAM)
 	var tween := create_tween()
 	for i in range(3):
-		tween.tween_property(sprite, "position:x", home.x + (3 if i % 2 == 0 else -3), 0.04)
+		tween.tween_property(sprite, "position:x", home.x + (0.14 if i % 2 == 0 else -0.14), 0.04)
 	tween.tween_property(sprite, "position:x", home.x, 0.04)
-	_shake_stage()
+	_shake_camera(0.06, 0.14)
 	await get_tree().create_timer(0.12).timeout
 	sprite.texture = normal_texture
 	sprite.hframes = normal_hframes
 	await tween.finished
 
 
-func _shake_stage() -> void:
+func _shake_camera(strength: float, duration: float) -> void:
 	if AudioManager.reduce_shake:
 		return
+	var steps := int(duration / 0.04)
 	var tween := create_tween()
-	for i in range(3):
-		tween.tween_property(_stage, "position", Vector2((2 if i % 2 == 0 else -2), 0), 0.04)
-	tween.tween_property(_stage, "position", Vector2.ZERO, 0.04)
+	for i in range(steps):
+		tween.tween_property(_camera, "h_offset", _shake_rng.randf_range(-strength, strength), 0.04)
+	tween.tween_property(_camera, "h_offset", 0.0, 0.04)
 
 
-func _burst_particles(at: Vector2) -> void:
-	var burst := CPUParticles2D.new()
+func _burst(at: Vector3, color: Color) -> void:
+	var burst := CPUParticles3D.new()
 	burst.position = at
 	burst.one_shot = true
 	burst.emitting = true
-	burst.amount = 10
-	burst.lifetime = 0.35
+	burst.amount = 12 if AudioManager.quality_high else 6
+	burst.lifetime = 0.4
 	burst.explosiveness = 1.0
 	burst.spread = 180.0
-	burst.initial_velocity_min = 40.0
-	burst.initial_velocity_max = 70.0
-	burst.gravity = Vector2(0, 120)
-	burst.scale_amount_min = 1.0
-	burst.scale_amount_max = 2.0
-	burst.color = Pal.FOAM
-	_stage.add_child(burst)
-	get_tree().create_timer(0.6).timeout.connect(burst.queue_free)
-
-
-func _capture_throw() -> void:
-	_capture_pending = true
-	AudioManager.play_capture_throw()
-	var box := Sprite2D.new()
-	box.name = "EchoBox"
-	box.texture = load("res://assets/ui/item_echo_box.png")
-	box.position = _player_home + Vector2(10, -20)
-	_stage.add_child(box)
-	# 拋物線：兩段補間
-	var mid := (_player_home + _enemy_home) * 0.5 + Vector2(0, -46)
-	var tween := create_tween()
-	tween.tween_property(box, "position", mid, 0.2).set_ease(Tween.EASE_OUT)
-	tween.tween_property(box, "position", _enemy_home + Vector2(0, 6), 0.2).set_ease(Tween.EASE_IN)
-	await tween.finished
-	# 迴靈被收入匣中
-	var close_tween := create_tween().set_parallel(true)
-	close_tween.tween_property(_enemy_sprite, "scale", Vector2(0.1, 0.1), 0.2)
-	close_tween.tween_property(_enemy_sprite, "modulate", Pal.AMBER_LT, 0.2)
-	await close_tween.finished
-	_enemy_sprite.visible = false
-	# 匣子晃三下（判定中）
-	var shake := create_tween()
-	for i in range(3):
-		shake.tween_property(box, "rotation_degrees", 12.0 if i % 2 == 0 else -12.0, 0.16)
-		shake.tween_interval(0.08)
-	shake.tween_property(box, "rotation_degrees", 0.0, 0.1)
-	await shake.finished
-
-
-func _capture_success() -> void:
-	AudioManager.play_capture_success()
-	_burst_particles(_enemy_home + Vector2(0, 6))
-	var box := _stage.get_node_or_null("EchoBox")
-	if box != null:
-		var tween := create_tween()
-		tween.tween_property(box, "modulate:a", 0.0, 0.35)
-		await tween.finished
-		box.queue_free()
-	_capture_pending = false
-
-
-func _capture_break() -> void:
-	AudioManager.play_capture_fail()
-	var box := _stage.get_node_or_null("EchoBox")
-	if box != null:
-		box.queue_free()
-	_enemy_sprite.visible = true
-	_enemy_sprite.modulate = Color.WHITE
-	var tween := create_tween()
-	tween.tween_property(_enemy_sprite, "scale", Vector2.ONE, 0.18).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	await tween.finished
-	_capture_pending = false
+	burst.initial_velocity_min = 1.6
+	burst.initial_velocity_max = 3.0
+	burst.gravity = Vector3(0, -4.0, 0)
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(0.07, 0.07)
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mesh.material = material
+	burst.mesh = mesh
+	add_child(burst)
+	get_tree().create_timer(0.7).timeout.connect(burst.queue_free)
 
 
 func _refresh_bars(animated: bool) -> void:
@@ -470,22 +399,19 @@ func _set_bar(bar: Dictionary, ratio: float, animated: bool) -> void:
 
 func _end_sequence() -> void:
 	_finished = true
-	if String(GameState.pending_encounter.get("scripted", "")) == "tutorial":
-		EventFlagStore.set_flag("tutorial_done")
 	if _battle.outcome == BattleService.Outcome.FLED:
 		SceneRouter.goto_world()
 		return
-	# 結算面板：調查紀錄
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", UiTheme.panel_style())
 	panel.position = Vector2(84, 56)
 	panel.custom_minimum_size = Vector2(152, 0)
-	add_child(panel)
+	_ui_root.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
 	panel.add_child(box)
 	var header := Label.new()
-	header.text = "── 調查紀錄 ──"
+	header.text = "── 戰鬥紀錄 ──"
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	UiTheme.style_header(header)
 	box.add_child(header)
@@ -496,11 +422,9 @@ func _end_sequence() -> void:
 	result.custom_minimum_size = Vector2(140, 0)
 	match _battle.outcome:
 		BattleService.Outcome.VICTORY:
-			result.text = "野生的%s退開了。這一帶的回聲安定了一些。" % _enemy.display_name
-		BattleService.Outcome.CAPTURED:
-			result.text = "%s的回聲已收錄，成為同行的夥伴。" % _enemy.display_name
+			result.text = "野生的%s退開了，鑽回草叢深處。" % _enemy.display_name
 		BattleService.Outcome.DEFEAT:
-			result.text = "你眼前一黑……醒來時已躺在霧港村。"
+			result.text = "你眼前一黑……醒來時已回到潮芽伴獸之家。"
 		_:
 			result.text = ""
 	box.add_child(result)
@@ -522,48 +446,18 @@ func _end_sequence() -> void:
 	SceneRouter.goto_world()
 
 
-# ---------- 版面 ----------
+# ---------- UI（沿用 v0.3 版面，掛在 ×2 CanvasLayer） ----------
 
-func _build_ui(bg_key: String) -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	_stage = Control.new()
-	_stage.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_stage)
-
-	var bg := TextureRect.new()
-	var bg_path := "res://assets/battle/bg_%s.png" % bg_key
-	bg.texture = load(bg_path if ResourceLoader.exists(bg_path) else "res://assets/battle/bg_village.png")
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_stage.add_child(bg)
-
-	var shadow_texture: Texture2D = load("res://assets/ui/contact_shadow.png")
-	var enemy_shadow := Sprite2D.new()
-	enemy_shadow.texture = shadow_texture
-	enemy_shadow.position = Vector2(240, 84)
-	_stage.add_child(enemy_shadow)
-	var player_shadow := Sprite2D.new()
-	player_shadow.texture = shadow_texture
-	player_shadow.position = Vector2(76, 150)
-	_stage.add_child(player_shadow)
-
-	_enemy_sprite = Sprite2D.new()
-	_enemy_sprite.texture = load(_enemy.sprite_path)
-	_enemy_sprite.hframes = 2
-	_enemy_sprite.position = Vector2(240, 58)
-	_stage.add_child(_enemy_sprite)
-
-	_player_sprite = Sprite2D.new()
-	_player_sprite.texture = load(_player.back_path)
-	_player_sprite.position = Vector2(76, 124)
-	_stage.add_child(_player_sprite)
-
+func _build_ui() -> void:
+	_canvas = CanvasLayer.new()
+	_canvas.layer = 1
+	_canvas.scale = Vector2(2, 2)
+	add_child(_canvas)
 	_ui_root = Control.new()
 	_ui_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_ui_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_ui_root)
+	_canvas.add_child(_ui_root)
 
-	# 敵方資訊（左上，儀器面板）
 	var enemy_panel := PanelContainer.new()
 	enemy_panel.position = Vector2(6, 6)
 	enemy_panel.add_theme_stylebox_override("panel", UiTheme.dark_panel_style())
@@ -585,7 +479,6 @@ func _build_ui(bg_key: String) -> void:
 	_enemy_bar = UiTheme.make_hp_bar(88.0)
 	enemy_box.add_child(_enemy_bar["back"])
 
-	# 我方資訊：與指令選單共用右下欄位（訊息列右側），開選單時互換
 	_player_panel = PanelContainer.new()
 	_player_panel.position = Vector2(208, 132)
 	_player_panel.size = Vector2(108, 44)
@@ -613,7 +506,6 @@ func _build_ui(bg_key: String) -> void:
 	_player_hp_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	player_box.add_child(_player_hp_text)
 
-	# 訊息面板（手冊紙面）
 	var message_panel := PanelContainer.new()
 	message_panel.position = Vector2(4, 132)
 	message_panel.size = Vector2(200, 44)
@@ -632,7 +524,6 @@ func _build_ui(bg_key: String) -> void:
 	_more_label.visible = false
 	_ui_root.add_child(_more_label)
 
-	# 指令選單（預設 2×2，技能清單時改直式）
 	_menu_panel = PanelContainer.new()
 	_menu_panel.position = Vector2(208, 132)
 	_menu_panel.size = Vector2(108, 44)

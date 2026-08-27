@@ -1,4 +1,4 @@
-# AGENTS.md — 潮霧群島 Tidemist Isles
+# AGENTS.md — 潮森群島 Tidegrove Isles
 
 給所有 AI coding agent 與貢獻者的固定規則。修改本專案前先讀完。
 世界觀與美術的最終依據：`docs/world-bible.md`、`docs/art-bible.md`、

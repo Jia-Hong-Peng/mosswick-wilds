@@ -1,124 +1,241 @@
 extends RefCounted
-## 資料完整性：無懸空 id、無缺圖、legend 全覆蓋、warp 落點可走。
+## 資料完整性：伴獸／技能／道具／御三家設定／地圖／對話劇本／
+## 素材檔案之間的參照全部互相成立（不會在執行期才發現斷鏈）。
+
+const ELEMENTS: Array[String] = ["grass", "fire", "water", "neutral"]
+const EFFECTS: Array[String] = ["", "slow", "shield", "break", "warm", "dodge", "cleanse"]
+const FX_WHITELIST: Array[String] = [
+	"crash", "tag_flash", "quake",
+	"cry_sproutwing", "cry_emberhorn", "cry_tidecrest",
+	"vfx_grass", "vfx_fire", "vfx_water", "soothe",
+]
+const ACTION_WHITELIST: Array[String] = [
+	"", "heal_party", "start_crisis", "return_title", "continue_explore",
+	"adopt_sproutwing", "adopt_emberhorn", "adopt_tidecrest",
+]
 
 
 func run(t: TestContext) -> void:
 	DataRegistry.ensure_loaded()
-	t.check(DataRegistry.creatures.size() == 3, "應有 3 隻迴靈")
-	t.check(DataRegistry.maps.size() == 5, "應有 5 張地圖")
-	for creature_id: Variant in DataRegistry.creatures:
-		var def: CreatureDef = DataRegistry.get_creature(String(creature_id))
-		t.check(def.skill_ids.size() >= 3, "%s 需要一般攻擊加兩種技能" % def.id)
+	_test_creatures(t)
+	_test_skills(t)
+	_test_items(t)
+	_test_starters(t)
+	_test_map(t)
+	_test_dialogues(t)
+	_test_ui_assets(t)
+
+
+func _test_creatures(t: TestContext) -> void:
+	t.check_eq(DataRegistry.creatures.size(), 4, "伴獸共 4 隻（御三家＋岩背獾）")
+	for creature_id: String in ["sproutwing", "emberhorn", "tidecrest", "rockbadger"]:
+		var def := DataRegistry.get_creature(creature_id)
+		t.check(def != null, "伴獸存在：" + creature_id)
+		if def == null:
+			continue
+		t.check(not def.display_name.is_empty(), creature_id + " 有名字")
+		t.check(def.element in ELEMENTS, creature_id + " 屬性合法")
+		t.check(def.skill_ids.size() >= 1, creature_id + " 至少一招")
 		for skill_id in def.skill_ids:
-			t.check(DataRegistry.get_skill(skill_id) != null, "%s 引用了不存在的技能 %s" % [def.id, skill_id])
+			t.check(DataRegistry.get_skill(skill_id) != null, "%s 的技能 %s 存在" % [creature_id, skill_id])
 		for path: String in [def.sprite_path, def.back_path, def.hit_path, def.icon_path]:
-			t.check(FileAccess.file_exists(path), "%s 缺少素材：%s" % [def.id, path])
-		for stat: String in ["max_hp", "attack", "defense", "speed"]:
-			t.check(def.base_stat(stat, -1) > 0, "%s 缺少 base stat %s" % [def.id, stat])
+			t.check(FileAccess.file_exists(path), "%s 圖檔存在：%s" % [creature_id, path])
+		# 姿勢幀
+		for pose: String in ["antic", "attack", "weak", "calm"]:
+			t.check(FileAccess.file_exists("res://assets/creatures/%s_%s.png" % [creature_id, pose]),
+				"%s 姿勢幀存在：%s" % [creature_id, pose])
+		var creature := DataRegistry.make_creature(creature_id, 5)
+		t.check(creature != null and creature.max_hp > 0, creature_id + " 可實例化")
+	# 御三家世界行走圖；岩背獾縮甲幀
+	for starter_id: String in ["sproutwing", "emberhorn", "tidecrest"]:
+		t.check(FileAccess.file_exists("res://assets/creatures/%s_world.png" % starter_id), starter_id + " 有世界行走圖")
+	t.check(FileAccess.file_exists("res://assets/creatures/rockbadger_shell.png"), "岩背獾有縮甲幀")
+	# 屬性循環：草克水、水克火、火克草
+	t.check(DamageCalculator.effectiveness("grass", "water") > 1.0, "草克水")
+	t.check(DamageCalculator.effectiveness("water", "fire") > 1.0, "水克火")
+	t.check(DamageCalculator.effectiveness("fire", "grass") > 1.0, "火克草")
+	t.check(DamageCalculator.effectiveness("water", "grass") < 1.0, "被剋減傷")
+
+
+func _test_skills(t: TestContext) -> void:
+	for skill_id: Variant in DataRegistry.skills:
+		var skill := DataRegistry.get_skill(String(skill_id))
+		t.check(not skill.display_name.is_empty(), String(skill_id) + " 有名字")
+		t.check(skill.element in ELEMENTS, String(skill_id) + " 屬性合法")
+		t.check(skill.effect in EFFECTS, String(skill_id) + " 效果合法")
+		t.check(skill.power > 0 or not skill.effect.is_empty(), String(skill_id) + " 要嘛有威力要嘛有效果")
+		t.check(not skill.description.is_empty(), String(skill_id) + " 有描述")
+	# 每隻御三家：一招攻擊＋兩招輔助／混合，三套路線互不相同
+	for starter_id: String in ["sproutwing", "emberhorn", "tidecrest"]:
+		var creature := DataRegistry.make_creature(starter_id, 5)
+		var skills := DataRegistry.skills_for(creature)
+		t.check_eq(skills.size(), 3, starter_id + " 有三招")
+		var has_attack := false
+		var has_effect := false
+		for skill in skills:
+			if skill.power > 0 and skill.effect.is_empty():
+				has_attack = true
+			if not skill.effect.is_empty():
+				has_effect = true
+		t.check(has_attack, starter_id + " 有純攻擊技")
+		t.check(has_effect, starter_id + " 有輔助效果技")
+
+
+func _test_items(t: TestContext) -> void:
 	for item_id: Variant in DataRegistry.items:
-		var item: ItemDef = DataRegistry.get_item(String(item_id))
-		if not item.icon_path.is_empty():
-			t.check(FileAccess.file_exists(item.icon_path), "道具 %s 缺少圖示" % item.id)
-	for table_key: Variant in DataRegistry.encounter_tables:
-		var table := DataRegistry.get_encounter_table(String(table_key))
-		for entry: Variant in Array(table.get("entries", [])):
-			var creature_id := String(Dictionary(entry).get("creature_id", ""))
-			t.check(DataRegistry.get_creature(creature_id) != null, "遭遇表 %s 引用了不存在的迴靈 %s" % [table_key, creature_id])
-	for map_id: Variant in DataRegistry.maps:
-		_check_map(t, DataRegistry.get_map(String(map_id)))
-	# DEMO 動線不得有隨機遭遇（教學遭遇為劇本觸發）
-	for map_id: Variant in ["harbor", "trail", "tide_station"]:
-		t.check(DataRegistry.get_map(String(map_id)).encounter_key.is_empty(), "%s 不得掛隨機遭遇表" % map_id)
-	# 對話中引用的立繪必須存在
-	_check_dialogue_assets(t)
-	# 頭目與 DEMO 專屬素材
-	for path: String in [
-		"res://assets/creatures/magshell_unbalanced.png",
-		"res://assets/creatures/magshell_charge.png",
-		"res://assets/creatures/magshell_attack.png",
-		"res://assets/creatures/magshell_weak.png",
-		"res://assets/creatures/magshell_calm.png",
-		"res://assets/battle/bg_station.png",
-		"res://assets/ui/clue_tide.png",
-		"res://assets/ui/clue_signal.png",
-		"res://assets/ui/clue_ripple.png",
-		"res://assets/ui/guard_arc.png",
-		"res://assets/ui/jam_bolt.png",
-		"res://assets/ui/resonance_ring.png",
-		"res://assets/ui/btn_observe.png",
-		"res://assets/ui/item_stable_echo.png",
+		var item := DataRegistry.get_item(String(item_id))
+		t.check(not item.display_name.is_empty(), String(item_id) + " 有名字")
+		t.check(FileAccess.file_exists(item.icon_path), String(item_id) + " 圖示存在")
+	t.check(DataRegistry.get_item("herbal_balm") != null, "青草膏存在")
+	t.check(DataRegistry.get_item("travel_pack") != null, "旅行包存在")
+	t.check(DataRegistry.get_item("travel_tag") != null, "旅伴牌存在")
+	t.check(DataRegistry.get_item("echo_box") == null, "回聲道具不得殘留")
+
+
+func _test_starters(t: TestContext) -> void:
+	var ids := DataRegistry.starter_ids()
+	t.check_eq(ids.size(), 3, "御三家三隻")
+	var map := DataRegistry.get_map("haven")
+	var behaviors := {}
+	var variants := {}
+	for starter_id in ids:
+		var starter := DataRegistry.get_starter(starter_id)
+		t.check(DataRegistry.get_creature(starter_id) != null, starter_id + " 對應伴獸存在")
+		t.check_eq(String(starter.get("element", "")), DataRegistry.get_creature(starter_id).element, starter_id + " 屬性一致")
+		t.check(Array(starter.get("battle_keywords", [])).size() == 2, starter_id + " 兩個戰鬥關鍵字")
+		t.check(not String(starter.get("personality", "")).is_empty(), starter_id + " 有性格描述")
+		behaviors[String(starter.get("follow_behavior", ""))] = true
+		variants[String(starter.get("ending_variant", ""))] = true
+		# 圍欄位置對得上地圖 NPC
+		var pen := Dictionary(starter.get("pen_cell", {}))
+		var pen_cell := Vector2i(int(pen.get("x", -1)), int(pen.get("y", -1)))
+		var found := false
+		for npc in map.npcs:
+			if String(npc.get("id", "")) == "pen_" + starter_id:
+				found = Vector2i(int(npc.get("x", -2)), int(npc.get("y", -2))) == pen_cell
+				t.check_eq(String(npc.get("if_flag_not", "")), "adopted_" + starter_id, starter_id + " 認養後欄位空出")
+		t.check(found, starter_id + " 的圍欄位置與地圖 NPC 一致")
+		# 六表情立繪
+		for expr: String in ["neutral", "curious", "happy", "nervous", "determined", "hurt"]:
+			t.check(FileAccess.file_exists("res://assets/portraits/%s_%s.png" % [starter_id, expr]),
+				"%s 立繪存在：%s" % [starter_id, expr])
+	t.check_eq(behaviors.size(), 3, "三種跟隨個性互不相同")
+	t.check_eq(variants.size(), 3, "三種結尾動畫互不相同")
+
+
+func _test_map(t: TestContext) -> void:
+	t.check_eq(DataRegistry.maps.size(), 1, "示範章節只有潮芽伴獸之家一張地圖")
+	var map := DataRegistry.get_map("haven")
+	t.check(map != null, "haven 地圖存在")
+	if map == null:
+		return
+	t.check_eq(map.width, 24, "地圖寬 24")
+	t.check_eq(map.height, 16, "地圖高 16")
+	var raw := DataRegistry.read_json_dict("res://data/maps/haven.json")
+	# 三層網格與 elevation 尺寸一致、字元都有對應
+	for layer_key: String in ["ground", "deco", "overhead", "elevation"]:
+		var rows := Array(raw.get(layer_key, []))
+		t.check_eq(rows.size(), 16, layer_key + " 列數 16")
+		for row: Variant in rows:
+			t.check_eq(String(row).length(), 24, layer_key + " 每列 24 字")
+	var ground_legend := Dictionary(raw.get("legend_ground", {}))
+	for row: Variant in Array(raw.get("ground", [])):
+		for ch in String(row):
+			t.check(ground_legend.has(ch), "ground 字元有圖例：" + ch)
+	var deco_legend := Dictionary(raw.get("legend_deco", {}))
+	for row: Variant in Array(raw.get("deco", [])):
+		for ch in String(row):
+			t.check(ch == "." or deco_legend.has(ch), "deco 字元有圖例：" + ch)
+	# 圖例的磚名都在圖集裡
+	for key: Variant in ground_legend:
+		t.check(TileCatalog.has_tile(String(ground_legend[key])), "圖集有磚：" + String(ground_legend[key]))
+	for key: Variant in deco_legend:
+		t.check(TileCatalog.has_tile(String(deco_legend[key])), "圖集有磚：" + String(deco_legend[key]))
+	# 出生點可走、NPC 與觸發合法
+	t.check(map.is_walkable(map.spawn_cell()), "出生點可走")
+	for npc in map.npcs:
+		var cell := Vector2i(int(npc.get("x", -1)), int(npc.get("y", -1)))
+		t.check(map.in_bounds(cell), "NPC 在界內：" + String(npc.get("id", "")))
+		t.check(FileAccess.file_exists(String(npc.get("sprite", ""))), "NPC 圖檔存在：" + String(npc.get("sprite", "")))
+		t.check(not DataRegistry.get_dialogue(String(npc.get("dialogue_id", ""))).is_empty(), "NPC 對話存在：" + String(npc.get("dialogue_id", "")))
+	for sign_cell: Variant in map.sign_dialogues:
+		t.check(not DataRegistry.get_dialogue(String(map.sign_dialogues[sign_cell])).is_empty(), "告示對話存在")
+	for trigger in map.triggers:
+		t.check(not DataRegistry.get_dialogue(String(trigger.get("dialogue_id", ""))).is_empty(), "觸發對話存在")
+	for entry in map.auto_dialogues:
+		t.check(not DataRegistry.get_dialogue(String(entry.get("dialogue_id", ""))).is_empty(), "自動對話存在")
+	# 認養互動點的鄰格要可以站人（玩家能靠近）
+	for starter_id in DataRegistry.starter_ids():
+		var pen := Dictionary(DataRegistry.get_starter(starter_id).get("pen_cell", {}))
+		var pen_cell := Vector2i(int(pen.get("x", 0)), int(pen.get("y", 0)))
+		var reachable := false
+		for offset: Vector2i in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+			if map.is_walkable(pen_cell + offset):
+				reachable = true
+		t.check(reachable, starter_id + " 的圍欄可被玩家靠近")
+
+
+func _test_dialogues(t: TestContext) -> void:
+	# 必要對話全部存在
+	for dialogue_id: String in [
+		"opening_haven", "npc_kui",
+		"pen_sproutwing", "pen_emberhorn", "pen_tidecrest",
+		"ceremony_sproutwing", "ceremony_emberhorn", "ceremony_tidecrest",
+		"ceremony_tag_sproutwing", "ceremony_tag_emberhorn", "ceremony_tag_tidecrest",
+		"partner_talk", "yard_gate",
+		"ending_calm", "ending_check", "ending_farewell", "ending_last_words",
+		"board_notice",
 	]:
-		t.check(FileAccess.file_exists(path), "缺少素材：" + path)
-
-
-func _check_dialogue_assets(t: TestContext) -> void:
+		t.check(not DataRegistry.get_dialogue(dialogue_id).is_empty(), "對話存在：" + dialogue_id)
+	# 每一頁：文字、立繪與 FX 參照都成立；動作都在白名單
+	var total_pages := 0
 	for dialogue_id: Variant in DataRegistry.dialogues:
 		var entry := DataRegistry.get_dialogue(String(dialogue_id))
-		var variants: Array = Array(entry.get("variants", [entry]))
+		var variants: Array = entry.get("variants", [entry])
 		for variant: Variant in variants:
 			var data := Dictionary(variant)
-			# 注意：Array() 轉型不複製，直接 append 會汙染 DataRegistry 快取
-			var pages: Array = Array(data.get("pages", [])).duplicate()
-			for option: Variant in Array(Dictionary(data.get("choice", {})).get("options", [])):
-				pages.append_array(Array(Dictionary(option).get("pages_after", [])))
-			for page: Variant in pages:
-				var page_data := Dictionary(page)
-				for side: String in ["left", "right"]:
-					if page_data.has(side):
-						var parts := String(page_data[side]).split(":")
-						var path := "res://assets/portraits/%s_%s.png" % [parts[0], parts[1] if parts.size() > 1 else "neutral"]
-						t.check(FileAccess.file_exists(path), "對話 %s 引用缺失立繪 %s" % [dialogue_id, path])
+			for page: Variant in Array(data.get("pages", [])):
+				total_pages += 1
+				_check_page(t, String(dialogue_id), Dictionary(page))
+			var choice := Dictionary(data.get("choice", {}))
+			if not choice.is_empty():
+				var options := Array(choice.get("options", []))
+				t.check(options.size() >= 1, String(dialogue_id) + " 選項至少一個")
+				for option: Variant in options:
+					var option_data := Dictionary(option)
+					t.check(String(option_data.get("action", "")) in ACTION_WHITELIST,
+						"%s 動作合法：%s" % [String(dialogue_id), String(option_data.get("action", ""))])
+					for page: Variant in Array(option_data.get("pages_after", [])):
+						total_pages += 1
+						_check_page(t, String(dialogue_id), Dictionary(page))
+			for item_id: Variant in Dictionary(data.get("grant_items", {})):
+				t.check(DataRegistry.get_item(String(item_id)) != null, "發放道具存在：" + String(item_id))
+	t.check(total_pages >= 40, "劇本頁數合理（%d）" % total_pages)
+	# 玩家可見文字不得殘留回聲設定
+	var script_text := FileAccess.get_file_as_string("res://data/dialogue/dialogues.json")
+	for banned: String in ["回聲", "觀測員", "迴靈", "共鳴"]:
+		t.check(not script_text.contains(banned), "劇本不得殘留舊設定用語：" + banned)
 
 
-func _check_map(t: TestContext, map: MapData) -> void:
-	t.check(map.width > 0 and map.height > 0, "地圖 %s 是空的" % map.id)
-	for rows: PackedStringArray in [map.ground_rows, map.deco_rows, map.overhead_rows]:
-		for row in rows:
-			t.check(row.length() == map.width, "地圖 %s 行寬不齊" % map.id)
-	# legend 覆蓋與圖塊存在
-	_check_legend(t, map, map.ground_rows, map.legend_ground, "ground", true)
-	_check_legend(t, map, map.deco_rows, map.legend_deco, "deco", false)
-	_check_legend(t, map, map.overhead_rows, map.legend_overhead, "overhead", false)
-	t.check(map.is_walkable(map.spawn_cell()), "地圖 %s 出生點不可走" % map.id)
-	for warp_cell: Variant in map.warps:
-		var warp := map.warp_at(Vector2i(warp_cell))
-		var target: MapData = DataRegistry.get_map(String(warp.get("target_map", "")))
-		t.check(target != null, "地圖 %s 的 warp 指向不存在的地圖" % map.id)
-		if target != null:
-			var target_cell := Vector2i(int(warp.get("target_x", 0)), int(warp.get("target_y", 0)))
-			t.check(target.is_walkable(target_cell), "地圖 %s 的 warp 落在 %s 的阻擋格 %s" % [map.id, target.id, str(target_cell)])
-	for sign_cell: Variant in map.sign_dialogues:
-		var dialogue_id := map.sign_at(Vector2i(sign_cell))
-		t.check(not DataRegistry.get_dialogue(dialogue_id).is_empty(), "地圖 %s 的互動點引用不存在的對話 %s" % [map.id, dialogue_id])
-	for npc in map.npcs:
-		var npc_cell := Vector2i(int(npc.get("x", 0)), int(npc.get("y", 0)))
-		t.check(map.is_walkable(npc_cell), "地圖 %s 的 NPC %s 站在阻擋格" % [map.id, npc.get("id", "?")])
-		t.check(not DataRegistry.get_dialogue(String(npc.get("dialogue_id", ""))).is_empty(), "地圖 %s 的 NPC %s 對話不存在" % [map.id, npc.get("id", "?")])
-		t.check(FileAccess.file_exists(String(npc.get("sprite", ""))), "地圖 %s 的 NPC %s 缺少 sprite" % [map.id, npc.get("id", "?")])
-	for clue in map.clues:
-		t.check(not DataRegistry.get_dialogue(String(clue.get("dialogue_id", ""))).is_empty(), "地圖 %s 線索對話不存在" % map.id)
-		t.check(not String(clue.get("flag", "")).is_empty(), "地圖 %s 線索缺 flag" % map.id)
-	for trigger in map.triggers:
-		t.check(not DataRegistry.get_dialogue(String(trigger.get("dialogue_id", ""))).is_empty(), "地圖 %s 觸發器對話不存在" % map.id)
-		t.check(map.is_walkable(Vector2i(int(trigger.get("x", 0)), int(trigger.get("y", 0)))), "地圖 %s 觸發器放在不可走格" % map.id)
-	for auto in map.auto_dialogues:
-		t.check(not DataRegistry.get_dialogue(String(auto.get("dialogue_id", ""))).is_empty(), "地圖 %s 自動對話不存在" % map.id)
-	for warp_cell: Variant in map.warps:
-		var warp := map.warp_at(Vector2i(warp_cell))
-		if warp.has("requires_flag"):
-			t.check(not DataRegistry.get_dialogue(String(warp.get("blocked_dialogue", ""))).is_empty(), "地圖 %s 條件 warp 缺提示對話" % map.id)
+func _check_page(t: TestContext, dialogue_id: String, page: Dictionary) -> void:
+	t.check(not String(page.get("text", "")).is_empty(), dialogue_id + " 每頁有文字")
+	for side: String in ["left", "right"]:
+		if page.has(side):
+			var parts := String(page[side]).split(":")
+			t.check_eq(parts.size(), 2, "%s 立繪格式 char:expr" % dialogue_id)
+			var path := "res://assets/portraits/%s_%s.png" % [parts[0], parts[1]]
+			t.check(FileAccess.file_exists(path), "%s 立繪存在：%s" % [dialogue_id, path])
+	if page.has("fx"):
+		t.check(String(page["fx"]) in FX_WHITELIST, "%s FX 合法：%s" % [dialogue_id, String(page["fx"])])
 
 
-func _check_legend(t: TestContext, map: MapData, rows: PackedStringArray, legend: Dictionary, layer: String, required: bool) -> void:
-	var used := {}
-	for row in rows:
-		for i in range(row.length()):
-			used[row[i]] = true
-	for symbol: Variant in used:
-		var ch := String(symbol)
-		if ch == "." and not required:
-			continue
-		var tile_name := String(legend.get(ch, ""))
-		t.check(not tile_name.is_empty(), "地圖 %s 的 %s 層符號 '%s' 缺 legend" % [map.id, layer, ch])
-		if not tile_name.is_empty():
-			t.check(TileCatalog.has_tile(tile_name), "地圖 %s 引用了不存在的圖塊 %s" % [map.id, tile_name])
+func _test_ui_assets(t: TestContext) -> void:
+	for element in ELEMENTS:
+		t.check(FileAccess.file_exists("res://assets/ui/elem_%s.png" % element), "屬性圖示存在：" + element)
+	for asset: String in ["contact_shadow", "fog_blob", "resonance_ring"]:
+		t.check(FileAccess.file_exists("res://assets/ui/%s.png" % asset), "UI 素材存在：" + asset)
+	for expr: String in ["neutral", "observing", "concerned", "relieved", "smiling"]:
+		t.check(FileAccess.file_exists("res://assets/portraits/kui_%s.png" % expr), "葵姨立繪存在：" + expr)
+	for expr: String in ["neutral", "thinking", "surprised", "determined", "happy"]:
+		t.check(FileAccess.file_exists("res://assets/portraits/player_%s.png" % expr), "玩家立繪存在：" + expr)
+	t.check(FileAccess.file_exists("res://assets/characters/npc_kui.png"), "葵姨世界圖存在")

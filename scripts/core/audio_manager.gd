@@ -10,6 +10,8 @@ const MIX_RATE := 22050
 var master_volume: float = 0.8
 var reduce_flash := false
 var reduce_shake := false
+## Web 品質分級（High：陰影/柔焦/全粒子；Low：blob 陰影、關柔焦、粒子減半）
+var quality_high := true
 
 var _players: Array[AudioStreamPlayer] = []
 var _next_player := 0
@@ -35,6 +37,8 @@ func _ready() -> void:
 	for extra: AudioStreamPlayer in [_amb_player, _hum_player, _music_player, _music_layer]:
 		add_child(extra)
 	load_settings()
+	if not FileAccess.file_exists(SETTINGS_PATH):
+		quality_high = not DisplayServer.is_touchscreen_available()
 	_apply_volume()
 
 
@@ -56,6 +60,11 @@ func set_reduce_shake(active: bool) -> void:
 	save_settings()
 
 
+func set_quality_high(active: bool) -> void:
+	quality_high = active
+	save_settings()
+
+
 func load_settings() -> void:
 	if not FileAccess.file_exists(SETTINGS_PATH):
 		return
@@ -65,6 +74,7 @@ func load_settings() -> void:
 		master_volume = clampf(float(data.get("master_volume", master_volume)), 0.0, 1.0)
 		reduce_flash = bool(data.get("reduce_flash", false))
 		reduce_shake = bool(data.get("reduce_shake", false))
+		quality_high = bool(data.get("quality_high", not DisplayServer.is_touchscreen_available()))
 
 
 func save_settings() -> void:
@@ -75,6 +85,7 @@ func save_settings() -> void:
 		"master_volume": master_volume,
 		"reduce_flash": reduce_flash,
 		"reduce_shake": reduce_shake,
+		"quality_high": quality_high,
 	}))
 	file.close()
 
@@ -213,6 +224,49 @@ func play_clue() -> void:
 
 func play_bell() -> void:
 	_play("bell", func() -> AudioStreamWAV: return _bell_tone())
+
+
+## 伴獸叫聲：每隻有自己的音色輪廓
+func play_cry(creature_id: String) -> void:
+	match creature_id:
+		"sproutwing":
+			_play("cry_sprout", func() -> AudioStreamWAV: return _tone([[880.0, 0.05], [740.0, 0.05], [990.0, 0.09]], 0.2, "sine"))
+		"emberhorn":
+			_play("cry_ember", func() -> AudioStreamWAV: return _tone([[330.0, 0.06], [262.0, 0.05], [392.0, 0.08]], 0.22))
+		"tidecrest":
+			_play("cry_tide", func() -> AudioStreamWAV: return _tone([[1180.0, 0.04], [1560.0, 0.04], [1180.0, 0.04], [1760.0, 0.07]], 0.18, "sine"))
+		"rockbadger":
+			_play("cry_badger", func() -> AudioStreamWAV: return _tone([[130.0, 0.09], [98.0, 0.12]], 0.26))
+		_:
+			pass
+
+
+## 認養完成的小樂句
+func play_adopt_jingle() -> void:
+	_play("adopt", func() -> AudioStreamWAV: return _tone([[523.0, 0.09], [659.0, 0.09], [784.0, 0.09], [1046.0, 0.16], [880.0, 0.1], [1318.0, 0.26]], 0.22, "sine"))
+
+
+## 圍欄被撞破的巨響
+func play_crash() -> void:
+	_play("crash", func() -> AudioStreamWAV: return _crash_sfx())
+
+
+## 三系技能音色：草＝葉聲、火＝炭裂、水＝水花
+func play_skill(element: String) -> void:
+	match element:
+		"grass":
+			_play("skill_grass", func() -> AudioStreamWAV: return _noise_sfx(0.12, 0.14, 2600.0))
+		"fire":
+			_play("skill_fire", func() -> AudioStreamWAV: return _crackle_sfx())
+		"water":
+			_play("skill_water", func() -> AudioStreamWAV: return _noise_sfx(0.14, 0.16, 1300.0))
+		_:
+			play_attack()
+
+
+## 安撫成功：緩慢上行的暖音
+func play_soothe() -> void:
+	_play("soothe", func() -> AudioStreamWAV: return _tone([[392.0, 0.12], [440.0, 0.12], [523.0, 0.16], [659.0, 0.26]], 0.2, "sine"))
 
 
 # ====== 戰鬥 SFX ======
@@ -366,6 +420,22 @@ static func _wrap_plain(data: PackedByteArray) -> AudioStreamWAV:
 	stream.stereo = false
 	stream.data = data
 	return stream
+
+
+static func _crash_sfx() -> AudioStreamWAV:
+	var data := _buffer(0.6)
+	_add_noise(data, 0.0, 0.5, 0.3, 700.0, 71)
+	_add_tone(data, 0.0, 0.3, 70.0, 0.24)
+	_add_tone(data, 0.05, 0.25, 55.0, 0.18)
+	return _wrap_plain(data)
+
+
+static func _crackle_sfx() -> AudioStreamWAV:
+	var data := _buffer(0.22)
+	_add_noise(data, 0.0, 0.08, 0.16, 3600.0, 72)
+	_add_noise(data, 0.09, 0.06, 0.13, 3200.0, 73)
+	_add_tone(data, 0.0, 0.18, 196.0, 0.1)
+	return _wrap_plain(data)
 
 
 static func _bell_tone() -> AudioStreamWAV:

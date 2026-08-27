@@ -1,3 +1,6 @@
+> **【已棄用】** 本文件屬 v0.3「潮霧群島／回聲觀測」世界觀，僅保留為歷史紀錄；
+> 現行設定見 world-bible.md（潮森群島・御三家認養）。
+
 # 視覺稽核報告（Visual Audit）
 
 稽核日期：2026-08-27
@@ -111,3 +114,4 @@ Before 截圖：`docs/screenshots/before/`　After 截圖：`docs/screenshots/af
 | 逐項檢查 | ✅ 無純色 placeholder、無密度混用、無模糊（像素字型關 AA）、繁中無裁切、色盤統一 40 色 |
 
 殘留風險見 `docs/asset-manifest.md`（🟨 設計稿項目建議日後由專業美術重繪）。
+

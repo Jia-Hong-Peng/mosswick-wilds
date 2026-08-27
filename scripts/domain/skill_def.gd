@@ -8,6 +8,7 @@ var description: String = ""
 var element: String = "neutral"
 var power: int = 0
 var accuracy: float = 1.0
+var effect: String = ""         # 輔助效果：slow/shield/break/warm/dodge/cleanse
 
 
 static func from_dict(skill_id: String, data: Dictionary) -> SkillDef:
@@ -18,4 +19,5 @@ static func from_dict(skill_id: String, data: Dictionary) -> SkillDef:
 	def.element = String(data.get("element", "neutral"))
 	def.power = int(data.get("power", 0))
 	def.accuracy = clampf(float(data.get("accuracy", 1.0)), 0.0, 1.0)
+	def.effect = String(data.get("effect", ""))
 	return def

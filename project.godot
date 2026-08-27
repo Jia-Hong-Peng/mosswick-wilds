@@ -10,9 +10,9 @@ config_version=5
 
 [application]
 
-config/name="潮霧群島 Tidemist Isles"
-config/description="原創俯視角迴靈觀測 RPG：霧港村 Vertical Slice。"
-config/version="0.3.0"
+config/name="潮森群島 Tidegrove Isles"
+config/description="原創 2.5D 像素立體劇場・伴獸認養 RPG：御三家認養日 Vertical Slice。"
+config/version="0.4.0"
 run/main_scene="res://scenes/main/title_screen.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://assets/ui/icon.png"
@@ -38,13 +38,12 @@ gdscript/warnings/untyped_declaration=1
 
 [display]
 
-window/size/viewport_width=320
-window/size/viewport_height=180
+window/size/viewport_width=640
+window/size/viewport_height=360
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
-window/stretch/scale_mode="integer"
 
 [gui]
 
@@ -113,3 +112,6 @@ pointing/emulate_touch_from_mouse=true
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/canvas_textures/default_texture_filter=0
+lights_and_shadows/directional_shadow/size=2048
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=1
+anti_aliasing/quality/msaa_3d=0

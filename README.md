@@ -1,94 +1,111 @@
-# 潮霧群島 Tidemist Isles — 第一章：失聲的港灣
+# 潮森群島 Tidegrove Isles — 第一章：第一位旅伴
 
-原創 2D 像素 RPG 的 **3–5 分鐘完整關卡 DEMO**。
-霧港村的浮標還在浪裡搖，鐘聲卻消失了。你是新上任的**回聲觀測員**：
-用回聲觀測判讀線索、穿過潮霧古道、在廢棄潮汐觀測站面對被三十年殘留訊號
-纏住的**磁殼仔**——不是打倒牠，而是在正確的時機**建立共鳴**，把耳朵還給海。
+原創 **2.5D 像素立體劇場**（Original Pixel Diorama Visual Style）伴獸認養 RPG 的
+**3–5 分鐘完整關卡 DEMO**。
+潮芽伴獸之家的認養日早晨：三隻幼獸在各自的角落看著你——
+謹慎的**芽翼鼯**（草）、好勝的**燼角羌**（火）、好奇的**潮冠鷺**（水）。
+別急著挑最強的；先看看，哪一隻願意跟你走。
+認養、同行、然後和牠一起面對第一場危機：一隻被港口施工巨響嚇壞、
+撞破圍欄的**岩背獾**。你不能打倒牠——壓下牠的恐慌，然後**安撫**牠。
 
 **線上遊玩：https://jia-hong-peng.github.io/mosswick-wilds/**
 
-設計文件：`docs/`（world-bible／art-bible／palette／ui-system／narrative-script／
-text-style-guide／vertical-slice-audit／quality-scorecard／asset-manifest／asset-licenses）
+![Title](docs/screenshots/hd2d-after/title.png)
 
-![Title](docs/screenshots/after/title.png)
-
-| 立繪對話開場 | 回聲觀測（線索判讀） |
+| 認養日開場（葵姨） | 認養互動（芽翼鼯） |
 |---|---|
-| ![Opening](docs/screenshots/after/dialogue_opening.png) | ![Observe](docs/screenshots/after/observe_clue.png) |
+| ![Opening](docs/screenshots/hd2d-after/opening_kui.png) | ![Adopt](docs/screenshots/hd2d-after/adopt_interact.png) |
 
-| 頭目戰（前兆判讀） | 關卡完成 |
+| 危機戰（前兆判讀＋安撫窗口） | 章節完成 |
 |---|---|
-| ![Boss](docs/screenshots/after/boss_phase2.png) | ![Done](docs/screenshots/after/chapter_card.png) |
+| ![Crisis](docs/screenshots/hd2d-after/soothe_window.png) | ![Done](docs/screenshots/hd2d-after/chapter_card.png) |
 
-## DEMO 流程（首玩約 4.5–5 分鐘）
+## DEMO 流程（首玩約 3.5–5 分鐘）
 
 ```text
-0:00 廣場異常（浮標無聲、觀測站閃光）→ 兩句對話交付目標
-0:30 村口回聲觀測：三線索擇二 → 路徑判讀（選錯＝30 秒潮翼教學遭遇，不懲罰）
-1:15 潮霧古道：補給箱／傾倒天線／可選觀測位（取得頭目前兆明示）／異常加劇
-2:00 觀測站進場演出（可跳過）：設備自醒 → 聲音消失 → 磁殼仔現身
-2:30 兩階段頭目戰（60–90 秒）：判讀前兆 → 防禦強波 → 干擾充能 → 紊亂窗口共鳴
-4:00 鐘聲回歸 → 色彩變暖 → 取得「穩定回聲」→ 自動存檔 → 章節完成 → 遠方訊號伏筆
+0:00 開場運鏡：港口晨光 → 三個活動區 → 章節卡「第一章：第一位旅伴」（可跳過）
+0:20 認養日：與三隻幼獸各自互動（蹲低等牠／接住試探／倒影引回）→ 認養確認
+     → 認養證 → 旅伴牌 → 暱稱（可保留原名）→ 專屬演出 → 自動存檔
+1:30 第一次同行：夥伴實際跟隨（三隻個性不同）→ 與夥伴互動 → 葵姨交付旅行包
+2:00 危機：岩背獾撞破圍欄衝進庭院——牠不是敵人，牠只是嚇壞了
+2:30 危機戰（60–90 秒、3–8 有效回合）：判讀前兆（噴氣／縮甲／衝撞）
+     → 三系各有解法（纏芽拖慢＋葉幕硬吃／燼角衝破防速攻／霧步閃避連擊）
+     → 恐慌壓到底線後「安撫」收尾（純攻擊不可能獲勝）
+4:00 岩背獾回歸山林 → 葵姨：「不只是你選了牠，牠也選了你」→ 走向港口道
+     → 章節完成＋認養結果＋三種結尾動畫 → 公告板伏筆（一雙不同顏色的眼睛）
 ```
 
 ## 操作
 
 ```text
-方向鍵 / WASD : 移動　　Z / Enter : 確認・調查
-C             : 回聲觀測（線索顯形、環境音收窄）
-X / Escape    : 取消・跳過演出　　M : 觀測手冊
+方向鍵 / WASD : 移動　　Z / Enter : 確認・互動（面向夥伴＝呼喚牠）
+X / Escape    : 取消・跳過演出　　M : 旅行手冊
 ```
 
-觸控裝置自動顯示儀器按鍵（十字鍵／確認／取消／觀測／選單）。
-標題選單含音量與「減少閃爍／減少震動」輔助選項。
+觸控裝置自動顯示螢幕按鍵（十字鍵／確認／取消／選單）。
+標題選單含音量、「減少閃爍／減少震動」輔助選項與「畫質：高／低」。
+
+## 視覺：原創 2.5D 像素立體劇場
+
+2D 像素角色 × 3D 立體場景。Compatibility Renderer／WebGL 2.0 限定實作：
+正交無旋轉攝影機（俯角 36°）、地形＋建築＋道具合併單一 ArrayMesh（頂點色烘焙明暗）、
+Sprite3D 立牌角色（Nearest／Alpha Scissor／腳底 blob 陰影）、
+1 方向光＋≤3 局部暖光（其餘假光光暈）、分層霧面片、捲動噪聲水面（無 SSR）、
+輕量單通道帶狀柔焦（假移軸）＋暗角。詳見
+`docs/hd2d-reference-analysis.md`／`docs/web-shader-inventory.md`／`docs/web-hd2d-performance.md`。
 
 ## 技術
 
 | 項目 | 值 |
 |---|---|
 | Engine | Godot **4.7.2 Stable**（CI 釘死；本機 4.7.1 驗證） |
-| 規格 | typed GDScript・Compatibility・320×180 integer scaling・Nearest・16px tile |
-| 色盤 | 全域 42 色（紫紅僅用於異常電波） |
+| 規格 | typed GDScript・Compatibility・640×360（UI 320×180 ×2）・Nearest・16px texel |
+| 御三家 | 資料驅動（`data/starters/starters.json`）：互動、跟隨個性、戰鬥定位、結尾動畫 |
 | 字型 | Fusion Pixel 12px 繁中（OFL） |
-| 音訊 | 全程序化合成：6 種環境音狀態＋頭目雙層音樂＋22 種 SFX |
-| 存檔 | user:// JSON・原子寫入・Schema v3（v1/v2 自動遷移）・通關自動存檔 |
+| 音訊 | 全程序化合成：環境音狀態機＋危機戰雙層音樂＋SFX（含三隻叫聲、認養樂句） |
+| 存檔 | user:// JSON・原子寫入・Schema **v4**（舊版回聲存檔安全重置，不崩潰）・認養／通關自動存檔 |
 
 ## 驗證指令
 
 ```powershell
 $godot = 'D:\Tools\Godot\4.7.1-stable-standard\Godot_v4.7.1-stable_win64_console.exe'
 & $godot --headless --path . --import                              # Headless 驗證
-& $godot --headless --path . --script res://tests/run_tests.gd     # 1021 asserts
+& $godot --headless --path . --script res://tests/run_tests.gd     # 2009 asserts
 & $godot --headless --path . --export-release "Web" build/web/index.html
-& $godot --path . --resolution 1280x720 -- --tour                  # 自動完整通關＋計時＋截圖
-& $godot --path . --resolution 1280x720 -- --tour-wrong            # 錯誤路線／教學遭遇
+& $godot --path . --resolution 1280x720 -- --tour                  # 認養芽翼鼯完整通關（草系解法）
+& $godot --path . --resolution 1280x720 -- --tour-fire             # 認養燼角羌（爆發解法）
+& $godot --path . --resolution 1280x720 -- --tour-water            # 認養潮冠鷺（速度解法）
 & $godot --path . --resolution 1280x720 -- --tour-continue         # Continue 恢復驗證
 ```
 
-測試涵蓋：頭目規則（前兆一致／攻擊下限／干擾窗口／共鳴時機／教科書打法必勝）、
-DEMO 流程（觀測情境／對話凍結移動／路徑選擇旗標／結局旗標＋自動存檔＋Continue）、
-存檔 v1→v3 遷移鏈、資料引用完整性（立繪/線索/觸發器/warp 527 項）等。
+測試涵蓋：危機戰規則（前兆序列一致／恐慌 30% 下限／安撫時機閘門／
+三系策略路線 3–10 回合必勝／破防・閃避・減速機制／敗北）、
+認養流程（互動旗標／確認二擇／世界動作訊號／旅行包發放／夥伴互動變體／伏筆變體）、
+存檔 v1→v4 遷移鏈（回聲版存檔安全返回新遊戲開場、無殭屍旗標）、
+資料引用完整性（1372 項：立繪／FX／動作白名單／地圖圖例／素材檔案存在）等。
 
 ## 專案架構重點
 
 ```text
-scripts/domain/boss_battle_service.gd   頭目規則（純邏輯、前兆制、可注入 RNG）
-scripts/world/world_scene.gd            觀測模式／觸發器／演出 FX／結局導演
-scripts/battle/boss_battle_scene.gd     前兆橫幅／姿勢幀／共鳴演出
-scripts/core/{dialogue_manager,audio_manager,debug_tour}.gd
-data/maps/*.json                        三層網格＋線索/觸發器/自動對話（資料驅動）
-tools/pixgen/*                          全素材產生器（含立繪 gen_portraits）
+scripts/domain/crisis_battle_service.gd  危機戰規則（純邏輯、前兆制、恐慌下限、安撫收尾）
+scripts/world/world_scene.gd             開場運鏡／認養儀式導演／結局三變化／伏筆
+scripts/world3d/{stage_builder,follower_3d,camera_rig,screen_grade}.gd
+scripts/battle/{crisis_battle_scene,battle_stage_3d}.gd
+data/starters/starters.json              御三家資料驅動定義
+data/maps/haven.json                     潮芽伴獸之家（三層網格＋elevation）
+tools/pixgen/*                           全素材產生器（含御三家六表情立繪與世界行走圖）
 ```
 
 ## 已知限制（誠實清單）
 
-- 全素材為**程式生成設計稿**（合規於 art-bible，工藝低於手繪；替換規則見 asset-manifest）。
-- 通關時間為自動化 bot 實測（43 秒）換算的人類估計，未做真人試玩取樣。
-- 音訊為合成器等級，無旋律主題曲；行動裝置未實機測試。
-- 指令清單開啟時會暫時遮住頭目本體（320 寬度取捨）。
+- 全素材為**程式生成設計稿**（工藝低於手繪；剪影與性格辨識已達成，替換規則見 asset-manifest）。
+- 通關時間為自動化 bot 實測（51–63 秒）換算的人類估計，未做真人試玩取樣。
+- Web 版於 Chromium 驗證啟動與 Console 無錯；畫面級／FPS／Firefox／Safari／
+  行動實機驗收標註於 `docs/web-hd2d-performance.md`（尚待人工裝置驗收）。
+- 危機戰指令清單開啟時會暫時遮住岩背獾本體（版面取捨；前兆／事件演出時完整可見）。
 
 ## Roadmap
 
-1. 第二章：遠方島嶼的訊號源（伏筆兌現）＋觀測機制深化（頻率匹配小玩法）。
-2. 專業美術重繪 manifest 🟨 項；主題曲與環境錄音。
-3. 真人試玩取樣與節奏調校；手機實機驗證。
+1. 第二章：公告板上那雙不同顏色的眼睛（失蹤伴獸線）；往霧杉島的航線。
+2. 伴獸成長與進化潛力；照護玩法（毛刷／食盆實際使用）。
+3. 專業美術重繪；真人試玩取樣與節奏調校；手機實機驗證。

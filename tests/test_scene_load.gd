@@ -5,7 +5,7 @@ const SCENES: Array[String] = [
 	"res://scenes/main/title_screen.tscn",
 	"res://scenes/world/world_scene.tscn",
 	"res://scenes/battle/battle_scene.tscn",
-	"res://scenes/battle/boss_battle_scene.tscn",
+	"res://scenes/battle/crisis_battle_scene.tscn",
 	"res://scenes/characters/player.tscn",
 	"res://scenes/characters/npc.tscn",
 	"res://scenes/ui/dialogue_box.tscn",
