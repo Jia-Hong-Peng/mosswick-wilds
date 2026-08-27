@@ -5,7 +5,7 @@ extends RefCounted
 
 
 static func generate() -> void:
-	_tree("res://assets/world3d/tree_a.png", 5)
+	_tree("res://assets/world3d/tree_a.png", 5)   # 內部繪 16×32，存檔前 Scale2x
 	_tree("res://assets/world3d/tree_b.png", 9)
 	_halo("res://assets/world3d/light_halo.png")
 	_godray("res://assets/world3d/godray.png")
@@ -34,7 +34,7 @@ static func _tree(path: String, seed_value: int) -> void:
 	Pix.px(c, 5, 5, Pal.SPROUT)
 	Pix.dither(c, 4, 15, 9, 4, Pal.MOSS, Pal.MOSS_DK)
 	Pix.outline_sprite(c)
-	Pix.save(c, path)
+	Pix.save(Pix.scale2x(c), path)
 
 
 ## 光暈：柔和放射漸層（Alpha Blend 面片用）

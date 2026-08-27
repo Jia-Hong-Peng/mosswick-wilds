@@ -50,8 +50,8 @@ func _ready() -> void:
 			_walk_frames[dir_name] = frames
 		var first: Texture2D = _walk_frames["down"][0]
 		_sprite.texture = first
-		# 幀畫布 208 高、內容 200、底邊留 4px：腳底貼齊地面
-		var ps := HERO_WALK_HEIGHT / 200.0
+		# 幀畫布 272 高、內容 260、底邊留 4px：腳底貼齊地面
+		var ps := HERO_WALK_HEIGHT / 260.0
 		_sprite.pixel_size = ps
 		_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 		_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED

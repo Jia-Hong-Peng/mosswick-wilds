@@ -16,6 +16,38 @@ static func save(image: Image, res_path: String) -> void:
 		print("wrote " + res_path)
 
 
+## 像素藝術感知 2× 放大（EPX/Scale2x）：保留硬邊、平滑階梯狀斜線。
+## 程序像素全是精準色，等值比較即可。
+static func scale2x(src: Image) -> Image:
+	var w := src.get_width()
+	var h := src.get_height()
+	var out := Image.create(w * 2, h * 2, false, Image.FORMAT_RGBA8)
+	for y in range(h):
+		for x in range(w):
+			var p := src.get_pixel(x, y)
+			var a := src.get_pixel(x, maxi(0, y - 1))
+			var b := src.get_pixel(mini(w - 1, x + 1), y)
+			var c := src.get_pixel(maxi(0, x - 1), y)
+			var d := src.get_pixel(x, mini(h - 1, y + 1))
+			var e0 := p
+			var e1 := p
+			var e2 := p
+			var e3 := p
+			if c == a and c != d and a != b:
+				e0 = a
+			if a == b and a != c and b != d:
+				e1 = b
+			if d == c and d != b and c != a:
+				e2 = c
+			if b == d and b != a and d != c:
+				e3 = d
+			out.set_pixel(x * 2, y * 2, e0)
+			out.set_pixel(x * 2 + 1, y * 2, e1)
+			out.set_pixel(x * 2, y * 2 + 1, e2)
+			out.set_pixel(x * 2 + 1, y * 2 + 1, e3)
+	return out
+
+
 static func rng(seed_value: int) -> RandomNumberGenerator:
 	var generator := RandomNumberGenerator.new()
 	generator.seed = seed_value

@@ -107,7 +107,7 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 		"trail":
 			for i in range(5):
 				_standee(root, load("res://assets/world3d/tree_a.png" if i % 2 == 0 else "res://assets/world3d/tree_b.png"),
-					Vector3(0.8 + float(i) * 2.1, 1.0, 0.6 + float(i % 2) * 0.5), 1.0 / 16.0)
+					Vector3(0.8 + float(i) * 2.1, 1.0, 0.6 + float(i % 2) * 0.5), 1.0 / 32.0)
 			for i in range(4):
 				_atlas_standee(root, "tallgrass", Vector3(1.5 + float(i) * 2.3, 0.5, 2.2))
 			_atlas_standee(root, "rock_a", Vector3(9.4, 0.5, 3.6))
@@ -118,8 +118,8 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 			_atlas_standee(root, "console_rust", Vector3(0.9, 0.5, 2.2))
 			_atlas_standee(root, "vine_wall", Vector3(3.4, 1.2, 0.5))
 		"haven":
-			_standee(root, load("res://assets/world3d/tree_a.png"), Vector3(0.7, 1.0, 1.4), 1.0 / 16.0)
-			_standee(root, load("res://assets/world3d/tree_b.png"), Vector3(9.6, 1.0, 1.2), 1.0 / 16.0)
+			_standee(root, load("res://assets/world3d/tree_a.png"), Vector3(0.7, 1.0, 1.4), 1.0 / 32.0)
+			_standee(root, load("res://assets/world3d/tree_b.png"), Vector3(9.6, 1.0, 1.2), 1.0 / 32.0)
 			_atlas_standee(root, "lamp_post", Vector3(6.3, 0.5, 1.3))
 			_atlas_standee(root, "fern", Vector3(8.6, 0.5, 2.4))
 			_atlas_standee(root, "flowers_a", Vector3(1.9, 0.5, 2.8))
@@ -212,8 +212,8 @@ static func _atlas_standee(root: Node3D, tile: String, at: Vector3) -> void:
 	sprite.texture = load(TileCatalog.ATLAS_PATH)
 	sprite.region_enabled = true
 	var pos := TileCatalog.pos(tile)
-	sprite.region_rect = Rect2(pos.x * 16, pos.y * 16, 16, 16)
-	sprite.pixel_size = 1.0 / 16.0
+	sprite.region_rect = Rect2(pos.x * 32, pos.y * 32, 32, 32)
+	sprite.pixel_size = 1.0 / 32.0
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD

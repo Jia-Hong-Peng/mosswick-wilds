@@ -15,7 +15,8 @@ static func generate() -> void:
 			var cell := Pix.img(T, T)
 			_draw(tile_name, cell, frame)
 			Pix.blit(atlas, cell, (pos.x + frame) * T, pos.y * T)
-	Pix.save(atlas, TileCatalog.ATLAS_PATH)
+	# Scale2x：圖集升到 32px 紋素（保硬邊、去階梯），UV 皆為正規化座標不受影響
+	Pix.save(Pix.scale2x(atlas), TileCatalog.ATLAS_PATH)
 
 
 static func _draw(tile_name: String, c: Image, f: int) -> void:

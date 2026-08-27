@@ -15,9 +15,9 @@ const HERO_DIR := "res://assets/characters/hero"
 const WALK_ROW_DOWN := 0
 const WALK_ROW_LEFT := 2
 const WALK_ROW_UP := 4
-const WALK_FRAME_W := 160
-const WALK_FRAME_H := 208
-const WALK_TARGET_H := 200
+const WALK_FRAME_W := 208
+const WALK_FRAME_H := 272
+const WALK_TARGET_H := 260
 
 ## 全身視圖裁切框（1672×941 座標；站立圖 y 38–710，去背後自動修邊）
 const BODY_CROPS := {
@@ -323,7 +323,7 @@ static func _trim_save(img: Image, path: String) -> void:
 	var used := img.get_used_rect()
 	if used.size.x > 0 and used.size.y > 0:
 		img = img.get_region(used)
-	var target_h := 240
+	var target_h := 320
 	var target_w := int(round(float(img.get_width()) * float(target_h) / float(img.get_height())))
 	img.resize(target_w, target_h, Image.INTERPOLATE_LANCZOS)
 	Pix.save(img, path)

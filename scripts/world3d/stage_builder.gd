@@ -353,8 +353,8 @@ static func _atlas_standee(parent: Node3D, cell: Vector2i, h: float, tile_name: 
 	sprite.texture = load(TileCatalog.ATLAS_PATH)
 	sprite.region_enabled = true
 	var pos := TileCatalog.pos(tile_name)
-	sprite.region_rect = Rect2(pos.x * 16, pos.y * 16, 16, 16)
-	sprite.pixel_size = 1.0 / 16.0
+	sprite.region_rect = Rect2(pos.x * 32, pos.y * 32, 32, 32)
+	sprite.pixel_size = 1.0 / 32.0
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
@@ -367,7 +367,7 @@ static func _atlas_standee(parent: Node3D, cell: Vector2i, h: float, tile_name: 
 static func _tree_standee(parent: Node3D, cell: Vector2i, h: float, flip: bool) -> void:
 	var sprite := Sprite3D.new()
 	sprite.texture = load("res://assets/world3d/tree_a.png" if not flip else "res://assets/world3d/tree_b.png")
-	sprite.pixel_size = 1.0 / 16.0
+	sprite.pixel_size = 1.0 / 32.0
 	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
