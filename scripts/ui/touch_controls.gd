@@ -1,13 +1,15 @@
 extends CanvasLayer
-## Autoload 場景：觀測儀器風螢幕按鍵（左下十字鍵、右下確認／取消、右上選單）。
-## 按鍵觸發與鍵盤相同的輸入動作，所有選單行為一致；非觸控裝置自動隱藏。
+## Autoload 場景：螢幕按鍵（左下十字鍵、右下確認／取消、右上選單）。
+## 按鍵觸發與鍵盤相同的輸入動作，所有選單行為一致。
+## 只在行動裝置（Android／iOS／行動網頁）顯示；電腦一律隱藏
+## （含觸控筆電——以平台判定，不看有無觸控螢幕）。
 ## 按下態使用 *_pressed 材質（GenUi 產生）。
 
 
 func _ready() -> void:
 	layer = 100
 	scale = Vector2(2, 2)
-	visible = DisplayServer.is_touchscreen_available()
+	visible = AudioManager.is_mobile()
 	_add_button("arrow_up", "move_up", Vector2(28, 120), true)
 	_add_button("arrow_down", "move_down", Vector2(28, 156), true)
 	_add_button("arrow_left", "move_left", Vector2(6, 138), true)

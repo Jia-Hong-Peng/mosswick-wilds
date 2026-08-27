@@ -38,8 +38,16 @@ func _ready() -> void:
 		add_child(extra)
 	load_settings()
 	if not FileAccess.file_exists(SETTINGS_PATH):
-		quality_high = not DisplayServer.is_touchscreen_available()
+		quality_high = not is_mobile()
 	_apply_volume()
+
+
+## 行動裝置判定：只看平台，不看「有無觸控螢幕」——
+## Windows 觸控筆電算電腦，不顯示螢幕按鍵、預設高畫質。
+static func is_mobile() -> bool:
+	if OS.has_feature("web"):
+		return OS.has_feature("web_android") or OS.has_feature("web_ios")
+	return OS.get_name() in ["Android", "iOS"]
 
 
 # ====== 設定（含 Accessibility） ======
@@ -74,7 +82,7 @@ func load_settings() -> void:
 		master_volume = clampf(float(data.get("master_volume", master_volume)), 0.0, 1.0)
 		reduce_flash = bool(data.get("reduce_flash", false))
 		reduce_shake = bool(data.get("reduce_shake", false))
-		quality_high = bool(data.get("quality_high", not DisplayServer.is_touchscreen_available()))
+		quality_high = bool(data.get("quality_high", not is_mobile()))
 
 
 func save_settings() -> void:
