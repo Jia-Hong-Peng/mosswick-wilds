@@ -120,7 +120,7 @@ func _build_ui() -> void:
 	_root.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "TIDEGROVE ISLES ── 第一位旅伴"
+	subtitle.text = "A00A IT × GHAS 導入篇"
 	subtitle.position = Vector2(0, 46)
 	subtitle.size = Vector2(220, 14)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

@@ -417,7 +417,7 @@ func _soothe_rings() -> void:
 
 
 func _refresh_bars(animated: bool) -> void:
-	_boss_name.text = "%s（受驚）" % _boss.display_name
+	_boss_name.text = "%s（外洩警報）" % _boss.display_name
 	_player_name.text = "%s Lv%d" % [_player.display_name, _player.level]
 	_player_hp_text.text = "%d / %d" % [_player.hp, _player.max_hp]
 	_set_bar(_boss_bar, _boss.hp_ratio(), animated, true)
@@ -455,7 +455,7 @@ func _end_sequence() -> void:
 	AudioManager.stop_music()
 	if _service.outcome == CrisisBattleService.Outcome.SOOTHED:
 		_telegraph_panel.visible = false
-		_message_label.text = "岩背獾抬起頭，眼睛裡的驚慌退去了。牠輕輕蹭了蹭你夥伴的額頭。"
+		_message_label.text = "岩背獾抬起頭，眼睛裡的驚慌退去了。它輕輕蹭了蹭你夥伴的額頭。"
 		await _wait_confirm()
 		_finished = true
 		EventFlagStore.set_flag("crisis_done")
@@ -463,7 +463,7 @@ func _end_sequence() -> void:
 		GameState.set_world_position("haven", Vector2i(16, 8), Vector2i.LEFT)
 		SceneRouter.goto_world()
 	else:
-		_message_label.text = "你抱著%s退到屋簷下。深呼吸——牠需要你們，再試一次。" % _player.display_name
+		_message_label.text = "你抱著%s退到屋簷下。深呼吸——它需要你們，再試一次。" % _player.display_name
 		await _wait_confirm()
 		_finished = true
 		PartyService.heal_all()
@@ -502,7 +502,7 @@ func _build_ui() -> void:
 	floor_mark.size = Vector2(1, 6)
 	(_boss_bar["back"] as Panel).add_child(floor_mark)
 	var boss_tag := Label.new()
-	boss_tag.text = "恐慌"
+	boss_tag.text = "事件等級"
 	boss_tag.add_theme_font_size_override("font_size", 12)
 	boss_tag.add_theme_color_override("font_color", Pal.MIST_LT)
 	boss_box.add_child(boss_tag)

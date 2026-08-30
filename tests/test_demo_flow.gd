@@ -129,12 +129,15 @@ func _test_adoption_interaction(t: TestContext) -> void:
 		_pump()
 		DialogueManager.world_action_requested.disconnect(_on_adopt)
 		t.check_eq(_adopt_requested, id, "%s 選「認養」必須發出世界動作訊號" % id)
-		# 已認養：欄位變體（幼獸留在之家、不消失也不被拋棄）
+		# 多重導入：導入一隻後，其他哨獸的欄位仍開放互動
 		EventFlagStore.set_flag("starter_chosen")
 		var other := "sproutwing" if id != "sproutwing" else "emberhorn"
 		DialogueManager.start("pen_" + other)
-		t.check(DialogueManager.active, "其他幼獸保留在認養之家（有留守對話）")
+		t.check(DialogueManager.active, "其他哨獸仍可導入（欄位對話開啟）")
 		_pump()
+		if DialogueManager._awaiting_choice:
+			DialogueManager.select_choice(1)
+			_pump()
 
 
 func _on_adopt(starter_id: String) -> void:
@@ -188,33 +191,42 @@ func _test_board_teaser(t: TestContext) -> void:
 	_pump()
 
 
-## 認養結果：入隊、旗標、旅伴牌、暱稱、自動存檔與 Continue 恢復
+## 導入結果：三隻都能先後加入、第一隻為跟隨基準、各自暱稱、
+## 自動存檔與 Continue 恢復
 func _test_adopt_and_autosave(t: TestContext) -> void:
 	EventFlagStore.reset()
 	InventoryService.reset()
 	PartyService.reset()
 	GameState.starter_id = ""
 	GameState.starter_nickname = ""
+	GameState.nicknames = {}
 	GameState.adopt_starter("tidecrest", "小浪")
-	t.check_eq(PartyService.size(), 1, "認養後隊伍一名成員")
-	t.check_eq(PartyService.members[0].creature_id, "tidecrest", "入隊的是選中的御三家")
+	t.check_eq(PartyService.size(), 1, "第一次導入後隊伍一名成員")
 	t.check_eq(PartyService.members[0].display_name, "小浪", "暱稱套用")
-	t.check(EventFlagStore.has_flag("starter_chosen"), "starter_chosen 旗標")
+	t.check_eq(GameState.starter_id, "tidecrest", "第一隻成為跟隨基準")
 	t.check(EventFlagStore.has_flag("adopted_tidecrest"), "adopted_<id> 旗標")
-	t.check_eq(InventoryService.count("travel_tag"), 1, "配戴旅伴牌")
-	# 自動存檔 → Continue
+	# 第二、三隻也能導入
+	GameState.adopt_starter("sproutwing", "")
+	GameState.adopt_starter("emberhorn", "小燼")
+	t.check_eq(PartyService.size(), 3, "三隻功能全數入隊")
+	t.check_eq(GameState.starter_id, "tidecrest", "跟隨基準仍是第一隻")
+	t.check(EventFlagStore.has_flag("adopted_sproutwing"), "第二隻旗標")
+	t.check(EventFlagStore.has_flag("adopted_emberhorn"), "第三隻旗標")
+	t.check_eq(PartyService.members[1].display_name, "芽翼鼯", "未取暱稱者用原名")
+	t.check_eq(PartyService.members[2].display_name, "小燼", "第三隻的暱稱各自套用")
+	t.check_eq(InventoryService.count("travel_tag"), 3, "每次導入配一張旅伴牌")
+	# 自動存檔 → Continue：三隻與各自暱稱都要回來
 	GameState.set_world_position("haven", Vector2i(20, 7), Vector2i.UP)
 	var payload := SaveService.collect_payload()
-	t.check(SaveScript.write_payload(FLOW_PATH, payload), "認養後自動存檔成功")
+	t.check(SaveScript.write_payload(FLOW_PATH, payload), "導入後自動存檔成功")
 	var loaded: Dictionary = SaveScript.read_payload(FLOW_PATH)
 	EventFlagStore.reset()
 	PartyService.reset()
 	GameState.starter_id = ""
+	GameState.nicknames = {}
 	SaveService.apply_payload(loaded)
-	t.check_eq(GameState.starter_id, "tidecrest", "Continue 恢復御三家")
-	t.check_eq(GameState.starter_nickname, "小浪", "Continue 恢復暱稱")
-	t.check_eq(PartyService.members[0].display_name, "小浪", "Continue 後隊伍成員仍用暱稱")
-	t.check(EventFlagStore.has_flag("adopted_tidecrest"), "Continue 恢復認養旗標")
-	# 保留原名：暱稱與原名相同時不入檔
-	GameState.adopt_starter("sproutwing", "芽翼鼯")
-	t.check_eq(GameState.starter_nickname, "", "與原名相同視為保留原名")
+	t.check_eq(GameState.starter_id, "tidecrest", "Continue 恢復跟隨基準")
+	t.check_eq(PartyService.size(), 3, "Continue 恢復三名成員")
+	t.check_eq(PartyService.members[0].display_name, "小浪", "Continue 恢復第一隻暱稱")
+	t.check_eq(PartyService.members[2].display_name, "小燼", "Continue 恢復第三隻暱稱")
+	t.check(EventFlagStore.has_flag("adopted_emberhorn"), "Continue 恢復導入旗標")

@@ -3,11 +3,11 @@ extends RefCounted
 ## 首戰規則（受驚的岩背獾）。純領域邏輯、行動序列固定、極少 RNG。
 ##
 ## 設計：
-## - 這不是狩獵戰——目標是把牠的「恐慌」壓下來，最後用「安撫」收尾。
+## - 這不是狩獵戰——目標是把它的「恐慌」壓下來，最後用「安撫」收尾。
 ## - 每回合開頭都有可判讀的前兆（telegraph）：噴氣（輕）／縮甲（下回合衝撞）／
 ##   驚慌衝撞（重，但永遠有前一回合的縮甲當預告）。
 ## - 恐慌值（以血條呈現）壓到 30% 下限後，純攻擊不再有效；
-##   必須選「安撫」結束戰鬥。玩家不能用最後一擊消滅牠。
+##   必須選「安撫」結束戰鬥。玩家不能用最後一擊消滅它。
 ## - 三隻御三家各有不同解法：
 ##   芽翼鼯：纏芽拖慢衝撞、葉幕硬吃傷害（穩定路線）。
 ##   燼角羌：燼角衝撬開縮甲、高攻速攻（爆發路線）。
@@ -20,8 +20,8 @@ enum Outcome { ONGOING, SOOTHED, DEFEAT }
 const PANIC_FLOOR_RATIO := 0.3
 
 const MOVE_TELEGRAPH := {
-	Move.SNORT: "牠煩躁地刨著地，鼻子噴著粗氣——（輕撞：站穩就好）",
-	Move.SHELL: "牠把身體縮進岩甲裡——（下一步是衝撞！先做好準備）",
+	Move.SNORT: "它煩躁地刨著地，鼻子噴著粗氣——（輕撞：站穩就好）",
+	Move.SHELL: "它把身體縮進岩甲裡——（下一步是衝撞！先做好準備）",
 	Move.RAM: "岩甲繃緊，後腿蹬地——（衝撞：擋下它，或閃開它！）",
 }
 const MOVE_POWER := {
@@ -72,14 +72,14 @@ func next_move() -> int:
 
 func telegraph_text() -> String:
 	if at_floor():
-		return "牠的衝勁弱了下來，腳步遲疑——牠聽得見你了。（安撫牠！）"
+		return "它的衝勁弱了下來，腳步遲疑——它聽得見你了。（安撫它！）"
 	return String(MOVE_TELEGRAPH[next_move()])
 
 
 func intro_events() -> Array[BattleService.BattleEvent]:
 	var events: Array[BattleService.BattleEvent] = []
-	events.append(BattleService.BattleEvent.make(BattleService.EVENT_MESSAGE, "受驚的岩背獾在院子裡橫衝直撞！"))
-	events.append(_msg("牠不是敵人——牠只是嚇壞了。壓下牠的恐慌，然後安撫牠。"))
+	events.append(BattleService.BattleEvent.make(BattleService.EVENT_MESSAGE, "金鑰外洩警報！老服務「岩背獾」驚慌暴走！"))
+	events.append(_msg("它不是敵人——錯的是外洩，不是它。壓下事件等級，最後安撫（修復）它。"))
 	events.append(_telegraph_event())
 	return events
 
@@ -115,7 +115,7 @@ func _resolve_skill(skill: SkillDef, events: Array[BattleService.BattleEvent]) -
 			events.append(BattleService.BattleEvent.make(BattleService.EVENT_MESSAGE, "%s使出%s！嫩藤纏上了岩背獾的腳。" % [player.display_name, skill.display_name], {"attacker": "player", "fx": "vfx_grass"}))
 			rooted = true
 			_calm_chip(6, events)
-			events.append(_msg("牠的腳步慢了下來——下一次衝撞不會那麼疼了。"))
+			events.append(_msg("它的腳步慢了下來——下一次衝撞不會那麼疼了。"))
 		"shield":
 			events.append(BattleService.BattleEvent.make(BattleService.EVENT_MESSAGE, "%s展開%s，滑翔膜擋在你們身前！" % [player.display_name, skill.display_name], {"fx": "vfx_grass"}))
 			guard_turns = 1
@@ -129,7 +129,7 @@ func _resolve_skill(skill: SkillDef, events: Array[BattleService.BattleEvent]) -
 			events.append(BattleService.BattleEvent.make(BattleService.EVENT_MESSAGE, "%s踏起%s，身影在薄霧裡快了一倍！" % [player.display_name, skill.display_name], {"fx": "vfx_water"}))
 			evasive = true
 			extra_strike = true
-			events.append(_msg("下一次攻擊能多出一步，衝撞也幾乎碰不到牠。"))
+			events.append(_msg("下一次攻擊能多出一步，衝撞也幾乎碰不到它。"))
 		"cleanse":
 			events.append(BattleService.BattleEvent.make(BattleService.EVENT_MESSAGE, "%s喚起%s，一道小潮洗過腳邊。" % [player.display_name, skill.display_name], {"fx": "vfx_water"}))
 			var healed := player.heal(int(float(player.max_hp) * 0.15))
@@ -166,13 +166,13 @@ func _resolve_attack(skill: SkillDef, events: Array[BattleService.BattleEvent], 
 	if breaks_shell and (shelled or not shell_broken):
 		shelled = false
 		shell_broken = true
-		events.append(_msg("短角撬進岩甲的縫隙——牠縮不回去了！"))
+		events.append(_msg("短角撬進岩甲的縫隙——它縮不回去了！"))
 	var floor_hp := panic_floor()
 	var was_at_floor := at_floor()
 	boss.hp = maxi(floor_hp, boss.hp - total)
 	events.append(BattleService.BattleEvent.make(BattleService.EVENT_ENEMY_HP, "", {"hp": boss.hp, "max_hp": boss.max_hp, "damage": total}))
 	if was_at_floor:
-		events.append(_msg("再打下去只會讓牠更慌——牠需要的是「安撫」。"))
+		events.append(_msg("再打下去只會讓它更慌——它需要的是「安撫」。"))
 	elif strikes == 2:
 		events.append(_msg("連續兩段，共壓下了 %d 點恐慌！" % total))
 	elif shelled and not shell_broken:
@@ -203,9 +203,9 @@ func _resolve_soothe(events: Array[BattleService.BattleEvent]) -> bool:
 	if at_floor():
 		outcome = Outcome.SOOTHED
 		events.append(BattleService.BattleEvent.make(BattleService.EVENT_MESSAGE, "岩背獾的呼吸，跟上了你們的節奏。", {"fx": "soothe", "boss_pose": "calm"}))
-		events.append(_msg("牠慢慢地、慢慢地，把岩甲鬆開了。"))
+		events.append(_msg("它慢慢地、慢慢地，把岩甲鬆開了。"))
 		return true
-	events.append(_msg("牠還在慌，聽不進去！先壓下牠的恐慌。"))
+	events.append(_msg("它還在慌，聽不進去！先壓下它的恐慌。"))
 	return false
 
 
@@ -261,7 +261,7 @@ func _boss_attack(move: int, text: String, events: Array[BattleService.BattleEve
 		events.append(_msg("%s（%d）" % [note, damage]))
 	if player.is_fainted():
 		outcome = Outcome.DEFEAT
-		events.append(_msg("%s撐不住了……你抱起牠退到屋簷下。" % player.display_name))
+		events.append(_msg("%s撐不住了……你抱起它退到屋簷下。" % player.display_name))
 
 
 func _element_fx(element: String) -> String:

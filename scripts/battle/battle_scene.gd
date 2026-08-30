@@ -482,7 +482,7 @@ func _end_sequence() -> void:
 				result.text = "野生的%s退開了，鑽回草叢深處。" % _enemy.display_name
 			result.text += _award_exp()
 		BattleService.Outcome.CAPTURED:
-			result.text = "%s 登記完成！牠成為你的旅伴了。" % _enemy.display_name
+			result.text = "%s 登記完成！防護已在它身上生效，成為你的旅伴了。" % _enemy.display_name
 		BattleService.Outcome.DEFEAT:
 			result.text = "你眼前一黑……醒來時已回到潮芽伴獸之家。"
 		_:

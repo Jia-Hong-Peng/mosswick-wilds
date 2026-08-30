@@ -36,6 +36,7 @@ func collect_payload() -> Dictionary:
 			"id": GameState.starter_id,
 			"nickname": GameState.starter_nickname,
 		},
+		"nicknames": GameState.nicknames,
 		"party": PartyService.to_dicts(),
 		"inventory": InventoryService.to_dict(),
 		"flags": EventFlagStore.to_dict(),
@@ -57,14 +58,17 @@ func apply_payload(payload: Dictionary) -> void:
 	var starter := Dictionary(payload.get("starter", {}))
 	GameState.starter_id = String(starter.get("id", ""))
 	GameState.starter_nickname = String(starter.get("nickname", ""))
+	GameState.nicknames = Dictionary(payload.get("nicknames", {}))
+	# 舊檔相容：只有 starter 欄位的暱稱也收進字典
+	if not GameState.starter_nickname.is_empty() and not GameState.nicknames.has(GameState.starter_id):
+		GameState.nicknames[GameState.starter_id] = GameState.starter_nickname
 	PartyService.load_from(Array(payload.get("party", [])), DataRegistry)
 	InventoryService.load_from(Dictionary(payload.get("inventory", {})))
 	EventFlagStore.load_from(Dictionary(payload.get("flags", {})))
 	# 暱稱重新套用（隊伍成員由 creature_id 重建，display_name 不入檔）
-	if not GameState.starter_nickname.is_empty():
-		for member in PartyService.members:
-			if member.creature_id == GameState.starter_id:
-				member.display_name = GameState.starter_nickname
+	for member in PartyService.members:
+		if GameState.nicknames.has(member.creature_id):
+			member.display_name = String(GameState.nicknames[member.creature_id])
 	var settings := Dictionary(payload.get("settings", {}))
 	AudioManager.set_master_volume(float(settings.get("master_volume", AudioManager.master_volume)))
 	AudioManager.reduce_flash = bool(settings.get("reduce_flash", AudioManager.reduce_flash))

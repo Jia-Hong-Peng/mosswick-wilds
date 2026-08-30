@@ -5,7 +5,7 @@
 		"amount": 25,
 		"usable_in_battle": true,
 		"usable_in_field": true,
-		"description": "潮芽伴獸之家常備的萬用青草膏，聞起來像雨後的院子。恢復 25 點 HP。",
+		"description": "導入前哨站常備的萬用青草膏，聞起來像剛除完錯的清爽早晨。恢復 25 點 HP。",
 		"icon_path": "res://assets/ui/item_herbal_balm.png"
 	},
 	"travel_pack": {
@@ -14,7 +14,7 @@
 		"amount": 0,
 		"usable_in_battle": false,
 		"usable_in_field": false,
-		"description": "葵姨準備的帆布旅行包：毛刷、食盆、備用牽繩，還有一格特地留給夥伴愛撿的小東西。",
+		"description": "葵姨準備的導入工具包：checklist、設定文件、備用牽繩，還有一格留給你的第一份掃描報告。",
 		"icon_path": "res://assets/ui/item_travel_pack.png"
 	},
 	"travel_tag": {
@@ -23,7 +23,7 @@
 		"amount": 0,
 		"usable_in_battle": false,
 		"usable_in_field": false,
-		"description": "木材、陶片與金屬做成的小識別牌，刻著認養人與夥伴的名字。戰鬥開始時會亮起簡短的光紋。",
+		"description": "木材、陶片與金屬做成的小識別牌，刻著 repo 與功能的名字。戰鬥開始時會亮起簡短的光紋。",
 		"icon_path": "res://assets/ui/item_travel_tag.png"
 	},
 	"blank_tag": {
@@ -32,7 +32,7 @@
 		"amount": 0,
 		"usable_in_battle": true,
 		"usable_in_field": false,
-		"description": "還沒刻上名字的旅伴牌。對放下戒心的野生伴獸出示，牠若願意，就當場登記成你的旅伴。",
+		"description": "還沒綁定 repo 的啟用名額。對還沒有防護的野生伴獸出示，它若願意，就當場登記——在它身上把防護開起來。席次有成本，用在刀口上。",
 		"icon_path": "res://assets/ui/item_blank_tag.png"
 	}
 }

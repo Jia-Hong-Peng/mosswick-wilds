@@ -171,7 +171,7 @@ func _run_opening_pan() -> void:
 	title.add_theme_constant_override("shadow_offset_y", 1)
 	card.add_child(title)
 	var subtitle := Label.new()
-	subtitle.text = "第一章：第一位旅伴"
+	subtitle.text = "第一章：第一次導入"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.custom_minimum_size = Vector2(128, 0)
 	subtitle.add_theme_font_size_override("font_size", 12)
@@ -262,7 +262,8 @@ func _run_adoption(starter_id: String) -> void:
 		pen_npc.queue_free()
 	_spawn_follower(starter_id, pen_cell)
 	SaveService.save_game()
-	_show_toast("%s 加入了你的隊伍！（已自動記錄）" % PartyService.first_conscious().display_name)
+	var newest: CreatureInstance = PartyService.members.back()
+	_show_toast("%s 導入完成，加入了你的隊伍！（已自動記錄）" % newest.display_name)
 	InputRouter.pop_context()
 	_ceremony_running = false
 
@@ -648,7 +649,7 @@ func _show_chapter_card() -> void:
 	box.add_theme_constant_override("separation", 4)
 	card.add_child(box)
 	var chapter := Label.new()
-	chapter.text = "第一章：第一位旅伴"
+	chapter.text = "第一章：第一次導入"
 	chapter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	chapter.add_theme_font_size_override("font_size", 14)
 	chapter.add_theme_color_override("font_color", UiTheme.text_color("header"))
@@ -659,12 +660,12 @@ func _show_chapter_card() -> void:
 	done.add_theme_font_size_override("font_size", 14)
 	done.add_theme_color_override("font_color", UiTheme.text_color("accent"))
 	box.add_child(done)
-	var starter := DataRegistry.get_starter(GameState.starter_id)
-	var adopted_line := "你認養了：%s" % String(starter.get("display_name", ""))
-	if not GameState.starter_nickname.is_empty():
-		adopted_line += "（%s）" % GameState.starter_nickname
+	var adopted_names: Array[String] = []
+	for starter_check in DataRegistry.starter_ids():
+		if EventFlagStore.has_flag("adopted_" + starter_check):
+			adopted_names.append(String(DataRegistry.get_starter(starter_check).get("display_name", "")))
 	var adopted := Label.new()
-	adopted.text = adopted_line
+	adopted.text = "已導入：%s" % "・".join(adopted_names)
 	adopted.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	adopted.add_theme_font_size_override("font_size", 12)
 	adopted.add_theme_color_override("font_color", UiTheme.text_color("normal"))
