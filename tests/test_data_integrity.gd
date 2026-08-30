@@ -1,5 +1,5 @@
 extends RefCounted
-## 資料完整性：伴獸／技能／道具／御三家設定／地圖／對話劇本／
+## 資料完整性：夥伴／技能／道具／御三家設定／地圖／對話劇本／
 ## 素材檔案之間的參照全部互相成立（不會在執行期才發現斷鏈）。
 
 const ELEMENTS: Array[String] = ["grass", "fire", "water", "neutral"]
@@ -27,10 +27,10 @@ func run(t: TestContext) -> void:
 
 
 func _test_creatures(t: TestContext) -> void:
-	t.check_eq(DataRegistry.creatures.size(), 4, "伴獸共 4 隻（御三家＋岩背獾）")
+	t.check_eq(DataRegistry.creatures.size(), 4, "夥伴共 4 隻（御三家＋岩背獾）")
 	for creature_id: String in ["sproutwing", "emberhorn", "tidecrest", "rockbadger"]:
 		var def := DataRegistry.get_creature(creature_id)
-		t.check(def != null, "伴獸存在：" + creature_id)
+		t.check(def != null, "夥伴存在：" + creature_id)
 		if def == null:
 			continue
 		t.check(not def.display_name.is_empty(), creature_id + " 有名字")
@@ -88,7 +88,7 @@ func _test_items(t: TestContext) -> void:
 		t.check(FileAccess.file_exists(item.icon_path), String(item_id) + " 圖示存在")
 	t.check(DataRegistry.get_item("herbal_balm") != null, "青草膏存在")
 	t.check(DataRegistry.get_item("travel_pack") != null, "旅行包存在")
-	t.check(DataRegistry.get_item("travel_tag") != null, "旅伴牌存在")
+	t.check(DataRegistry.get_item("travel_tag") != null, "啟用標籤存在")
 	t.check(DataRegistry.get_item("echo_box") == null, "回聲道具不得殘留")
 
 
@@ -100,7 +100,7 @@ func _test_starters(t: TestContext) -> void:
 	var variants := {}
 	for starter_id in ids:
 		var starter := DataRegistry.get_starter(starter_id)
-		t.check(DataRegistry.get_creature(starter_id) != null, starter_id + " 對應伴獸存在")
+		t.check(DataRegistry.get_creature(starter_id) != null, starter_id + " 對應夥伴存在")
 		t.check_eq(String(starter.get("element", "")), DataRegistry.get_creature(starter_id).element, starter_id + " 屬性一致")
 		t.check(Array(starter.get("battle_keywords", [])).size() == 2, starter_id + " 兩個戰鬥關鍵字")
 		t.check(not String(starter.get("personality", "")).is_empty(), starter_id + " 有性格描述")
@@ -237,7 +237,7 @@ func _test_dialogues(t: TestContext) -> void:
 	t.check(total_pages >= 40, "劇本頁數合理（%d）" % total_pages)
 	# 玩家可見文字不得殘留回聲設定
 	var script_text := FileAccess.get_file_as_string("res://data/dialogue/dialogues.json")
-	for banned: String in ["回聲", "觀測員", "迴靈", "共鳴"]:
+	for banned: String in ["回聲", "觀測員", "迴靈", "共鳴", "工具精靈", "哨獸", "守望生物", "旅伴牌", "伴獸"]:
 		t.check(not script_text.contains(banned), "劇本不得殘留舊設定用語：" + banned)
 
 

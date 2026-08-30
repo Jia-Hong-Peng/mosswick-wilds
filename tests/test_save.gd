@@ -102,7 +102,7 @@ func _test_v1_migration(t: TestContext) -> void:
 	t.check(not migrated.is_empty(), "v1 存檔必須可遷移（不崩潰、不拒絕）")
 	t.check_eq(int(migrated.get("schema_version", 0)), 4, "遷移後版本為最新（4）")
 	# v1/v2/v3 都是回聲版世界——最終安全重置為新遊戲開場
-	t.check_eq(String(migrated.get("map_id", "")), "haven", "舊世界地圖重設為潮芽伴獸之家")
+	t.check_eq(String(migrated.get("map_id", "")), "haven", "舊世界地圖重設為A00A 導入前哨站")
 	t.check_eq(Array(migrated.get("party", [])).size(), 0, "舊迴靈隊伍無對應內容，安全清空")
 	t.check(absf(float(Dictionary(migrated.get("settings", {})).get("master_volume", 0.0)) - 0.8) < 0.0001, "玩家設定值保留")
 

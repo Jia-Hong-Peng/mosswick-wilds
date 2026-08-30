@@ -1,11 +1,11 @@
 extends Node3D
 ## 首戰呈現層（受驚的岩背獾，2.5D 立體舞台版）。規則在 CrisisBattleService；
 ## 本場景負責：前兆橫幅（不需確認、保持節奏）、姿勢幀切換（縮甲／衝撞／平靜）、
-## 三系技能 VFX（葉片弧線／火星炭裂／羽狀水花）、安撫收尾演出、結算轉場。
+## 三系技能 VFX（葉片弧線／火星炭裂／羽狀水花）、修復收尾演出、結算轉場。
 
 enum View { EVENTS, COMMAND, SKILLS, ITEMS }
 
-const COMMANDS: Array[String] = ["技能", "安撫", "道具"]
+const COMMANDS: Array[String] = ["技能", "修復", "道具"]
 const BOSS_SPRITES := {
 	"idle": "res://assets/creatures/rockbadger_front.png",
 	"shell": "res://assets/creatures/rockbadger_shell.png",
@@ -194,7 +194,7 @@ func _refresh_menu() -> void:
 				var row := UiTheme.make_row(COMMANDS[i], null)
 				_menu_box.add_child(row["panel"])
 				_menu_rows.append(row)
-			# 安撫窗口：恐慌壓到下限時高亮「安撫」
+			# 修復窗口：恐慌壓到下限時高亮「修復」
 			if _service != null and _service.at_floor():
 				UiTheme.set_row_state(_menu_rows[1], "pressed")
 	for i in range(_menu_rows.size()):
@@ -382,7 +382,7 @@ func _burst(at: Vector3, color: Color) -> void:
 	get_tree().create_timer(0.7).timeout.connect(burst.queue_free)
 
 
-## 安撫成功：暖色擴散環＋環境回暖＋夥伴走近
+## 修復成功：暖色擴散環＋環境回暖＋夥伴走近
 func _soothe_rings() -> void:
 	_set_boss_pose("weak")
 	var warm_tween := create_tween().set_parallel(true)
@@ -482,7 +482,7 @@ func _build_ui() -> void:
 	_ui_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_canvas.add_child(_ui_root)
 
-	# 岩背獾資訊（左上）＋恐慌條（含 30% 安撫線）
+	# 岩背獾資訊（左上）＋恐慌條（含 30% 修復線）
 	var boss_panel := PanelContainer.new()
 	boss_panel.position = Vector2(6, 6)
 	boss_panel.add_theme_stylebox_override("panel", UiTheme.dark_panel_style())

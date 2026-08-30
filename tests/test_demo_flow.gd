@@ -129,11 +129,11 @@ func _test_adoption_interaction(t: TestContext) -> void:
 		_pump()
 		DialogueManager.world_action_requested.disconnect(_on_adopt)
 		t.check_eq(_adopt_requested, id, "%s 選「認養」必須發出世界動作訊號" % id)
-		# 多重導入：導入一隻後，其他哨獸的欄位仍開放互動
+		# 多重導入：導入一隻後，其他工具的欄位仍開放互動
 		EventFlagStore.set_flag("starter_chosen")
 		var other := "sproutwing" if id != "sproutwing" else "emberhorn"
 		DialogueManager.start("pen_" + other)
-		t.check(DialogueManager.active, "其他哨獸仍可導入（欄位對話開啟）")
+		t.check(DialogueManager.active, "其他工具仍可導入（欄位對話開啟）")
 		_pump()
 		if DialogueManager._awaiting_choice:
 			DialogueManager.select_choice(1)
@@ -181,7 +181,7 @@ func _test_board_teaser(t: TestContext) -> void:
 	_pump()
 	EventFlagStore.set_flag("chapter_done")
 	DialogueManager.start("board_notice")
-	# 通關後：失蹤伴獸啟事（伏筆）
+	# 通關後：影子系統啟事（伏筆）
 	var teaser_found := false
 	for variant: Variant in Array(entry.get("variants", [])):
 		for page: Variant in Array(Dictionary(variant).get("pages", [])):
@@ -214,7 +214,7 @@ func _test_adopt_and_autosave(t: TestContext) -> void:
 	t.check(EventFlagStore.has_flag("adopted_emberhorn"), "第三隻旗標")
 	t.check_eq(PartyService.members[1].display_name, "芽翼鼯", "未取暱稱者用原名")
 	t.check_eq(PartyService.members[2].display_name, "小燼", "第三隻的暱稱各自套用")
-	t.check_eq(InventoryService.count("travel_tag"), 3, "每次導入配一張旅伴牌")
+	t.check_eq(InventoryService.count("travel_tag"), 3, "每次導入配一張啟用標籤")
 	# 自動存檔 → Continue：三隻與各自暱稱都要回來
 	GameState.set_world_position("haven", Vector2i(20, 7), Vector2i.UP)
 	var payload := SaveService.collect_payload()

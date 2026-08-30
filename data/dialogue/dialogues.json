@@ -1,7 +1,7 @@
 {
 	"opening_haven": {
 		"pages": [
-			{ "speaker": "旁白", "text": "A00A 導入前哨站。今天是你的團隊試點 GHAS 的日子——三頭哨獸——GHAS 三道防線的守望生物——在院子裡看著你這位 A00A IT 的開發者。" },
+			{ "speaker": "旁白", "text": "A00A 導入前哨站。今天是你的團隊試點 GHAS 的日子——三隻小獸——分別代表 Secret Protection、Code Security 與 Code Quality——在院子裡看著你這位 A00A IT 的開發者。" },
 			{ "speaker": "葵姨", "left": "kui:neutral", "speaker_side": "left", "text": "別急著挑最強的。" },
 			{ "speaker": "葵姨", "left": "kui:observing", "speaker_side": "left", "text": "先看看，從哪一隻開始。一隻一隻來——最後三隻都帶上，防護才完整。" }
 		]
@@ -99,7 +99,7 @@
 			},
 			{
 				"pages": [
-					{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "葉堆裡有一雙眼睛。芽翼鼯——駐守 Secret Protection 防線的哨獸——正躲在葉片後觀察你。秘密就該藏這麼好。" },
+					{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "葉堆裡有一雙眼睛。芽翼鼯——代表 Secret Protection——正躲在葉片後觀察你。秘密就該藏這麼好。" },
 					{ "speaker": "葵姨", "left": "kui:observing", "right": "sproutwing:nervous", "speaker_side": "left", "text": "防守型。金鑰、token、密碼——它在 push 之前就擋下外洩（Push Protection）。事前攔一次，勝過事後救一週的火。" }
 				],
 				"choice": {
@@ -150,7 +150,7 @@
 			},
 			{
 				"pages": [
-					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "暖石台上，燼角羌抬起頭。它是駐守 Code Security 防線的哨獸——角縫的光，是 CodeQL 照進程式碼縫隙的光。" },
+					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "暖石台上，燼角羌抬起頭。它代表 Code Security——角縫的光，是 CodeQL 掃描照進程式碼縫隙的光。" },
 					{ "speaker": "葵姨", "left": "kui:observing", "right": "emberhorn:neutral", "speaker_side": "left", "text": "破防型。它會把藏最深的漏洞挖出來擺在你面前。它愛找碴——那是它認真愛你程式碼的方式。" }
 				],
 				"choice": {
@@ -201,7 +201,7 @@
 			},
 			{
 				"pages": [
-					{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "淺水池邊，潮冠鷺一個箭步衝過來——叼走了你手上的 PR 印出來的那疊紙！它是駐守 Code Quality 防線的哨獸。" },
+					{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "淺水池邊，潮冠鷺一個箭步衝過來——叼走了你手上的 PR 印出來的那疊紙！它代表 Code Quality——PR 的品質把關。" },
 					{ "speaker": "葵姨", "left": "kui:concerned", "right": "tidecrest:happy", "speaker_side": "left", "text": "整潔型。它專挑程式碼裡的壞味道——重複、繞遠路、看不懂的命名。追它？你追不上的。" }
 				],
 				"choice": {
@@ -248,19 +248,19 @@
 
 	"ceremony_tag_sproutwing": {
 		"pages": [
-			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它戴上旅伴牌——你 repo 的名字刻了上去。木片和陶片碰在一起，輕輕響了一聲。" },
+			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它掛上啟用標籤——你 repo 的名字刻了上去。木片和陶片碰在一起，輕輕響了一聲。" },
 			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "text": "芽翼鼯──Secret Protection・事前攔阻與外洩防護。從今天起，守著你團隊的每一次 push。" }
 		]
 	},
 	"ceremony_tag_emberhorn": {
 		"pages": [
-			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它戴上旅伴牌——你 repo 的名字刻了上去。掛上的那一刻，角縫的橙光第一次亮了起來。" },
+			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它掛上啟用標籤——你 repo 的名字刻了上去。掛上的那一刻，角縫的橙光第一次亮了起來。" },
 			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "text": "燼角羌──Code Security・漏洞掃描與深掘。從今天起，替你把藏在最深處的問題挖出來。" }
 		]
 	},
 	"ceremony_tag_tidecrest": {
 		"pages": [
-			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它戴上旅伴牌——你 repo 的名字刻了上去。它低頭盯著牌子上的倒影，看了很久。" },
+			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它掛上啟用標籤——你 repo 的名字刻了上去。它低頭盯著牌子上的倒影，看了很久。" },
 			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "潮冠鷺──Code Quality・整潔與可維護。從今天起，盯著你每一條 PR 的味道。" }
 		]
 	},
@@ -373,7 +373,7 @@
 		"grant_items": { "blank_tag": 3 },
 		"pages": [
 			{ "speaker": "葵姨", "left": "kui:neutral", "speaker_side": "left", "text": "試點證明、平台的 repo 地圖。閘門我開了，海岸邊全是還沒防護的舊程式碼。" },
-			{ "speaker": "葵姨", "left": "kui:observing", "speaker_side": "left", "text": "再給你三張空白旅伴牌——三個 repo 的啟用名額。席次有成本，用在刀口上。遇到願意被守護的 repo，就替它登記。" },
+			{ "speaker": "葵姨", "left": "kui:observing", "speaker_side": "left", "text": "再給你三張空白啟用標籤——三個 repo 的啟用名額。席次有成本，用在刀口上。遇到願意被守護的 repo，就替它登記。" },
 			{ "speaker": "葵姨", "left": "kui:smiling", "speaker_side": "left", "text": "去吧。它會跟著你。" }
 		]
 	},
@@ -442,7 +442,7 @@
 			},
 			{
 				"pages": [
-					{ "speaker": "公告板", "text": "【退役公告】Checkmarx・SonarQube・Mend 將分階段退役。三座老塔守了海岸多年，功成身退——防線交接給新哨獸。" },
+					{ "speaker": "公告板", "text": "【退役公告】Checkmarx・SonarQube・Mend 將分階段退役。三套工具守了多年，功成身退——防線交接給 GHAS。" },
 					{ "speaker": "公告板", "text": "【平台公告】GHAS 已開放各部門申請試點：Secret Protection・Code Security・Code Quality。洽 A00A 導入前哨站。" }
 				]
 			}

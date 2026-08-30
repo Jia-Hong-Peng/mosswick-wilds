@@ -1,7 +1,7 @@
 extends Node3D
-## 2.5D 像素立體劇場・世界場景（潮芽伴獸之家）。
+## 2.5D 像素立體劇場・世界場景（A00A 導入前哨站）。
 ## 導演職責：開場運鏡與章節卡、認養流程（互動→確認→儀式→暱稱→入隊）、
-## 夥伴跟隨、危機觸發、結局（安撫後的告別、三種結尾小動畫、伏筆、結尾選單）。
+## 夥伴跟隨、危機觸發、結局（修復後的告別、三種結尾小動畫、伏筆、結尾選單）。
 ## 呈現層：StageBuilder 3D 舞台＋Sprite3D 角色＋方向光/局部暖光＋
 ## 分層霧面片＋God Ray＋螢幕分級（假移軸／通關暖調）。
 
@@ -246,7 +246,7 @@ func _run_adoption(starter_id: String) -> void:
 			tween.tween_property(pen_npc, "position:y", pen_npc.position.y + 0.28, 0.14)
 			tween.tween_property(pen_npc, "position:y", pen_npc.position.y, 0.12)
 		await tween.finished
-	# 3) 旅伴牌
+	# 3) 啟用標籤
 	DialogueManager.start("ceremony_tag_" + starter_id)
 	await DialogueManager.dialogue_finished
 	# 4) 暱稱（可保留原名）
@@ -704,7 +704,7 @@ func _show_teaser() -> void:
 	box.add_theme_constant_override("separation", 4)
 	paper.add_child(box)
 	var head := Label.new()
-	head.text = "【尋】失蹤伴獸"
+	head.text = "【尋】影子系統"
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	head.add_theme_font_size_override("font_size", 12)
 	head.add_theme_color_override("font_color", UiTheme.text_color("header"))

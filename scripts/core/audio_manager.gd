@@ -234,7 +234,7 @@ func play_bell() -> void:
 	_play("bell", func() -> AudioStreamWAV: return _bell_tone())
 
 
-## 伴獸叫聲：每隻有自己的音色輪廓
+## 夥伴叫聲：每隻有自己的音色輪廓
 func play_cry(creature_id: String) -> void:
 	match creature_id:
 		"sproutwing":
@@ -272,7 +272,7 @@ func play_skill(element: String) -> void:
 			play_attack()
 
 
-## 安撫成功：緩慢上行的暖音
+## 修復成功：緩慢上行的暖音
 func play_soothe() -> void:
 	_play("soothe", func() -> AudioStreamWAV: return _tone([[392.0, 0.12], [440.0, 0.12], [523.0, 0.16], [659.0, 0.26]], 0.2, "sine"))
 

@@ -3,11 +3,11 @@ extends RefCounted
 ## 首戰規則（受驚的岩背獾）。純領域邏輯、行動序列固定、極少 RNG。
 ##
 ## 設計：
-## - 這不是狩獵戰——目標是把它的「恐慌」壓下來，最後用「安撫」收尾。
+## - 這不是狩獵戰——目標是把它的「恐慌」壓下來，最後用「修復」收尾。
 ## - 每回合開頭都有可判讀的前兆（telegraph）：噴氣（輕）／縮甲（下回合衝撞）／
 ##   驚慌衝撞（重，但永遠有前一回合的縮甲當預告）。
 ## - 恐慌值（以血條呈現）壓到 30% 下限後，純攻擊不再有效；
-##   必須選「安撫」結束戰鬥。玩家不能用最後一擊消滅它。
+##   必須選「修復」結束戰鬥。玩家不能用最後一擊消滅它。
 ## - 三隻御三家各有不同解法：
 ##   芽翼鼯：纏芽拖慢衝撞、葉幕硬吃傷害（穩定路線）。
 ##   燼角羌：燼角衝撬開縮甲、高攻速攻（爆發路線）。
@@ -72,14 +72,14 @@ func next_move() -> int:
 
 func telegraph_text() -> String:
 	if at_floor():
-		return "它的衝勁弱了下來，腳步遲疑——它聽得見你了。（安撫它！）"
+		return "它的衝勁弱了下來，腳步遲疑——它聽得見你了。（修復它！）"
 	return String(MOVE_TELEGRAPH[next_move()])
 
 
 func intro_events() -> Array[BattleService.BattleEvent]:
 	var events: Array[BattleService.BattleEvent] = []
 	events.append(BattleService.BattleEvent.make(BattleService.EVENT_MESSAGE, "金鑰外洩警報！老服務「岩背獾」驚慌暴走！"))
-	events.append(_msg("它不是敵人——錯的是外洩，不是它。壓下事件等級，最後安撫（修復）它。"))
+	events.append(_msg("它不是敵人——錯的是外洩，不是它。壓下事件等級，最後修復它。"))
 	events.append(_telegraph_event())
 	return events
 
@@ -172,7 +172,7 @@ func _resolve_attack(skill: SkillDef, events: Array[BattleService.BattleEvent], 
 	boss.hp = maxi(floor_hp, boss.hp - total)
 	events.append(BattleService.BattleEvent.make(BattleService.EVENT_ENEMY_HP, "", {"hp": boss.hp, "max_hp": boss.max_hp, "damage": total}))
 	if was_at_floor:
-		events.append(_msg("再打下去只會讓它更慌——它需要的是「安撫」。"))
+		events.append(_msg("再打下去只會讓它更慌——它需要的是「修復」。"))
 	elif strikes == 2:
 		events.append(_msg("連續兩段，共壓下了 %d 點恐慌！" % total))
 	elif shelled and not shell_broken:

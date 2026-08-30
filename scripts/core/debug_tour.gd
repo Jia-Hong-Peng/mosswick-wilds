@@ -125,7 +125,7 @@ func _run() -> void:
 	# 開始旅程
 	await _press("confirm")
 	await _wait(35)
-	_mark("new game → 潮芽伴獸之家")
+	_mark("new game → A00A 導入前哨站")
 	# 開場運鏡：拍一張後跳過
 	await _wait(45)
 	if default_run:
@@ -399,7 +399,7 @@ func _run_crisis() -> void:
 			if not shot_soothe and default_run:
 				shot_soothe = true
 				_shot("soothe_window")
-			await _select_command(scene, 1)  # 安撫
+			await _select_command(scene, 1)  # 修復
 			continue
 		var skill_index := _pick_skill(service)
 		await _select_command(scene, 0)  # 技能

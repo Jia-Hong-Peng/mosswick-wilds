@@ -18,21 +18,21 @@
 		"icon_path": "res://assets/ui/item_travel_pack.png"
 	},
 	"travel_tag": {
-		"display_name": "旅伴牌",
+		"display_name": "啟用標籤",
 		"kind": "key",
 		"amount": 0,
 		"usable_in_battle": false,
 		"usable_in_field": false,
-		"description": "木材、陶片與金屬做成的小識別牌，刻著 repo 與功能的名字。戰鬥開始時會亮起簡短的光紋。",
+		"description": "刻著 repo 與功能名字的識別標籤——這個 repo 已啟用這項防護。戰鬥開始時會亮起簡短的光紋。",
 		"icon_path": "res://assets/ui/item_travel_tag.png"
 	},
 	"blank_tag": {
-		"display_name": "空白旅伴牌",
+		"display_name": "空白啟用標籤",
 		"kind": "capture",
 		"amount": 0,
 		"usable_in_battle": true,
 		"usable_in_field": false,
-		"description": "還沒綁定 repo 的啟用名額。對還沒有防護的野生伴獸出示，它若願意，就當場登記——在它身上把防護開起來。席次有成本，用在刀口上。",
+		"description": "還沒綁定 repo 的啟用名額。對還沒有防護的對象出示，它若願意，就當場登記——在它身上把防護開起來。席次有成本，用在刀口上。",
 		"icon_path": "res://assets/ui/item_blank_tag.png"
 	}
 }

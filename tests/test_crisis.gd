@@ -1,6 +1,6 @@
 extends RefCounted
 ## 危機戰規則（岩背獾）：前兆一致性、恐慌下限（純攻擊打不完）、
-## 安撫時機閘門、三隻御三家各自的策略路線都能在有限回合內收尾、
+## 修復時機閘門、三隻御三家各自的策略路線都能在有限回合內收尾、
 ## 破防／閃避／減速機制、敗北路線。
 
 
@@ -57,10 +57,10 @@ func _test_telegraph_pattern(t: TestContext) -> void:
 		previous = move
 		service.player.heal_full()  # 只驗前兆序列，排除敗北
 		service.take_turn(CrisisBattleService.Action.ITEM, {})  # 無效道具＝跳過玩家行動
-	# 恐慌壓到下限後，前兆改為安撫提示
+	# 恐慌壓到下限後，前兆改為修復提示
 	var boss := service.boss
 	boss.hp = service.panic_floor()
-	t.check(service.telegraph_text().contains("安撫"), "下限時的前兆必須提示安撫")
+	t.check(service.telegraph_text().contains("修復"), "下限時的前兆必須提示修復")
 
 
 func _test_attack_cannot_finish(t: TestContext) -> void:
@@ -75,27 +75,27 @@ func _test_attack_cannot_finish(t: TestContext) -> void:
 		player.heal_full()  # 排除敗北，純看攻擊能不能打完
 		var events := service.take_turn(CrisisBattleService.Action.SKILL, {"skill": heat})
 		for event in events:
-			if event.text.contains("安撫"):
+			if event.text.contains("修復"):
 				floor_message_seen = true
 	t.check_eq(service.outcome, CrisisBattleService.Outcome.ONGOING, "純攻擊不可能結束戰鬥")
 	t.check_eq(service.boss.hp, floor_hp, "恐慌值停在 30% 下限，不得歸零")
-	t.check(floor_message_seen, "下限時必須說明需要「安撫」")
+	t.check(floor_message_seen, "下限時必須說明需要「修復」")
 
 
 func _test_soothe_gate(t: TestContext) -> void:
 	var service := CrisisBattleService.new(_starter("sproutwing"), _badger(), _rng(3))
-	# 恐慌還高：安撫失敗、岩背獾照常行動
+	# 恐慌還高：修復失敗、岩背獾照常行動
 	var events := service.take_turn(CrisisBattleService.Action.SOOTHE, {})
-	t.check_eq(service.outcome, CrisisBattleService.Outcome.ONGOING, "太早安撫不能結束戰鬥")
+	t.check_eq(service.outcome, CrisisBattleService.Outcome.ONGOING, "太早修復不能結束戰鬥")
 	var failed_text := false
 	for event in events:
 		if event.text.contains("聽不進去"):
 			failed_text = true
-	t.check(failed_text, "太早安撫要說明原因")
-	# 到下限：安撫成功
+	t.check(failed_text, "太早修復要說明原因")
+	# 到下限：修復成功
 	service.boss.hp = service.panic_floor()
 	service.take_turn(CrisisBattleService.Action.SOOTHE, {})
-	t.check_eq(service.outcome, CrisisBattleService.Outcome.SOOTHED, "下限時安撫必須成功")
+	t.check_eq(service.outcome, CrisisBattleService.Outcome.SOOTHED, "下限時修復必須成功")
 	t.check(service.take_turn(CrisisBattleService.Action.SOOTHE, {}).is_empty(), "結束後不再接受行動")
 
 
@@ -185,7 +185,7 @@ func _test_starter_paths(t: TestContext) -> void:
 					service.take_turn(CrisisBattleService.Action.SOOTHE, {})
 				else:
 					service.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player, _pick(service, id, player))})
-			t.check_eq(service.outcome, CrisisBattleService.Outcome.SOOTHED, "%s（seed %d）必須以安撫收尾" % [id, seed_value])
+			t.check_eq(service.outcome, CrisisBattleService.Outcome.SOOTHED, "%s（seed %d）必須以修復收尾" % [id, seed_value])
 			t.check(service.turn_count >= 3 and service.turn_count <= 10, "%s 有效回合 3–10（實際 %d）" % [id, service.turn_count])
 			t.check(not player.is_fainted(), "%s 走對策略不應倒下" % id)
 

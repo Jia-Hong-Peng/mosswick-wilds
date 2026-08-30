@@ -118,7 +118,7 @@ func _use_bag_item() -> void:
 		_refresh()
 		return
 	if PartyService.members.is_empty():
-		_message_label.text = "還沒有同行的伴獸。"
+		_message_label.text = "還沒有導入任何工具。"
 		AudioManager.play_bump()
 		_refresh()
 		return
@@ -197,7 +197,7 @@ func _refresh() -> void:
 	match _view:
 		View.PARTY, View.TARGET:
 			if PartyService.members.is_empty():
-				_add_text_row("（還沒有同行的伴獸）", null)
+				_add_text_row("（還沒有導入任何工具）", null)
 			for member in PartyService.members:
 				_add_party_row(member)
 		View.BAG:

@@ -210,14 +210,14 @@ func _activate() -> void:
 			pass
 
 
-## 登記：出示空白旅伴牌，邀請野生伴獸同行
+## 登記：出示空白啟用標籤，邀請野生個體同行
 func _try_register() -> void:
 	if _trainer:
-		_flash_message("對手的夥伴已經有旅伴牌了！")
+		_flash_message("對手的夥伴已經有啟用標籤了！")
 		return
 	var tag := DataRegistry.get_item("blank_tag")
 	if tag == null or InventoryService.count(tag.id) <= 0:
-		_flash_message("沒有空白旅伴牌了。")
+		_flash_message("沒有空白啟用標籤了。")
 		return
 	_do_action(BattleService.ActionType.CAPTURE, {"item": tag, "party_full": PartyService.is_full()})
 
@@ -421,7 +421,7 @@ func _award_exp() -> String:
 	return text
 
 
-## 登記成功：旅伴牌光紋＋野生伴獸走向我方
+## 登記成功：啟用標籤光紋＋野生個體走向我方
 func _register_success() -> void:
 	AudioManager.play_adopt_jingle()
 	_burst(_enemy_home + Vector3(0, 1.0, 0), Pal.AMBER_LT)
@@ -484,7 +484,7 @@ func _end_sequence() -> void:
 		BattleService.Outcome.CAPTURED:
 			result.text = "%s 登記完成！防護已在它身上生效，成為你的旅伴了。" % _enemy.display_name
 		BattleService.Outcome.DEFEAT:
-			result.text = "你眼前一黑……醒來時已回到潮芽伴獸之家。"
+			result.text = "你眼前一黑……醒來時已回到A00A 導入前哨站。"
 		_:
 			result.text = ""
 	box.add_child(result)
