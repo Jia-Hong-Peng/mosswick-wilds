@@ -21,13 +21,19 @@
 
 Godot Engine（MIT License）。
 
-## 標題畫面背景
+## 使用者生成之高解析背景（美術方向 v2）
 
-- `docs/backgrounds/title-island-original.png`：使用者以圖像生成工具產出之**原創**
-  「A00A 導入前哨站」島嶼全景（依本專案規範：無文字、無角色、無任何品牌視覺、
-  無既有遊戲可辨識設計）。原圖 1672×941，僅入 docs（.gdignore，不進遊戲 pck）。
-- 進入遊戲的是縮放至 1280×720 的 `assets/ui/title_bg_island.png`，
-  由標題畫面優先載入；缺檔時退回程式生成版 `title_bg.png`。
+皆為使用者以圖像生成工具產出之**原創**場景（依本專案規範：無文字、無角色、
+無任何品牌視覺、無既有遊戲可辨識設計）。原圖 1672×941 僅入 docs/backgrounds
+（.gdignore，不進遊戲 pck）；進入遊戲的是縮放後版本，程式一律
+「優先載入手繪版，缺檔退回程式生成版」。
+
+| 原圖（docs/backgrounds/） | 遊戲資產 | 用途 |
+|---|---|---|
+| title-island-original.png | assets/ui/title_bg_island.png（1280×720） | 標題畫面 |
+| battle_courtyard_v2.png | assets/battle/backdrop_haven.png（1536×864） | 院子事件戰背板 |
+| battle_coastal_trail_v2.png | assets/battle/backdrop_trail.png（1536×864） | 潮風小徑戰鬥背板 |
+| battle_server_room_v2.png | assets/battle/backdrop_station.png（1536×864） | 機房戰鬥背板 |
 
 ## 主角官方設定圖
 

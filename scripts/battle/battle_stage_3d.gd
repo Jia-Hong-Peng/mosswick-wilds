@@ -11,9 +11,18 @@ const GROUND_KINDS := {
 	"haven": ["grass_a", "grass_b", "path_a"],
 }
 
+## 高解析手繪背板（美術方向 v2）：存在時取代程序生成的背景層；缺檔自動退回
+const BACKDROPS := {
+	"haven": "res://assets/battle/backdrop_haven.png",
+	"trail": "res://assets/battle/backdrop_trail.png",
+	"station": "res://assets/battle/backdrop_station.png",
+}
+
 
 static func build(root: Node3D, kind: String) -> Dictionary:
 	var result := {}
+	var backdrop_path := String(BACKDROPS.get(kind, ""))
+	var has_backdrop := not backdrop_path.is_empty() and ResourceLoader.exists(backdrop_path)
 	# ---------- 環境 ----------
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
@@ -58,25 +67,27 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 	root.add_child(sun)
 	result["sun"] = sun
 
-	# ---------- 地面（10×8 舞台盤） ----------
+	# ---------- 地面（10×8 舞台盤；有手繪背板時整片捨棄，戰鬥員直接站在畫上） ----------
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var kinds: Array = GROUND_KINDS.get(kind, GROUND_KINDS["village"])
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 7
-	for y in range(8):
+	if not has_backdrop:
+		var kinds: Array = GROUND_KINDS.get(kind, GROUND_KINDS["village"])
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 7
+		for y in range(8):
+			for x in range(-2, 12):
+				var tile: String = kinds[rng.randi_range(0, kinds.size() - 1)]
+				var shade := 1.0 - float(y) * 0.03
+				_ground_quad(st, float(x), float(y), tile, shade)
+		# 舞台邊緣裙牆（南緣＋東西側緣——斜角鏡頭會看到側面）
+		var skirt_tile := "cliff_face" if kind != "station" else "wall_stone_in"
 		for x in range(-2, 12):
-			var tile: String = kinds[rng.randi_range(0, kinds.size() - 1)]
-			var shade := 1.0 - float(y) * 0.03
-			_ground_quad(st, float(x), float(y), tile, shade)
-	# 舞台邊緣裙牆（南緣＋東西側緣——斜角鏡頭會看到側面）
-	var skirt_tile := "cliff_face" if kind != "station" else "wall_stone_in"
-	for x in range(-2, 12):
-		_skirt(st, float(x), 8.0, skirt_tile)
-	for y in range(8):
-		_side_skirt(st, 12.0, float(y), skirt_tile)
+			_skirt(st, float(x), 8.0, skirt_tile)
+		for y in range(8):
+			_side_skirt(st, 12.0, float(y), skirt_tile)
 	# 箱型背景物（與地面共用網格，逐面貼 UV——AtlasTexture 不能直接當 3D 材質）
-	match kind:
+	# 有手繪背板時跳過：背景內容已在畫裡
+	match (kind if not has_backdrop else ""):
 		"village":
 			for i in range(3):
 				_tex_box(st, "plaster_wall", Vector3(1.6 + float(i) * 3.1, 0.0, 0.7), Vector3(2.4, 1.3, 1.0))
@@ -91,19 +102,20 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 					continue
 				_tex_box(st, "stone_wall", Vector3(0.65 + float(i) * 1.25, 0.0, 0.5), Vector3(1.2, 0.55, 0.5))
 			_tex_box(st, "log_a", Vector3(8.9, 0.0, 1.8), Vector3(1.6, 0.4, 1.0))
-	st.generate_normals()
-	var mesh := MeshInstance3D.new()
-	mesh.mesh = st.commit()
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = load(TileCatalog.ATLAS_PATH)
-	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
-	material.vertex_color_use_as_albedo = true
-	material.roughness = 1.0
-	mesh.material_override = material
-	root.add_child(mesh)
+	if not has_backdrop:
+		st.generate_normals()
+		var mesh := MeshInstance3D.new()
+		mesh.mesh = st.commit()
+		var material := StandardMaterial3D.new()
+		material.albedo_texture = load(TileCatalog.ATLAS_PATH)
+		material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+		material.vertex_color_use_as_albedo = true
+		material.roughness = 1.0
+		mesh.material_override = material
+		root.add_child(mesh)
 
-	# ---------- 背景層物件 ----------
-	match kind:
+	# ---------- 背景層物件（有手繪背板時跳過） ----------
+	match (kind if not has_backdrop else ""):
 		"trail":
 			for i in range(5):
 				_standee(root, load("res://assets/world3d/tree_a.png" if i % 2 == 0 else "res://assets/world3d/tree_b.png"),
@@ -140,7 +152,8 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 	# ---------- 站位與攝影機 ----------
 	# 構圖對齊 2D 版：我方左下（約 25%,70%）、敵方右上（約 59%,37%）；
 	# -30° 俯角下要拉開足夠的 z 縱深才能在畫面上分出高低。
-	result["player_pos"] = Vector3(2.0, 0.0, 6.4)
+	# 手繪背板構圖：我方讓開畫面左下的前景物（破圍欄），站進空地
+	result["player_pos"] = Vector3(4.7, 0.0, 6.3) if has_backdrop else Vector3(2.0, 0.0, 6.4)
 	result["enemy_pos"] = Vector3(8.1, 0.0, 1.7)
 	var camera := Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
@@ -153,6 +166,24 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 	root.add_child(camera)
 	camera.make_current()
 	result["camera"] = camera
+	# 手繪背板：正對攝影機的大型無光照畫布，置於舞台後方
+	if has_backdrop:
+		var backdrop := MeshInstance3D.new()
+		var quad := QuadMesh.new()
+		# 放大＋下移：把畫作的前景帶（欄杆等）推出畫面下緣，院子中央對齊戰鬥站位
+		quad.size = Vector2(16.0, 9.0)
+		backdrop.mesh = quad
+		var bg_mat := StandardMaterial3D.new()
+		bg_mat.albedo_texture = load(backdrop_path)
+		bg_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		bg_mat.disable_fog = true
+		bg_mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
+		backdrop.material_override = bg_mat
+		backdrop.rotation_degrees = Vector3(-30, 14, 0)
+		var cam_up := Basis.from_euler(Vector3(deg_to_rad(-30.0), deg_to_rad(14.0), 0)) * Vector3.UP
+		backdrop.position = target - back * 8.0 - cam_up * 1.2
+		root.add_child(backdrop)
+		result["backdrop"] = backdrop
 	# 遭遇推鏡：由略遠推近
 	camera.size = 7.4
 	var tween := root.create_tween()
