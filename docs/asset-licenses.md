@@ -35,6 +35,16 @@ Godot Engine（MIT License）。
 | battle_coastal_trail_v2.png | assets/battle/backdrop_trail.png（1536×864） | 潮風小徑戰鬥背板 |
 | battle_server_room_v2.png | assets/battle/backdrop_station.png（1536×864） | 機房戰鬥背板 |
 
+御三家＋馱庫龜的高解析戰鬥立繪與表情集（原圖在 docs/character/，
+經 `tools/pixgen/gen_creatures_hd.gd` 去背、置框後覆蓋程式生成版）：
+
+| 原圖（docs/character/） | 覆蓋輸出 |
+|---|---|
+| secret_pangolin_battle_sheet_v2.png ＋ _expressions_v2 | sproutwing 全套戰鬥幀＋六表情立繪 |
+| codeql_woodpecker_battle_sheet_v2.png ＋ _expressions_v2 | emberhorn 全套戰鬥幀＋六表情立繪 |
+| code_quality_beaver_battle_sheet_v2.png ＋ _expressions_v2 | tidecrest 全套戰鬥幀＋六表情立繪 |
+| legacy_tortoise_battle_sheet_v2.png ＋ _shell_v2 | rockbadger 全套戰鬥幀＋縮甲幀 |
+
 ## 主角官方設定圖
 
 - `docs/character/protagonist-model-sheet.png`：使用者提供之**原創**主角概念設定圖（依本專案原創性規範產出：無紅白帽、無球形徽記、非任何既有訓練家之可辨識設計）。

@@ -282,10 +282,13 @@ static func make_creature(root: Node3D, texture: Texture2D, at: Vector3, pixel: 
 	var sprite := Sprite3D.new()
 	sprite.texture = texture
 	sprite.hframes = hframes
-	sprite.pixel_size = pixel
-	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	# pixel 參數以 64px 設計框為基準；高解析立繪依材質高度換算，畫面尺寸不變
+	var frame_h := float(texture.get_height())
+	var hd := frame_h > 128.0
+	sprite.pixel_size = pixel * 64.0 / frame_h
+	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR if hd else BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.shaded = true
-	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED if hd else SpriteBase3D.ALPHA_CUT_DISCARD
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.position = at + Vector3(0, 32.0 * pixel, 0)
 	root.add_child(sprite)
