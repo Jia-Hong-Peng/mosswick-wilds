@@ -235,7 +235,7 @@ func _run_adoption(starter_id: String) -> void:
 	var pen := Dictionary(starter.get("pen_cell", {}))
 	var pen_cell := Vector2i(int(pen.get("x", 0)), int(pen.get("y", 0)))
 	var pen_npc: Node3D = _npcs_by_cell.get(pen_cell)
-	# 1) 葵姨確認＋認養證
+	# 1) 安姐確認＋認養證
 	DialogueManager.start("ceremony_" + starter_id)
 	await DialogueManager.dialogue_finished
 	# 2) 幼獸主動走向玩家（小跳兩下＋叫聲）
@@ -509,7 +509,7 @@ func _run_ending() -> void:
 	AudioManager.stop_music()
 	_apply_ambience()
 	await get_tree().create_timer(0.8).timeout
-	# 1) 岩背獾平靜離場
+	# 1) 馱庫龜平靜離場
 	var badger := Sprite3D.new()
 	badger.texture = load("res://assets/creatures/rockbadger_calm.png")
 	badger.pixel_size = 1.0 / 30.0
@@ -525,7 +525,7 @@ func _run_ending() -> void:
 	leave_tween.tween_property(badger, "modulate:a", 0.0, 2.4)
 	leave_tween.chain().tween_callback(badger.queue_free)
 	await get_tree().create_timer(1.4).timeout
-	# 2) 葵姨檢查夥伴＋依個性反應
+	# 2) 安姐檢查夥伴＋依個性反應
 	if _follower != null:
 		_follower.hop()
 	DialogueManager.start("ending_check")
@@ -573,7 +573,7 @@ func _ending_walk() -> void:
 		variant = String(DataRegistry.get_starter(_follower.starter_id).get("ending_variant", ""))
 	match variant:
 		"glide":
-			# 芽翼鼯：跳上玩家肩膀展開葉翼，一起走
+			# 鎖鱗甲：蜷成一顆球跳進玩家懷裡，讓玩家抱著走
 			AudioManager.play_cry("sproutwing")
 			var tween := create_tween().set_parallel(true)
 			tween.tween_property(_follower, "position", _player.position + Vector3(0, 0.9, 0), 0.5).set_ease(Tween.EASE_IN)
@@ -582,7 +582,7 @@ func _ending_walk() -> void:
 			_burst_3d(_player.position + Vector3(0, 1.2, 0), Pal.LEAF_LT)
 			_follower.visible = false
 		"torch":
-			# 燼角羌：走在玩家前方，角上的火光映亮道路
+			# 啄錯鳥：跳在玩家前方，紅冠的光映亮道路
 			AudioManager.play_cry("emberhorn")
 			var glow := OmniLight3D.new()
 			glow.light_color = Color(1.0, 0.62, 0.3)
@@ -597,7 +597,7 @@ func _ending_walk() -> void:
 	await _walk_player_to(Vector2i(GATE_CELL.x, 8))
 	await _walk_player_to(Vector2i(GATE_CELL.x, 12))
 	if _follower != null and variant == "chase":
-		# 潮冠鷺：叼著地圖搶先跑出閘門，玩家追上
+		# 理木狸：叼著地圖搖著大尾搶先跑出閘門，玩家追上
 		for i in range(2):
 			_follower.scripted_step(Vector2i.RIGHT)
 			while _follower.is_moving():

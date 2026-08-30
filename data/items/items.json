@@ -14,7 +14,7 @@
 		"amount": 0,
 		"usable_in_battle": false,
 		"usable_in_field": false,
-		"description": "葵姨準備的導入工具包：checklist、設定文件、備用牽繩，還有一格留給你的第一份掃描報告。",
+		"description": "安姐準備的導入工具包：checklist、設定文件、備用牽繩，還有一格留給你的第一份掃描報告。",
 		"icon_path": "res://assets/ui/item_travel_pack.png"
 	},
 	"travel_tag": {

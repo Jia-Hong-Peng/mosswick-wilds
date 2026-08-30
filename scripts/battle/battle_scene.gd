@@ -477,7 +477,7 @@ func _end_sequence() -> void:
 		BattleService.Outcome.VICTORY:
 			if _scripted == "rival":
 				EventFlagStore.set_flag("rival_beaten")
-				result.text = "阿汐收回了夥伴：「可惡……默契輸你們一截！」"
+				result.text = "老桑收回了夥伴：「可惡……默契輸你們一截！」"
 			else:
 				result.text = "野生的%s退開了，鑽回草叢深處。" % _enemy.display_name
 			result.text += _award_exp()

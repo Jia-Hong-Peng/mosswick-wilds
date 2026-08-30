@@ -1,47 +1,47 @@
 {
 	"sproutwing": {
 		"id": "sproutwing",
-		"display_name": "芽翼鼯",
+		"display_name": "鎖鱗甲",
 		"element": "grass",
 		"feature": "Secret Protection",
-		"description": "代表 Secret Protection。把金鑰藏進葉子裡，在 push 之前就擋下外洩。",
-		"personality": "謹慎——秘密不會交給急著伸手的人。",
+		"description": "代表 Secret Protection 的穿山甲。金鑰、token、密碼都收進鱗甲下，胸口有一枚鑰匙孔紋——在 push 之前就把外洩擋下來。",
+		"personality": "謹慎——鱗甲不為急著伸手的人打開。",
 		"battle_keywords": ["事前攔阻", "外洩防護"],
-		"adoption_hint": "蹲低、等它自己過來。",
+		"adoption_hint": "蹲低、掌心朝上，等它自己過來。",
 		"follow_behavior": "lag",
 		"ending_variant": "glide",
 		"pen_cell": { "x": 3, "y": 5 },
 		"cry": "cry_sproutwing",
-		"kui_comment": "它很少主動信任別人。你的金鑰和 token，它會守好。"
+		"kui_comment": "它很少把鑰匙鱗交給別人。你的金鑰和 token，它會鎖好。"
 	},
 	"emberhorn": {
 		"id": "emberhorn",
-		"display_name": "燼角羌",
+		"display_name": "啄錯鳥",
 		"element": "fire",
 		"feature": "Code Security",
-		"description": "代表 Code Security（CodeQL）。角縫的光照進程式碼縫隙，把藏最深的漏洞挖出來。",
+		"description": "代表 Code Security（CodeQL）的啄木鳥。火紅冠羽是掃描的光，專往木頭最深處鑿——藏得再深的蟲，也會被它揪出來擺在你面前。",
 		"personality": "好勝——愛找碴，那是它認真愛你程式碼的方式。",
 		"battle_keywords": ["漏洞掃描", "深掘"],
-		"adoption_hint": "正面走近，接住它的試探。",
+		"adoption_hint": "伸出手臂，接住它的檢查。",
 		"follow_behavior": "lead",
 		"ending_variant": "torch",
 		"pen_cell": { "x": 15, "y": 5 },
 		"cry": "cry_emberhorn",
-		"kui_comment": "它第一次對人低下角。被它指出問題，就是被它認可。"
+		"kui_comment": "它第一次在人的手臂上啄完整整三下。被它揪出問題，就是被它認可。"
 	},
 	"tidecrest": {
 		"id": "tidecrest",
-		"display_name": "潮冠鷺",
+		"display_name": "理木狸",
 		"element": "water",
 		"feature": "Code Quality",
-		"description": "代表 Code Quality。專挑 PR 裡的壞味道，把程式碼洗到照得出倒影。",
-		"personality": "好奇——盯上你的 PR 就不會放過。",
+		"description": "代表 Code Quality 的河狸。看到亂的就想理：亂枝疊成穩固的壩，亂程式碼啃出整齊的邊。它理過的水面，乾淨得照得出倒影。",
+		"personality": "較真——亂的東西它看不下去。",
 		"battle_keywords": ["整潔", "可維護"],
-		"adoption_hint": "別追它，用池邊的倒影引它回來。",
+		"adoption_hint": "別追它，把亂枝擺到它面前。",
 		"follow_behavior": "wander",
 		"ending_variant": "chase",
 		"pen_cell": { "x": 20, "y": 6 },
 		"cry": "cry_tidecrest",
-		"kui_comment": "它把 PR 還給你了？那它是認可你的整潔了。"
+		"kui_comment": "它把 PR 還給你了？上面的啃痕，就是它的 review。"
 	}
 }

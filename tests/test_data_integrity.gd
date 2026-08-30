@@ -27,7 +27,7 @@ func run(t: TestContext) -> void:
 
 
 func _test_creatures(t: TestContext) -> void:
-	t.check_eq(DataRegistry.creatures.size(), 4, "夥伴共 4 隻（御三家＋岩背獾）")
+	t.check_eq(DataRegistry.creatures.size(), 4, "夥伴共 4 隻（御三家＋馱庫龜）")
 	for creature_id: String in ["sproutwing", "emberhorn", "tidecrest", "rockbadger"]:
 		var def := DataRegistry.get_creature(creature_id)
 		t.check(def != null, "夥伴存在：" + creature_id)
@@ -46,10 +46,10 @@ func _test_creatures(t: TestContext) -> void:
 				"%s 姿勢幀存在：%s" % [creature_id, pose])
 		var creature := DataRegistry.make_creature(creature_id, 5)
 		t.check(creature != null and creature.max_hp > 0, creature_id + " 可實例化")
-	# 御三家世界行走圖；岩背獾縮甲幀
+	# 御三家世界行走圖；馱庫龜縮甲幀
 	for starter_id: String in ["sproutwing", "emberhorn", "tidecrest"]:
 		t.check(FileAccess.file_exists("res://assets/creatures/%s_world.png" % starter_id), starter_id + " 有世界行走圖")
-	t.check(FileAccess.file_exists("res://assets/creatures/rockbadger_shell.png"), "岩背獾有縮甲幀")
+	t.check(FileAccess.file_exists("res://assets/creatures/rockbadger_shell.png"), "馱庫龜有縮甲幀")
 	# 屬性循環：草克水、水克火、火克草
 	t.check(DamageCalculator.effectiveness("grass", "water") > 1.0, "草克水")
 	t.check(DamageCalculator.effectiveness("water", "fire") > 1.0, "水克火")
@@ -237,7 +237,8 @@ func _test_dialogues(t: TestContext) -> void:
 	t.check(total_pages >= 40, "劇本頁數合理（%d）" % total_pages)
 	# 玩家可見文字不得殘留回聲設定
 	var script_text := FileAccess.get_file_as_string("res://data/dialogue/dialogues.json")
-	for banned: String in ["回聲", "觀測員", "迴靈", "共鳴", "工具精靈", "哨獸", "守望生物", "旅伴牌", "伴獸"]:
+	for banned: String in ["回聲", "觀測員", "迴靈", "共鳴", "工具精靈", "哨獸", "守望生物", "旅伴牌", "伴獸",
+			"芽翼鼯", "燼角羌", "潮冠鷺", "岩背獾", "葵姨", "阿汐"]:
 		t.check(not script_text.contains(banned), "劇本不得殘留舊設定用語：" + banned)
 
 
@@ -259,7 +260,7 @@ func _test_ui_assets(t: TestContext) -> void:
 	for asset: String in ["contact_shadow", "fog_blob", "resonance_ring"]:
 		t.check(FileAccess.file_exists("res://assets/ui/%s.png" % asset), "UI 素材存在：" + asset)
 	for expr: String in ["neutral", "observing", "concerned", "relieved", "smiling"]:
-		t.check(FileAccess.file_exists("res://assets/portraits/kui_%s.png" % expr), "葵姨立繪存在：" + expr)
+		t.check(FileAccess.file_exists("res://assets/portraits/kui_%s.png" % expr), "安姐立繪存在：" + expr)
 	for expr: String in ["neutral", "thinking", "surprised", "determined", "happy"]:
 		t.check(FileAccess.file_exists("res://assets/portraits/player_%s.png" % expr), "玩家立繪存在：" + expr)
-	t.check(FileAccess.file_exists("res://assets/characters/npc_kui.png"), "葵姨世界圖存在")
+	t.check(FileAccess.file_exists("res://assets/characters/npc_kui.png"), "安姐世界圖存在")

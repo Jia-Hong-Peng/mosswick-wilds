@@ -4,75 +4,75 @@
 		"element": "neutral",
 		"power": 35,
 		"accuracy": 1.0,
-		"description": "壓低重心撞上去，樸實可靠。"
+		"description": "壓低重心撞上去，樸實可靠——跑了十年的老服務就這一招。"
 	},
 	"leaf_slap": {
-		"display_name": "葉拍",
+		"display_name": "鱗甲拍",
 		"element": "grass",
 		"power": 40,
 		"accuracy": 1.0,
-		"description": "側身用葉形滑翔膜俐落地拍上去。"
+		"description": "側身甩動成排鱗甲拍上去，扎實有份量。"
 	},
 	"tangle_sprout": {
-		"display_name": "纏芽",
+		"display_name": "藤蔓鎖",
 		"element": "grass",
 		"power": 0,
 		"accuracy": 1.0,
 		"effect": "slow",
-		"description": "撒出會抓地的嫩藤纏住對方腳步，降低牠的速度，衝撞也慢了下來。"
+		"description": "撒出帶鉤的藤蔓鎖住對方腳步，速度下降，衝撞也慢了下來。"
 	},
 	"leaf_veil": {
-		"display_name": "葉幕",
+		"display_name": "推送攔阻",
 		"element": "grass",
 		"power": 0,
 		"accuracy": 1.0,
 		"effect": "shield",
-		"description": "展開滑翔膜擋在身前，短時間大幅降低受到的傷害。"
+		"description": "鱗甲張成一面盾擋在身前——像 Push Protection 一樣，把傷害在進門前擋下來。"
 	},
 	"heat_hoof": {
-		"display_name": "熱蹄",
+		"display_name": "連啄",
 		"element": "fire",
 		"power": 45,
 		"accuracy": 1.0,
-		"description": "蹄尖帶著地熱的溫度，近距離重重踏出一擊。"
+		"description": "快、準、狠的三連啄，每一下都落在同一個點上。"
 	},
 	"ember_charge": {
-		"display_name": "燼角衝",
+		"display_name": "深度掃描",
 		"element": "fire",
 		"power": 35,
 		"accuracy": 1.0,
 		"effect": "break",
-		"description": "壓低炭黑短角衝撞，撬開對方的防禦；自己的腳步會慢上一拍。"
+		"description": "鑿進防禦的縫隙裡連啄，撬開對方的硬殼——藏最深的弱點也挖得到；自己的腳步會慢上一拍。"
 	},
 	"warm_flame": {
-		"display_name": "暖火",
+		"display_name": "紅羽預警",
 		"element": "fire",
 		"power": 0,
 		"accuracy": 1.0,
 		"effect": "warm",
-		"description": "角縫的火光轉旺，小幅恢復狀態，下一次攻擊更有力。"
+		"description": "冠羽的紅光轉旺，小幅恢復狀態，下一次攻擊更有力——先修最痛的那一項。"
 	},
 	"tide_feather": {
-		"display_name": "潮羽",
+		"display_name": "拍尾水花",
 		"element": "water",
 		"power": 38,
 		"accuracy": 1.0,
-		"description": "貼地掠過，用翼緣的水花快速劃過對方。"
+		"description": "格紋大尾重重一拍，水花俐落地掃過對方。"
 	},
 	"mist_step": {
-		"display_name": "霧步",
+		"display_name": "潛游",
 		"element": "water",
 		"power": 0,
 		"accuracy": 1.0,
 		"effect": "dodge",
-		"description": "踏起一圈薄霧，速度與閃避提高，還能抓住多出來的一步。"
+		"description": "貼著水花潛進去，速度與閃避提高，還能多搶一步。"
 	},
 	"return_tide": {
-		"display_name": "回潮",
+		"display_name": "重構",
 		"element": "water",
 		"power": 0,
 		"accuracy": 1.0,
 		"effect": "cleanse",
-		"description": "喚一道退了又回的小潮，洗去一項負面狀態並小幅恢復體力。"
+		"description": "把亂掉的狀態拆掉重理，洗去一項負面狀態並小幅恢復——重構完就是清爽。"
 	}
 }

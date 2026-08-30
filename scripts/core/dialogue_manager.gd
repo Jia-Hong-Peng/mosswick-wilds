@@ -163,7 +163,7 @@ func _finish() -> void:
 		"start_crisis":
 			SceneRouter.goto_crisis()
 		"rival_battle":
-			# 阿汐的夥伴剋玩家御三家（草→火、火→水、水→草）
+			# 老桑的夥伴剋玩家御三家（草→火、火→水、水→草）
 			var counter := {
 				"sproutwing": "emberhorn",
 				"emberhorn": "tidecrest",

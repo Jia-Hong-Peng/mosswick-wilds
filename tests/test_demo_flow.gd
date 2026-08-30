@@ -1,6 +1,6 @@
 extends RefCounted
 ## DEMO 流程（認養日）：對話凍結移動、閘門變體閘控、認養互動→
-## 確認→動作訊號、葵姨旅行包發放、夥伴互動變體、伏筆公告板、
+## 確認→動作訊號、安姐旅行包發放、夥伴互動變體、伏筆公告板、
 ## 認養結果入檔與 Continue 恢復。
 
 const SaveScript := preload("res://scripts/persistence/save_service.gd")
@@ -144,7 +144,7 @@ func _on_adopt(starter_id: String) -> void:
 	_adopt_requested = starter_id
 
 
-## 葵姨：認養後首次對話發旅行包＋依御三家給不同評語
+## 安姐：認養後首次對話發旅行包＋依御三家給不同評語
 func _test_kui_travel_pack(t: TestContext) -> void:
 	EventFlagStore.reset()
 	InventoryService.reset()
@@ -153,7 +153,7 @@ func _test_kui_travel_pack(t: TestContext) -> void:
 	EventFlagStore.set_flag("adopted_emberhorn")
 	DialogueManager.start("npc_kui")
 	_pump()
-	t.check(EventFlagStore.has_flag("travel_pack_taken"), "葵姨首次對話立旅行包旗標")
+	t.check(EventFlagStore.has_flag("travel_pack_taken"), "安姐首次對話立旅行包旗標")
 	t.check_eq(InventoryService.count("travel_pack"), 1, "取得旅行包")
 	t.check_eq(InventoryService.count("herbal_balm"), 2, "旅行包附青草膏 ×2")
 	# 再談：不重複發包
@@ -212,7 +212,7 @@ func _test_adopt_and_autosave(t: TestContext) -> void:
 	t.check_eq(GameState.starter_id, "tidecrest", "跟隨基準仍是第一隻")
 	t.check(EventFlagStore.has_flag("adopted_sproutwing"), "第二隻旗標")
 	t.check(EventFlagStore.has_flag("adopted_emberhorn"), "第三隻旗標")
-	t.check_eq(PartyService.members[1].display_name, "芽翼鼯", "未取暱稱者用原名")
+	t.check_eq(PartyService.members[1].display_name, "鎖鱗甲", "未取暱稱者用原名")
 	t.check_eq(PartyService.members[2].display_name, "小燼", "第三隻的暱稱各自套用")
 	t.check_eq(InventoryService.count("travel_tag"), 3, "每次導入配一張啟用標籤")
 	# 自動存檔 → Continue：三隻與各自暱稱都要回來

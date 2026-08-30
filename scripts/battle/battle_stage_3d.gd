@@ -85,7 +85,7 @@ static func build(root: Node3D, kind: String) -> Dictionary:
 			for i in range(4):
 				_tex_box(st, "instrument", Vector3(1.2 + float(i) * 2.4, 0.0, 0.6), Vector3(1.6, 1.35, 0.8))
 		"haven":
-			# 庭院背景：圍欄一排（缺口＝被岩背獾撞破的位置）＋培育木框
+			# 庭院背景：圍欄一排（缺口＝被馱庫龜撞破的位置）＋培育木框
 			for i in range(8):
 				if i == 2 or i == 3:
 					continue

@@ -1,5 +1,5 @@
 extends RefCounted
-## 危機戰規則（岩背獾）：前兆一致性、恐慌下限（純攻擊打不完）、
+## 危機戰規則（馱庫龜）：前兆一致性、恐慌下限（純攻擊打不完）、
 ## 修復時機閘門、三隻御三家各自的策略路線都能在有限回合內收尾、
 ## 破防／閃避／減速機制、敗北路線。
 
@@ -84,7 +84,7 @@ func _test_attack_cannot_finish(t: TestContext) -> void:
 
 func _test_soothe_gate(t: TestContext) -> void:
 	var service := CrisisBattleService.new(_starter("sproutwing"), _badger(), _rng(3))
-	# 恐慌還高：修復失敗、岩背獾照常行動
+	# 恐慌還高：修復失敗、馱庫龜照常行動
 	var events := service.take_turn(CrisisBattleService.Action.SOOTHE, {})
 	t.check_eq(service.outcome, CrisisBattleService.Outcome.ONGOING, "太早修復不能結束戰鬥")
 	var failed_text := false
@@ -105,21 +105,21 @@ func _test_break_mechanic(t: TestContext) -> void:
 	var service := CrisisBattleService.new(player, _badger(), _rng(11))
 	service.take_turn(CrisisBattleService.Action.ITEM, {})
 	service.take_turn(CrisisBattleService.Action.ITEM, {})
-	t.check(service.shelled, "第二回合後岩背獾必須處於縮甲")
+	t.check(service.shelled, "第二回合後馱庫龜必須處於縮甲")
 	# 縮甲時普通攻擊大減
 	var hp_before := service.boss.hp
 	service.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player, 0)})
 	var reduced := hp_before - service.boss.hp
 	t.check(reduced > 0, "縮甲下仍要有最低傷害")
-	# 重來：用燼角衝撬開
+	# 重來：用深度掃描撬開
 	var player_b := _starter("emberhorn")
 	var service_b := CrisisBattleService.new(player_b, _badger(), _rng(11))
 	service_b.take_turn(CrisisBattleService.Action.ITEM, {})
 	service_b.take_turn(CrisisBattleService.Action.ITEM, {})
 	var hp_before_b := service_b.boss.hp
-	service_b.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player_b, 1)})  # 燼角衝
+	service_b.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player_b, 1)})  # 深度掃描
 	var break_damage := hp_before_b - service_b.boss.hp
-	t.check(service_b.shell_broken, "燼角衝必須撬開岩甲")
+	t.check(service_b.shell_broken, "深度掃描必須撬開岩甲")
 	t.check(break_damage > reduced, "破防的一擊必須勝過對著岩甲硬打（%d vs %d）" % [break_damage, reduced])
 	# 撬開後縮甲失效
 	player_b.heal_full()
@@ -132,12 +132,12 @@ func _test_break_mechanic(t: TestContext) -> void:
 func _test_dodge_mechanic(t: TestContext) -> void:
 	var player := _starter("tidecrest")
 	var service := CrisisBattleService.new(player, _badger(), _rng(5))
-	# 霧步後，下一次受擊幾乎無傷
+	# 潛游後，下一次受擊幾乎無傷
 	var hp_before := player.hp
-	service.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player, 1)})  # 霧步（回合1 噴氣）
+	service.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player, 1)})  # 潛游（回合1 噴氣）
 	var dodged_damage := hp_before - player.hp
-	t.check(dodged_damage <= 3, "霧步必須幾乎閃開攻擊（受了 %d）" % dodged_damage)
-	# 連擊：霧步後的攻擊比平常多一段
+	t.check(dodged_damage <= 3, "潛游必須幾乎閃開攻擊（受了 %d）" % dodged_damage)
+	# 連擊：潛游後的攻擊比平常多一段
 	var player_b := _starter("tidecrest")
 	var service_b := CrisisBattleService.new(player_b, _badger(), _rng(9))
 	var boss_before := service_b.boss.hp
@@ -149,7 +149,7 @@ func _test_dodge_mechanic(t: TestContext) -> void:
 	var boss_mid := service_c.boss.hp
 	service_c.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player_c, 0)})
 	var double := boss_mid - service_c.boss.hp
-	t.check(double > single, "霧步後的攻擊必須多出一段（%d vs %d）" % [double, single])
+	t.check(double > single, "潛游後的攻擊必須多出一段（%d vs %d）" % [double, single])
 
 
 func _test_slow_and_shield(t: TestContext) -> void:
@@ -161,15 +161,15 @@ func _test_slow_and_shield(t: TestContext) -> void:
 	var hp_before := player.hp
 	service.take_turn(CrisisBattleService.Action.ITEM, {})  # 回合3：衝撞
 	var raw := hp_before - player.hp
-	# 纏芽＋葉幕的衝撞
+	# 藤蔓鎖＋推送攔阻的衝撞
 	var player_b := _starter("sproutwing")
 	var service_b := CrisisBattleService.new(player_b, _badger(), _rng(13))
-	service_b.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player_b, 1)})  # 纏芽
+	service_b.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player_b, 1)})  # 藤蔓鎖
 	service_b.take_turn(CrisisBattleService.Action.ITEM, {})
 	var hp_before_b := player_b.hp
-	service_b.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player_b, 2)})  # 葉幕＋衝撞
+	service_b.take_turn(CrisisBattleService.Action.SKILL, {"skill": _skill(player_b, 2)})  # 推送攔阻＋衝撞
 	var mitigated := hp_before_b - player_b.hp
-	t.check(raw >= mitigated * 3, "纏芽＋葉幕必須大幅壓低衝撞傷害（%d vs %d）" % [raw, mitigated])
+	t.check(raw >= mitigated * 3, "藤蔓鎖＋推送攔阻必須大幅壓低衝撞傷害（%d vs %d）" % [raw, mitigated])
 
 
 ## 三條策略路線都能在 3–8 個有效回合內收尾，且不需要道具或練等

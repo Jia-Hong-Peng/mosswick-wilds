@@ -9,27 +9,29 @@ GitHub 平台＝群島世界、三個安全功能＝御三家、導入流程＝�
 三套工具功成身退，交接不留空窗。
 
 你是 A00A IT 的一般開發者。今天輪到你的團隊試點 GHAS——
-到導入前哨站與三個功能的代表角色互動：守秘密的**芽翼鼯**（Secret Protection）、
-愛找碴的**燼角羌**（Code Security／CodeQL）、盯 PR 的**潮冠鷺**（Code Quality）。
+到導入前哨站與三個功能的代表角色互動——設定直接長在功能上：
+把秘密鎖進鱗甲的穿山甲**鎖鱗甲**（Secret Protection）、
+專啄深處之蟲的啄木鳥**啄錯鳥**（Code Security／CodeQL）、
+把亂枝理成水壩的河狸**理木狸**（Code Quality）。
 **三隻都能導入**——一隻一隻來，三道防線都帶上才完整。
-然後處理你的第一起事件：金鑰外洩、警報大作，老服務**岩背獾**驚慌暴走。
+然後處理你的第一起事件：金鑰外洩、警報大作，老服務**馱庫龜**驚慌暴走。
 你不能打倒它——降級事件、不咎責，最後**修復**它。
 
 | 遊戲機制 | 宣導訊息 |
 |---|---|
 | 三選三御三家 | 先試點、再擴大，三個功能都導入 |
-| 葉幕減傷 | Push Protection 在事前擋下外洩 |
+| 推送攔阻減傷 | Push Protection 在事前擋下外洩 |
 | 戰鬥前兆判讀 | Alert 依嚴重度分級處理 |
 | 修復機制（打不死） | 事件應變：不咎責、輪替金鑰、修復 |
 | 登記收服（空白啟用標籤） | 在一個 repo 上啟用功能；席次有成本 |
 | 公告板退役公告 | 舊工具功成身退、防線交接不留空窗 |
-| 對手阿汐 | 「SonarQube 用十年好好的幹嘛換」——正面回應真實抗拒 |
+| 對手老桑 | 「SonarQube 用十年好好的幹嘛換」——正面回應真實抗拒 |
 
 **線上遊玩：https://jia-hong-peng.github.io/mosswick-wilds/**
 
 ![Title](docs/screenshots/hd2d-after/title.png)
 
-| 試點日開場（葵姨） | 導入互動（芽翼鼯） |
+| 試點日開場（安姐） | 導入互動（鎖鱗甲） |
 |---|---|
 | ![Opening](docs/screenshots/hd2d-after/opening_kui.png) | ![Adopt](docs/screenshots/hd2d-after/adopt_interact.png) |
 
@@ -41,15 +43,15 @@ GitHub 平台＝群島世界、三個安全功能＝御三家、導入流程＝�
 
 ```text
 0:00 開場運鏡：前哨站晨光 → 三個活動區 → 章節卡「第一章：第一次導入」（可跳過）
-0:20 試點日：與三個功能的代表角色各自互動（蹲低等它／接住試探／倒影引回）→ 導入確認
+0:20 試點日：與三個功能的代表角色各自互動（掌心等它開鱗／手臂接住三啄／亂枝引它整理）→ 導入確認
      → 試點申請 → 啟用標籤 → 暱稱（可保留原名）→ 專屬演出 → 自動存檔
      ※ 三隻都能導入——回頭把另外兩道防線也帶上
-1:30 第一次同行：夥伴實際跟隨（三隻個性不同）→ 與夥伴互動 → 葵姨交付導入工具包
-2:00 事件：金鑰外洩警報大作——老服務岩背獾驚慌暴走，撞破圍欄衝進院子
+1:30 第一次同行：夥伴實際跟隨（三隻個性不同）→ 與夥伴互動 → 安姐交付導入工具包
+2:00 事件：金鑰外洩警報大作——老服務馱庫龜驚慌暴走，撞破圍欄衝進院子
 2:30 事件應變戰（60–90 秒、3–8 有效回合）：判讀前兆＝alert 分級（噴氣／縮甲／衝撞）
-     → 三道防線各有解法（纏芽拖慢＋葉幕硬吃／燼角衝破防速攻／霧步閃避連擊）
+     → 三道防線各有解法（藤蔓鎖拖慢＋推送攔阻硬吃／深度掃描破防速攻／潛游閃避連擊）
      → 事件等級壓到底線後「修復」收尾——純攻擊不可能獲勝，blameless
-4:00 撤銷輪替外洩 token → 服務恢復 → 葵姨發三張啟用名額 → 走向舊程式碼海岸
+4:00 撤銷輪替外洩 token → 服務恢復 → 安姐發三張啟用名額 → 走向舊程式碼海岸
      → 章節完成＋已導入清單 → 公告板伏筆：影子系統（一雙不同顏色的眼睛）
 ```
 
@@ -93,9 +95,9 @@ $godot = 'D:\Tools\Godot\4.7.1-stable-standard\Godot_v4.7.1-stable_win64_console
 & $godot --headless --path . --import                              # Headless 驗證
 & $godot --headless --path . --script res://tests/run_tests.gd     # 2831 asserts
 & $godot --headless --path . --export-release "Web" build/web/index.html
-& $godot --path . --resolution 1280x720 -- --tour                  # 導入芽翼鼯完整通關（草系解法）
-& $godot --path . --resolution 1280x720 -- --tour-fire             # 導入燼角羌（爆發解法）
-& $godot --path . --resolution 1280x720 -- --tour-water            # 導入潮冠鷺（速度解法）
+& $godot --path . --resolution 1280x720 -- --tour                  # 導入鎖鱗甲完整通關（草系解法）
+& $godot --path . --resolution 1280x720 -- --tour-fire             # 導入啄錯鳥（爆發解法）
+& $godot --path . --resolution 1280x720 -- --tour-water            # 導入理木狸（速度解法）
 & $godot --path . --resolution 1280x720 -- --tour-continue         # Continue 恢復驗證
 ```
 
@@ -123,7 +125,7 @@ tools/pixgen/*                           全素材產生器（含御三家六表
 - 通關時間為自動化 bot 實測（51–63 秒）換算的人類估計，未做真人試玩取樣。
 - Web 版於 Chromium 驗證啟動與 Console 無錯；畫面級／FPS／Firefox／Safari／
   行動實機驗收標註於 `docs/web-hd2d-performance.md`（尚待人工裝置驗收）。
-- 危機戰指令清單開啟時會暫時遮住岩背獾本體（版面取捨；前兆／事件演出時完整可見）。
+- 危機戰指令清單開啟時會暫時遮住馱庫龜本體（版面取捨；前兆／事件演出時完整可見）。
 
 ## Roadmap
 

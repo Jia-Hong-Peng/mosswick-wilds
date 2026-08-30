@@ -1,6 +1,6 @@
 extends Node
-## Autoload QA：`-- --tour` 從 New Game 完整自動通關（認養芽翼鼯、草系解法）；
-## `-- --tour-fire` 認養燼角羌（爆發解法）；`-- --tour-water` 認養潮冠鷺（速度解法）；
+## Autoload QA：`-- --tour` 從 New Game 完整自動通關（認養鎖鱗甲、草系解法）；
+## `-- --tour-fire` 認養啄錯鳥（爆發解法）；`-- --tour-water` 認養理木狸（速度解法）；
 ## `-- --tour-continue` 驗證通關存檔的 Continue。未帶參數時完全不作用。
 ## 僅供 QA：會直接讀取場景內部狀態（_view/_service）驅動危機戰。
 
@@ -132,7 +132,7 @@ func _run() -> void:
 		_shot("opening_pan")
 	await _press("confirm")
 	await _wait(25)
-	# 開場對話（葵姨）
+	# 開場對話（安姐）
 	await _wait_dialogue_start()
 	if default_run:
 		await _pump_dialogue(2, "opening_kui")
@@ -177,7 +177,7 @@ func _run() -> void:
 	# 與夥伴互動一次（夥伴會跟在附近；面向下方嘗試）
 	await _wait(30)
 	await _try_partner_talk()
-	# 找葵姨拿旅行包（11,9）：站 (11,8) 面下
+	# 找安姐拿旅行包（11,9）：站 (11,8) 面下
 	await _walk_to_row8_x(11)
 	await _face("move_down")
 	await _press("confirm")
@@ -194,7 +194,7 @@ func _run() -> void:
 	await _pump_choice_first()  # （點頭）我們一起。
 	await _pump_dialogue()
 	await _wait(50)
-	_mark("危機戰開始（岩背獾）")
+	_mark("危機戰開始（馱庫龜）")
 	await _run_crisis()
 	# ---- 結局 ----
 	await _wait_dialogue_start()
@@ -409,25 +409,25 @@ func _run_crisis() -> void:
 
 
 ## 御三家策略：
-## 芽翼鼯＝縮甲時上纏芽、衝撞前葉幕、其餘葉拍；
-## 燼角羌＝縮甲後燼角衝撬開、其餘熱蹄；
-## 潮冠鷺＝衝撞前霧步閃避（附帶連擊）、其餘潮羽。
+## 鎖鱗甲＝縮甲時上藤蔓鎖、衝撞前推送攔阻、其餘鱗甲拍；
+## 啄錯鳥＝縮甲後深度掃描撬開、其餘連啄；
+## 理木狸＝衝撞前潛游閃避（附帶連擊）、其餘拍尾水花。
 func _pick_skill(service: CrisisBattleService) -> int:
 	match starter:
 		"sproutwing":
 			if service.next_move() == CrisisBattleService.Move.RAM:
-				return 2  # 葉幕
+				return 2  # 推送攔阻
 			if service.next_move() == CrisisBattleService.Move.SHELL:
-				return 1  # 纏芽（衝撞前上減速）
-			return 0      # 葉拍
+				return 1  # 藤蔓鎖（衝撞前上減速）
+			return 0      # 鱗甲拍
 		"emberhorn":
 			if service.shelled and not service.shell_broken:
-				return 1  # 燼角衝
-			return 0      # 熱蹄
+				return 1  # 深度掃描
+			return 0      # 連啄
 		_:
 			if service.next_move() == CrisisBattleService.Move.RAM:
-				return 1  # 霧步
-			return 0      # 潮羽
+				return 1  # 潛游
+			return 0      # 拍尾水花
 
 
 func _select_command(scene: Node, target: int) -> void:

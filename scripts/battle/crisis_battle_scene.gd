@@ -1,5 +1,5 @@
 extends Node3D
-## 首戰呈現層（受驚的岩背獾，2.5D 立體舞台版）。規則在 CrisisBattleService；
+## 首戰呈現層（受驚的馱庫龜，2.5D 立體舞台版）。規則在 CrisisBattleService；
 ## 本場景負責：前兆橫幅（不需確認、保持節奏）、姿勢幀切換（縮甲／衝撞／平靜）、
 ## 三系技能 VFX（葉片弧線／火星炭裂／羽狀水花）、修復收尾演出、結算轉場。
 
@@ -62,7 +62,7 @@ func _ready() -> void:
 		SceneRouter.goto_world()
 		return
 	_boss = DataRegistry.make_creature("rockbadger", 5)
-	_boss.display_name = "岩背獾"
+	_boss.display_name = "馱庫龜"
 	_boss.max_hp = 80
 	_boss.hp = 80
 	_boss.attack = 16
@@ -455,7 +455,7 @@ func _end_sequence() -> void:
 	AudioManager.stop_music()
 	if _service.outcome == CrisisBattleService.Outcome.SOOTHED:
 		_telegraph_panel.visible = false
-		_message_label.text = "岩背獾抬起頭，眼睛裡的驚慌退去了。它輕輕蹭了蹭你夥伴的額頭。"
+		_message_label.text = "馱庫龜抬起頭，眼睛裡的驚慌退去了。它輕輕蹭了蹭你夥伴的額頭。"
 		await _wait_confirm()
 		_finished = true
 		EventFlagStore.set_flag("crisis_done")
@@ -482,7 +482,7 @@ func _build_ui() -> void:
 	_ui_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_canvas.add_child(_ui_root)
 
-	# 岩背獾資訊（左上）＋恐慌條（含 30% 修復線）
+	# 馱庫龜資訊（左上）＋恐慌條（含 30% 修復線）
 	var boss_panel := PanelContainer.new()
 	boss_panel.position = Vector2(6, 6)
 	boss_panel.add_theme_stylebox_override("panel", UiTheme.dark_panel_style())
