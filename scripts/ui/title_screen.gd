@@ -79,10 +79,10 @@ func _refresh() -> void:
 	var texts: Array[String] = [
 		"開始旅程",
 		"繼續旅程",
-		"音量　◂ %d%% ▸" % volume_percent,
-		"減少閃爍：%s" % ("開" if AudioManager.reduce_flash else "關"),
-		"減少震動：%s" % ("開" if AudioManager.reduce_shake else "關"),
-		"畫質：%s" % ("高" if AudioManager.quality_high else "低"),
+		"◂音量%d%%▸" % volume_percent,
+		"閃爍:%s" % ("減" if AudioManager.reduce_flash else "常"),
+		"震動:%s" % ("減" if AudioManager.reduce_shake else "常"),
+		"畫質:%s" % ("高" if AudioManager.quality_high else "低"),
 	]
 	for i in range(_rows.size()):
 		var row := _rows[i]
@@ -102,19 +102,38 @@ func _build_ui() -> void:
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_root)
 	var bg := TextureRect.new()
-	bg.texture = load("res://assets/ui/title_bg.png")
+	# 使用者提供的高解析島嶼背景優先；缺檔時退回程式生成版
+	var island_path := "res://assets/ui/title_bg_island.png"
+	if ResourceLoader.exists(island_path):
+		bg.texture = load(island_path)
+		bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		bg.stretch_mode = TextureRect.STRETCH_SCALE
+	else:
+		bg.texture = load("res://assets/ui/title_bg.png")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(bg)
 
-	# 標題：靠左置於海霧上方，避開右側村落剪影
+	# 標題：左上，半透明深色底板保住高解析背景上的可讀性
+	var title_scrim := Panel.new()
+	var scrim_style := StyleBoxFlat.new()
+	scrim_style.bg_color = Pal.alpha(Pal.NIGHT, 0.55)
+	scrim_style.set_corner_radius_all(2)
+	scrim_style.set_content_margin_all(0)
+	title_scrim.add_theme_stylebox_override("panel", scrim_style)
+	title_scrim.position = Vector2(10, 14)
+	title_scrim.size = Vector2(204, 50)
+	title_scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(title_scrim)
+
 	var title := Label.new()
 	title.text = "潮 森 群 島"
-	title.position = Vector2(0, 20)
+	title.position = Vector2(0, 18)
 	title.size = Vector2(220, 26)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 24)
-	title.add_theme_color_override("font_color", Pal.NIGHT)
-	title.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.FOG, 0.9))
+	title.add_theme_color_override("font_color", Pal.PAPER)
+	title.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.INK, 0.9))
 	title.add_theme_constant_override("shadow_offset_x", 1)
 	title.add_theme_constant_override("shadow_offset_y", 1)
 	_root.add_child(title)
@@ -125,24 +144,39 @@ func _build_ui() -> void:
 	subtitle.size = Vector2(220, 14)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_font_size_override("font_size", 12)
-	subtitle.add_theme_color_override("font_color", Pal.SLATE)
-	subtitle.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.FOG, 0.85))
+	subtitle.add_theme_color_override("font_color", Pal.SEA_PALE)
+	subtitle.add_theme_color_override("font_shadow_color", Pal.alpha(Pal.INK, 0.85))
 	subtitle.add_theme_constant_override("shadow_offset_x", 1)
 	subtitle.add_theme_constant_override("shadow_offset_y", 1)
 	_root.add_child(subtitle)
 
-	# 選單：手冊面板（左下，避開右側村落剪影；六列故略上移）
+	# 主選單：開始／繼續（左側直列）
 	var panel := PanelContainer.new()
-	panel.position = Vector2(20, 66)
+	panel.position = Vector2(20, 72)
 	panel.custom_minimum_size = Vector2(128, 0)
 	panel.add_theme_stylebox_override("panel", UiTheme.panel_style())
 	_root.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 2)
 	panel.add_child(box)
-	for i in range(MENU_COUNT):
+	for i in range(2):
 		var row := UiTheme.make_row("", null)
 		box.add_child(row["panel"])
+		_rows.append(row)
+
+	# 設定列：音量／閃爍／震動／畫質（底部橫列紙面板，位於操作提示上方）
+	var settings_panel := PanelContainer.new()
+	settings_panel.position = Vector2(8, 128)
+	var settings_style := UiTheme.panel_style()
+	settings_style.set_content_margin_all(3)
+	settings_panel.add_theme_stylebox_override("panel", settings_style)
+	_root.add_child(settings_panel)
+	var settings := HBoxContainer.new()
+	settings.add_theme_constant_override("separation", 4)
+	settings_panel.add_child(settings)
+	for i in range(2, MENU_COUNT):
+		var row := UiTheme.make_row("", null)
+		settings.add_child(row["panel"])
 		_rows.append(row)
 
 	# 操作提示（底部儀器色帶）

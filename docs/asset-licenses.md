@@ -10,7 +10,7 @@
 
 ## 專案自產素材（版權隨本專案）
 
-- 全部像素圖（tileset／角色／迴靈／UI／背景／圖示）：由
+- 全部像素圖（tileset／角色／夥伴／UI／背景／圖示）：由
   `tools/generate_assets.gd`＋`tools/pixgen/*` 程式生成，
   色盤與規則見 `docs/palette.md`、`docs/art-bible.md`。
 - 全部音效：`scripts/core/audio_manager.gd` 於執行期以方波／濾波噪音合成
@@ -20,6 +20,14 @@
 ## 引擎
 
 Godot Engine（MIT License）。
+
+## 標題畫面背景
+
+- `docs/backgrounds/title-island-original.png`：使用者以圖像生成工具產出之**原創**
+  「A00A 導入前哨站」島嶼全景（依本專案規範：無文字、無角色、無任何品牌視覺、
+  無既有遊戲可辨識設計）。原圖 1672×941，僅入 docs（.gdignore，不進遊戲 pck）。
+- 進入遊戲的是縮放至 1280×720 的 `assets/ui/title_bg_island.png`，
+  由標題畫面優先載入；缺檔時退回程式生成版 `title_bg.png`。
 
 ## 主角官方設定圖
 
