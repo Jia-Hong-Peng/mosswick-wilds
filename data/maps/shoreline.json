@@ -92,6 +92,6 @@
 	],
 	"triggers": [],
 	"npcs": [
-		{ "id": "shioh", "x": 12, "y": 6, "sprite": "res://assets/characters/npc_xiaoman.png", "facing": "left", "dialogue_id": "rival_shioh" }
+		{ "id": "shioh", "x": 12, "y": 6, "sprite": "res://assets/characters/npc_sang.png", "facing": "left", "dialogue_id": "rival_shioh" }
 	]
 }

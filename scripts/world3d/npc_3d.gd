@@ -24,10 +24,15 @@ func setup(world: Node3D, data: Dictionary) -> void:
 		_sprite.texture = load(texture_path)
 	_sprite.hframes = SHEET_COLUMNS
 	_sprite.vframes = 4
-	_sprite.pixel_size = 1.0 / 32.0
-	_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	# 32×48 格為設計基準；高解析圖集依格高自動換算，畫面尺寸不變
+	var cell_h := 48.0
+	if _sprite.texture != null:
+		cell_h = float(_sprite.texture.get_height()) / 4.0
+	var hd := cell_h > 96.0
+	_sprite.pixel_size = (1.0 / 32.0) * 48.0 / cell_h
+	_sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR if hd else BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	_sprite.shaded = true
-	_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	_sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISABLED if hd else SpriteBase3D.ALPHA_CUT_DISCARD
 	_sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	_sprite.position = Vector3(0, 0.75, 0)
 	add_child(_sprite)

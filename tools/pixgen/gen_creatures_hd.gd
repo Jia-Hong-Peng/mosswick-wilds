@@ -24,6 +24,16 @@ const EXPR_SHEETS := {
 }
 const SHELL_SHEET := "legacy_tortoise_shell_v2.png"
 
+## NPC 走路圖（7 或 6 列 × 4 欄、灰底棋格）→ 世界圖集（6 欄 × 4 向、128×192 格）
+## 來源列序：0=正面(down)、1=背面(up)、2=側面朝左(left)；right 由左向鏡射
+const NPC_WALKS := {
+	"npc_kui": { "file": "an_walk_sheet_v2.png", "rows": 6 },
+	"npc_sang": { "file": "sang_walk_sheet_v2.png", "rows": 7 },
+}
+const WALK_CELL_W := 128
+const WALK_CELL_H := 192
+const WALK_FIG_H := 176
+
 ## NPC 設定圖：下排 4 表情等分；表情名 → 欄位索引（可多對一）
 const NPC_SHEETS := {
 	"kui": { "file": "advisor_an_model_sheet_v2.png",
@@ -86,6 +96,7 @@ static func generate() -> void:
 	_export_shell()
 	_export_portraits()
 	_export_npc_portraits()
+	_export_npc_walks()
 
 
 ## 馱庫龜「縮甲」特寫
@@ -136,6 +147,75 @@ static func _export_npc_portraits() -> void:
 				cache[col] = sheet.get_region(Rect2i(x, band_y, crop_w, band_h))
 			Pix.save((cache[col] as Image).duplicate(), "res://assets/portraits/%s_%s.png" % [npc, expr])
 		print("hd npc portraits: ", npc)
+
+
+## NPC 走路圖 → 世界圖集（rows: down/up/left/right(鏡射)；欄序 0,1,2,3,1,3）
+static func _export_npc_walks() -> void:
+	for npc: String in NPC_WALKS:
+		var spec: Dictionary = NPC_WALKS[npc]
+		var sheet := _load(String(spec["file"]))
+		if sheet == null:
+			continue
+		# 全圖去背後以透明度投影找列帶（來源格高非整數、固定切格會切碎人）
+		_cutout(sheet)
+		var bands := _alpha_row_bands(sheet)
+		if bands.size() < 3:
+			print("npc walk 列帶不足，跳過：", npc)
+			continue
+		var cell_w := sheet.get_width() / 4
+		var figs: Array = []
+		for row in range(3):
+			var band: Vector2i = bands[row]
+			var row_figs: Array[Image] = []
+			for col in range(4):
+				var cell := sheet.get_region(Rect2i(col * cell_w + 4, band.x, cell_w - 8, band.y - band.x))
+				row_figs.append(_trim(cell))
+			figs.append(row_figs)
+		var ref_h := 1
+		for col in range(4):
+			ref_h = maxi(ref_h, (figs[0][col] as Image).get_height())
+		var scale := float(WALK_FIG_H) / float(ref_h)
+		var out := Pix.img(WALK_CELL_W * 6, WALK_CELL_H * 4)
+		var col_order: Array[int] = [0, 1, 2, 3, 1, 3]
+		for dir in range(4):  # 0 down, 1 up, 2 left, 3 right
+			var src_row := dir if dir < 3 else 2
+			for out_col in range(6):
+				var fig := (figs[src_row][col_order[out_col]] as Image).duplicate() as Image
+				fig.resize(maxi(1, int(round(fig.get_width() * scale))), maxi(1, int(round(fig.get_height() * scale))), Image.INTERPOLATE_LANCZOS)
+				if dir == 3:
+					fig.flip_x()
+				var x := out_col * WALK_CELL_W + (WALK_CELL_W - fig.get_width()) / 2
+				var y := dir * WALK_CELL_H + WALK_CELL_H - 6 - fig.get_height()
+				Pix.blit(out, fig, x, y)
+		Pix.save(out, "res://assets/characters/%s.png" % npc)
+		print("hd npc walk: ", npc, " bands=", bands.size())
+
+
+## 有不透明像素的連續列 → 列帶（間隙 ≥6px 分段；忽略高度 <40 的雜訊帶）
+static func _alpha_row_bands(img: Image) -> Array:
+	var bands: Array = []
+	var start := -1
+	var gap := 0
+	for y in range(img.get_height()):
+		var has := false
+		for x in range(0, img.get_width(), 3):
+			if img.get_pixel(x, y).a > 0.05:
+				has = true
+				break
+		if has:
+			if start < 0:
+				start = y
+			gap = 0
+		elif start >= 0:
+			gap += 1
+			if gap >= 6:
+				if y - gap - start >= 40:
+					bands.append(Vector2i(start, y - gap + 1))
+				start = -1
+				gap = 0
+	if start >= 0 and img.get_height() - start >= 40:
+		bands.append(Vector2i(start, img.get_height()))
+	return bands
 
 
 static func _load(file: String) -> Image:
