@@ -44,6 +44,8 @@ Godot Engine（MIT License）。
 | codeql_woodpecker_battle_sheet_v2.png ＋ _expressions_v2 | emberhorn 全套戰鬥幀＋六表情立繪 |
 | code_quality_beaver_battle_sheet_v2.png ＋ _expressions_v2 | tidecrest 全套戰鬥幀＋六表情立繪 |
 | legacy_tortoise_battle_sheet_v2.png ＋ _shell_v2 | rockbadger 全套戰鬥幀＋縮甲幀 |
+| advisor_an_model_sheet_v2.png | kui（安姐）五表情立繪 |
+| veteran_sang_model_sheet_v2.png | sang（老桑）四表情立繪 |
 
 ## 主角官方設定圖
 
