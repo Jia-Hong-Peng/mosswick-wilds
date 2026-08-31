@@ -24,6 +24,14 @@ const EXPR_SHEETS := {
 }
 const SHELL_SHEET := "legacy_tortoise_shell_v2.png"
 
+## NPC 設定圖：下排 4 表情等分；表情名 → 欄位索引（可多對一）
+const NPC_SHEETS := {
+	"kui": { "file": "advisor_an_model_sheet_v2.png",
+		"map": { "neutral": 0, "smiling": 1, "relieved": 1, "concerned": 2, "observing": 3 } },
+	"sang": { "file": "veteran_sang_model_sheet_v2.png",
+		"map": { "neutral": 0, "smug": 1, "surprised": 2, "determined": 3 } },
+}
+
 const FRAME := 512
 const BASELINE := 448          # 腳底基準（0.875×FRAME，與 64px 版的 56/64 一致）
 const FIT_W := 481             # 圖形最大寬（0.94×FRAME）
@@ -77,6 +85,7 @@ static func generate() -> void:
 		print("hd creature: ", id)
 	_export_shell()
 	_export_portraits()
+	_export_npc_portraits()
 
 
 ## 馱庫龜「縮甲」特寫
@@ -106,6 +115,27 @@ static func _export_portraits() -> void:
 			var crop_x := (cell.get_width() - crop_w) / 2
 			var portrait := cell.get_region(Rect2i(crop_x, 0, crop_w, cell.get_height()))
 			Pix.save(portrait, "res://assets/portraits/%s_%s.png" % [id, EXPRESSIONS[i]])
+
+
+## NPC 設定圖下排 4 表情 → 對話立繪（40:48 直式，保留灰底）
+static func _export_npc_portraits() -> void:
+	for npc: String in NPC_SHEETS:
+		var spec: Dictionary = NPC_SHEETS[npc]
+		var sheet := _load(String(spec["file"]))
+		if sheet == null:
+			continue
+		var col_w := sheet.get_width() / 4
+		var band_y := int(float(sheet.get_height()) * 0.672) + 4
+		var band_h := sheet.get_height() - band_y - 4
+		var crop_w := int(float(band_h) * 40.0 / 48.0)
+		var cache := {}
+		for expr: String in Dictionary(spec["map"]):
+			var col := int(Dictionary(spec["map"])[expr])
+			if not cache.has(col):
+				var x := col * col_w + (col_w - crop_w) / 2
+				cache[col] = sheet.get_region(Rect2i(x, band_y, crop_w, band_h))
+			Pix.save((cache[col] as Image).duplicate(), "res://assets/portraits/%s_%s.png" % [npc, expr])
+		print("hd npc portraits: ", npc)
 
 
 static func _load(file: String) -> Image:

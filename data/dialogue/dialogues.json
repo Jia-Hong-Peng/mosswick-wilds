@@ -402,13 +402,13 @@
 			{
 				"if_flag": "rival_beaten",
 				"pages": [
-					{ "speaker": "老桑", "text": "哼，算你們默契好。……反正舊的要退役了，我回去挑個 repo 開開看。只開一個喔！" }
+					{ "speaker": "老桑", "left": "sang:surprised", "speaker_side": "left", "text": "哼，算你們默契好。……反正舊的要退役了，我回去挑個 repo 開開看。只開一個喔！" }
 				]
 			},
 			{
 				"pages": [
-					{ "speaker": "老桑", "text": "站住！今天試點的就是你吧？我老桑，隔壁組的。SonarQube 我用十年，好好的幹嘛換？" },
-					{ "speaker": "老桑", "text": "新工具再炫，比不上老手直覺。來，見識一下。" }
+					{ "speaker": "老桑", "left": "sang:neutral", "speaker_side": "left", "text": "站住！今天試點的就是你吧？我老桑，隔壁組的。SonarQube 我用十年，好好的幹嘛換？" },
+					{ "speaker": "老桑", "left": "sang:smug", "speaker_side": "left", "text": "新工具再炫，比不上老手直覺。來，見識一下。" }
 				],
 				"choice": {
 					"prompt": "接受老桑的較勁？",
@@ -417,13 +417,13 @@
 							"text": "接受較勁",
 							"action": "rival_battle",
 							"pages_after": [
-								{ "speaker": "老桑", "text": "上吧！" }
+								{ "speaker": "老桑", "left": "sang:determined", "speaker_side": "left", "text": "上吧！" }
 							]
 						},
 						{
 							"text": "還沒準備好",
 							"pages_after": [
-								{ "speaker": "老桑", "text": "切。我就在這等，隨時奉陪。" }
+								{ "speaker": "老桑", "left": "sang:smug", "speaker_side": "left", "text": "切。我就在這等，隨時奉陪。" }
 							]
 						}
 					]
