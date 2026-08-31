@@ -1,9 +1,9 @@
 {
 	"opening_haven": {
 		"pages": [
-			{ "speaker": "旁白", "text": "A00A 導入前哨站。今天是你的團隊試點 GHAS 的日子——三隻小獸——分別代表 Secret Protection、Code Security 與 Code Quality——在院子裡看著你這位 A00A IT 的開發者。" },
+			{ "speaker": "旁白", "text": "A00A 導入前哨站。今天輪到你的團隊試點 GHAS。三隻小獸在院子裡看著你——Secret Protection、Code Security、Code Quality。" },
 			{ "speaker": "安姐", "left": "kui:neutral", "speaker_side": "left", "text": "別急著挑最強的。" },
-			{ "speaker": "安姐", "left": "kui:observing", "speaker_side": "left", "text": "先看看，從哪一隻開始。一隻一隻來——最後三隻都帶上，防護才完整。" }
+			{ "speaker": "安姐", "left": "kui:observing", "speaker_side": "left", "text": "先看看。一隻一隻來，三隻都帶上才完整。" }
 		]
 	},
 
@@ -12,7 +12,7 @@
 			{
 				"if_flag": "chapter_done",
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "回來啦。要不要讓夥伴們休息一下？順便把 alert 清一清。" }
+					{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "回來啦。要讓大家休息一下嗎？順便清清 alert。" }
 				],
 				"choice": {
 					"prompt": "讓夥伴們休息嗎？",
@@ -21,13 +21,13 @@
 							"text": "休息（全隊恢復）",
 							"action": "heal_party",
 							"pages_after": [
-								{ "speaker": "安姐", "left": "kui:relieved", "speaker_side": "left", "text": "掃描佇列清空、規則更新完畢。大家精神都回來了。" }
+								{ "speaker": "安姐", "left": "kui:relieved", "speaker_side": "left", "text": "好了，精神都回來了。" }
 							]
 						},
 						{
 							"text": "不用，只是路過",
 							"pages_after": [
-								{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "路上遇到還沒防護的 repo，就想想今天。去吧。" }
+								{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "去吧。" }
 							]
 						}
 					]
@@ -36,7 +36,7 @@
 			{
 				"if_flag": "travel_pack_taken",
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:neutral", "speaker_side": "left", "text": "東邊閘門出去就是舊程式碼的海岸。走之前，跟你的夥伴說一聲。" }
+					{ "speaker": "安姐", "left": "kui:neutral", "speaker_side": "left", "text": "東門出去就是舊程式碼海岸。走前跟夥伴說一聲。" }
 				]
 			},
 			{
@@ -44,8 +44,8 @@
 				"set_flag": "travel_pack_taken",
 				"grant_items": { "travel_pack": 1, "herbal_balm": 2 },
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:relieved", "speaker_side": "left", "text": "它很少把鑰匙鱗交給別人。你的金鑰和 token，它會鎖好。" },
-					{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "這是導入工具包——checklist、文件、青草膏。想叫它的時候，面對它按下確認鍵就行。記住：先把一個 repo 顧好，再談擴大。另外兩隻的欄位也開著——回來把它們也帶上，三個功能都導入，防護才完整。" }
+					{ "speaker": "安姐", "left": "kui:relieved", "speaker_side": "left", "text": "它很少信人。你的金鑰，它會鎖好。" },
+					{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "導入工具包拿去——checklist、文件、青草膏。先顧好一個 repo。另外兩隻的欄位也開著，回來把它們也帶上。" }
 				]
 			},
 			{
@@ -53,8 +53,8 @@
 				"set_flag": "travel_pack_taken",
 				"grant_items": { "travel_pack": 1, "herbal_balm": 2 },
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:relieved", "speaker_side": "left", "text": "它第一次在人的手臂上啄完整整三下。被它揪出問題，就是被它認可。" },
-					{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "這是導入工具包——checklist、文件、青草膏。想叫它的時候，面對它按下確認鍵就行。記住：先把一個 repo 顧好，再談擴大。另外兩隻的欄位也開著——回來把它們也帶上，三個功能都導入，防護才完整。" }
+					{ "speaker": "安姐", "left": "kui:relieved", "speaker_side": "left", "text": "它肯在你手臂上啄完三下，很難得。被它挑毛病，就是被它認可。" },
+					{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "導入工具包拿去——checklist、文件、青草膏。先顧好一個 repo。另外兩隻的欄位也開著，回來把它們也帶上。" }
 				]
 			},
 			{
@@ -62,13 +62,13 @@
 				"set_flag": "travel_pack_taken",
 				"grant_items": { "travel_pack": 1, "herbal_balm": 2 },
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:relieved", "speaker_side": "left", "text": "它把 PR 還給你了？上面的啃痕，就是它的 review。" },
-					{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "這是導入工具包——checklist、文件、青草膏。想叫它的時候，面對它按下確認鍵就行。記住：先把一個 repo 顧好，再談擴大。另外兩隻的欄位也開著——回來把它們也帶上，三個功能都導入，防護才完整。" }
+					{ "speaker": "安姐", "left": "kui:relieved", "speaker_side": "left", "text": "它把 PR 還你了？那些啃痕就是它的 review。" },
+					{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "導入工具包拿去——checklist、文件、青草膏。先顧好一個 repo。另外兩隻的欄位也開著，回來把它們也帶上。" }
 				]
 			},
 			{
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:observing", "speaker_side": "left", "text": "西邊葉堆是 Secret Protection 的鎖鱗甲、中間棲木是 Code Security 的啄錯鳥、東邊水池是 Code Quality 的理木狸。慢慢看，它們也在看你。" }
+					{ "speaker": "安姐", "left": "kui:observing", "speaker_side": "left", "text": "西邊葉堆是 Secret Protection、中間棲木是 Code Security、東邊水池是 Code Quality。慢慢看。" }
 				]
 			}
 		]
@@ -79,10 +79,10 @@
 			{
 				"if_flag": "met_sproutwing",
 				"pages": [
-					{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "text": "鎖鱗甲坐在你腳邊，前爪還按著那枚刻著鑰匙孔的鱗片。" }
+					{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "text": "鎖鱗甲坐在你腳邊，爪子還按著那枚鑰匙鱗。" }
 				],
 				"choice": {
-					"prompt": "要導入「鎖鱗甲」（Secret Protection）嗎？它將加入你團隊的防護行列。",
+					"prompt": "導入「鎖鱗甲」（Secret Protection）？",
 					"options": [
 						{
 							"text": "導入",
@@ -91,7 +91,7 @@
 						{
 							"text": "再想一下",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "鎖鱗甲歪著頭，把鑰匙鱗收回甲片底下，繼續等。" }
+								{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "它把鱗片收回去，繼續等。" }
 							]
 						}
 					]
@@ -99,24 +99,24 @@
 			},
 			{
 				"pages": [
-					{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "葉堆裡有一雙眼睛。鎖鱗甲——代表 Secret Protection——蜷成半顆球，只露出眼睛觀察你。秘密就該藏這麼好。" },
-					{ "speaker": "安姐", "left": "kui:observing", "right": "sproutwing:nervous", "speaker_side": "left", "text": "防守型。金鑰、token、密碼——它在 push 之前就擋下外洩（Push Protection）。事前攔一次，勝過事後救一週的火。" }
+					{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "葉堆裡有一雙眼睛。鎖鱗甲——Secret Protection——蜷成半顆球看著你。" },
+					{ "speaker": "安姐", "left": "kui:observing", "right": "sproutwing:nervous", "speaker_side": "left", "text": "防守型。push 之前就把外洩擋下來。事前攔一次，勝過事後救一週。" }
 				],
 				"choice": {
-					"prompt": "要怎麼接近鎖鱗甲？",
+					"prompt": "要怎麼接近？",
 					"options": [
 						{
-							"text": "蹲低，掌心朝上，等它自己過來",
+							"text": "蹲低，掌心朝上等它",
 							"set_flag": "met_sproutwing",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "fx": "cry_sproutwing", "text": "你蹲下來，掌心朝上，不動。葉片沙沙響了幾聲——鱗甲一片一片鬆開，它一小步一小步挪出來，嗅了嗅你的手。" },
-								{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "text": "然後，它從胸口取下一枚刻著鑰匙孔的鱗片，放到你的掌心。你的秘密，它願意鎖了。" }
+								{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "fx": "cry_sproutwing", "text": "你蹲下不動。沙沙——它自己挪出來，嗅了嗅你的手。" },
+								{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "text": "然後把一枚鑰匙孔鱗片放上你掌心。你的秘密，它收了。" }
 							]
 						},
 						{
 							"text": "直接伸手去摸",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "唰——它瞬間蜷成一顆球，鱗甲密得一條縫都不留。秘密不會交給急著伸手的人。看來得換個方式。" }
+								{ "speaker": "旁白", "right": "sproutwing:nervous", "speaker_side": "right", "text": "唰——蜷成一顆球，一條縫都不留。急著伸手的人，它不理。" }
 							]
 						}
 					]
@@ -130,10 +130,10 @@
 			{
 				"if_flag": "met_emberhorn",
 				"pages": [
-					{ "speaker": "旁白", "right": "emberhorn:determined", "speaker_side": "right", "text": "啄錯鳥站在棲木上，紅冠微微發亮，等你開口。" }
+					{ "speaker": "旁白", "right": "emberhorn:determined", "speaker_side": "right", "text": "啄錯鳥站在棲木上，紅冠微亮，等你開口。" }
 				],
 				"choice": {
-					"prompt": "要導入「啄錯鳥」（Code Security）嗎？它將加入你團隊的防護行列。",
+					"prompt": "導入「啄錯鳥」（Code Security）？",
 					"options": [
 						{
 							"text": "導入",
@@ -142,7 +142,7 @@
 						{
 							"text": "再想一下",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "啄錯鳥不以為然地在棲木上敲了兩下——頭卻還朝著你這邊。" }
+								{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "它敲了兩下——頭還朝著你這邊。" }
 							]
 						}
 					]
@@ -150,24 +150,24 @@
 			},
 			{
 				"pages": [
-					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "叩、叩、叩。棲木上，啄錯鳥朝你敲了三下。它代表 Code Security——火紅的冠羽，是 CodeQL 掃描照進程式碼縫隙的光。" },
-					{ "speaker": "安姐", "left": "kui:observing", "right": "emberhorn:neutral", "speaker_side": "left", "text": "破防型。藏得再深的蟲，它都會鑿出來擺在你面前。它愛找碴——那是它認真愛你程式碼的方式。" }
+					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "text": "叩、叩、叩。啄錯鳥朝你敲了三下。紅冠——CodeQL 掃描的光。" },
+					{ "speaker": "安姐", "left": "kui:observing", "right": "emberhorn:neutral", "speaker_side": "left", "text": "破防型。蟲藏再深都挖出來。愛找碴，是它愛你程式碼的方式。" }
 				],
 				"choice": {
-					"prompt": "要怎麼接近啄錯鳥？",
+					"prompt": "要怎麼接近？",
 					"options": [
 						{
-							"text": "伸出手臂，接住它的檢查",
+							"text": "伸出手臂，讓它啄",
 							"set_flag": "met_emberhorn",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "emberhorn:curious", "speaker_side": "right", "fx": "cry_emberhorn", "text": "它跳上你的手臂，沿著袖口叩、叩、叩啄了三下——像第一份掃描報告，直接、不留情面。你穩穩接住了。" },
-								{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "text": "它從你的袖縫裡叼出一截鬆脫的線頭，得意地舉給你看。能接受它揪出問題的人，它才認。" }
+								{ "speaker": "旁白", "right": "emberhorn:curious", "speaker_side": "right", "fx": "cry_emberhorn", "text": "叩叩叩，三下，不留情面。你穩穩接住了。" },
+								{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "text": "它從你袖縫叼出一根鬆線頭，得意得很。它認你了。" }
 							]
 						},
 						{
-							"text": "假裝沒聽見，快步走過",
+							"text": "假裝沒聽見，走過去",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "emberhorn:nervous", "speaker_side": "right", "text": "它一個俯衝落在你正前方的地上，對著你加倍用力地敲。掃描報告不會因為你不看，就自己消失。" }
+								{ "speaker": "旁白", "right": "emberhorn:nervous", "speaker_side": "right", "text": "它落到你正前方，敲得更大聲。報告不會因為你不看就消失。" }
 							]
 						}
 					]
@@ -181,10 +181,10 @@
 			{
 				"if_flag": "met_tidecrest",
 				"pages": [
-					{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "理木狸拍了拍剛理好的枝條堆，抬頭看你，一副「下一個換誰」的樣子。" }
+					{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "理木狸拍拍理好的枝條，看著你：下一個換誰？" }
 				],
 				"choice": {
-					"prompt": "要導入「理木狸」（Code Quality）嗎？它將加入你團隊的防護行列。",
+					"prompt": "導入「理木狸」（Code Quality）？",
 					"options": [
 						{
 							"text": "導入",
@@ -193,7 +193,7 @@
 						{
 							"text": "再想一下",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "理木狸想了想，跑回池邊把壩又整了一遍——又回頭看你一眼。" }
+								{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "它跑回去把壩又整了一遍——還是回頭看了你一眼。" }
 							]
 						}
 					]
@@ -201,24 +201,24 @@
 			},
 			{
 				"pages": [
-					{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "水池邊，理木狸一個箭步衝過來——叼走了你手上的 PR 印出來的那疊紙，疊進它的小壩裡！它代表 Code Quality——PR 的品質把關。" },
-					{ "speaker": "安姐", "left": "kui:concerned", "right": "tidecrest:happy", "speaker_side": "left", "text": "整潔型。重複、繞遠路、看不懂的命名——亂的東西它看不下去。追它？你追不上的。" }
+					{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "text": "唰——理木狸叼走你手上那疊 PR，疊進壩裡！它管 Code Quality。" },
+					{ "speaker": "安姐", "left": "kui:concerned", "right": "tidecrest:happy", "speaker_side": "left", "text": "整潔型。亂的它看不下去。追它？追不上的。" }
 				],
 				"choice": {
 					"prompt": "怎麼把 PR 拿回來？",
 					"options": [
 						{
-							"text": "把亂成一團的枝條擺到它面前",
+							"text": "把亂枝擺到它面前",
 							"set_flag": "met_tidecrest",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "fx": "cry_tidecrest", "text": "它盯著那堆亂枝，忍了三秒——忍不住了。喀嚓喀嚓，長短分類、疊齊、壓實，一座小壩眨眼成形。" },
-								{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "然後它把 PR 輕輕放回你手裡——上面多了幾排整齊的啃痕。全是該改的地方。這就是它的 review。" }
+								{ "speaker": "旁白", "right": "tidecrest:curious", "speaker_side": "right", "fx": "cry_tidecrest", "text": "它盯著亂枝，忍了三秒——喀嚓喀嚓，全理好了。" },
+								{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "PR 還你，上面多了幾排啃痕。全是該改的。這就是它的 review。" }
 							]
 						},
 						{
 							"text": "直接追上去",
 							"pages_after": [
-								{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "它叼著你的 PR 繞著水壩跑了三圈。想跳過品質檢查？你追不上技術債的。" }
+								{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "它繞著水壩跑三圈。你追不上技術債的。" }
 							]
 						}
 					]
@@ -229,39 +229,39 @@
 
 	"ceremony_sproutwing": {
 		"pages": [
-			{ "speaker": "安姐", "left": "kui:neutral", "right": "sproutwing:curious", "speaker_side": "left", "text": "想清楚了？導入不是裝上就完事——是接下來的每一天，每一次 push。" },
-			{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "text": "你在試點申請單上寫下團隊名。安姐蓋了章，蹲下來，朝葉堆的方向點點頭。" }
+			{ "speaker": "安姐", "left": "kui:neutral", "right": "sproutwing:curious", "speaker_side": "left", "text": "想清楚囉？導入不是裝完就沒事——是之後的每一次 push。" },
+			{ "speaker": "旁白", "right": "sproutwing:curious", "speaker_side": "right", "text": "你寫下團隊名。安姐蓋章，朝葉堆點點頭。" }
 		]
 	},
 	"ceremony_emberhorn": {
 		"pages": [
-			{ "speaker": "安姐", "left": "kui:neutral", "right": "emberhorn:determined", "speaker_side": "left", "text": "想清楚了？導入不是裝上就完事——是接下來的每一天，每一次 push。" },
-			{ "speaker": "旁白", "right": "emberhorn:determined", "speaker_side": "right", "text": "你在試點申請單上寫下團隊名。安姐蓋了章，退開一步，把路讓給棲木。" }
+			{ "speaker": "安姐", "left": "kui:neutral", "right": "emberhorn:determined", "speaker_side": "left", "text": "想清楚囉？導入不是裝完就沒事——是之後的每一次 push。" },
+			{ "speaker": "旁白", "right": "emberhorn:determined", "speaker_side": "right", "text": "你寫下團隊名。安姐蓋章，退開一步讓路。" }
 		]
 	},
 	"ceremony_tidecrest": {
 		"pages": [
-			{ "speaker": "安姐", "left": "kui:neutral", "right": "tidecrest:happy", "speaker_side": "left", "text": "想清楚了？導入不是裝上就完事——是接下來的每一天，每一次 push。" },
-			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "你在試點申請單上寫下團隊名。安姐蓋了章，朝水池吹了聲口哨。" }
+			{ "speaker": "安姐", "left": "kui:neutral", "right": "tidecrest:happy", "speaker_side": "left", "text": "想清楚囉？導入不是裝完就沒事——是之後的每一次 push。" },
+			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "你寫下團隊名。安姐蓋章，朝水池吹了聲口哨。" }
 		]
 	},
 
 	"ceremony_tag_sproutwing": {
 		"pages": [
-			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它掛上啟用標籤——你 repo 的名字刻了上去。它把標籤收攏進鱗甲底下，貼著胸口的鑰匙孔。" },
-			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "text": "鎖鱗甲──Secret Protection・事前攔阻與外洩防護。從今天起，守著你團隊的每一次 push。" }
+			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "fx": "tag_flash", "text": "掛上啟用標籤——刻著你 repo 的名字。它把標籤收進鱗甲，貼著鑰匙孔。" },
+			{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "text": "鎖鱗甲──Secret Protection。守著你每一次 push。" }
 		]
 	},
 	"ceremony_tag_emberhorn": {
 		"pages": [
-			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它掛上啟用標籤——你 repo 的名字刻了上去。它沿著標籤邊緣叩叩啄了兩下，確認掛得夠穩——第一次檢查，完成。" },
-			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "text": "啄錯鳥──Code Security・漏洞掃描與深掘。從今天起，替你把藏在最深處的蟲挖出來。" }
+			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "fx": "tag_flash", "text": "掛上啟用標籤——刻著你 repo 的名字。它沿邊啄兩下：檢查完畢。" },
+			{ "speaker": "旁白", "right": "emberhorn:happy", "speaker_side": "right", "text": "啄錯鳥──Code Security。專挖藏最深的蟲。" }
 		]
 	},
 	"ceremony_tag_tidecrest": {
 		"pages": [
-			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "fx": "tag_flash", "text": "你替它掛上啟用標籤——你 repo 的名字刻了上去。它把標籤的邊角啃出一道整齊的圓弧，滿意地拍了拍尾巴。" },
-			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "理木狸──Code Quality・整潔與可維護。從今天起，盯著你每一條 PR 的味道。" }
+			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "fx": "tag_flash", "text": "掛上啟用標籤——刻著你 repo 的名字。它把邊角啃出圓弧，拍拍尾巴。" },
+			{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "text": "理木狸──Code Quality。盯著你每一條 PR。" }
 		]
 	},
 
@@ -270,19 +270,19 @@
 			{
 				"if_flag": "adopted_sproutwing",
 				"pages": [
-					{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "fx": "cry_sproutwing", "text": "鎖鱗甲輕輕叫了一聲，爬上你的旅行包蜷成半顆球。今天的 push，一件外洩都沒放過去。" }
+					{ "speaker": "旁白", "right": "sproutwing:happy", "speaker_side": "right", "fx": "cry_sproutwing", "text": "鎖鱗甲爬上背包蜷成球。今天一件外洩都沒放過。" }
 				]
 			},
 			{
 				"if_flag": "adopted_emberhorn",
 				"pages": [
-					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "fx": "cry_emberhorn", "text": "啄錯鳥短短應了一聲，用喙朝前方點了點：還有 repo 沒掃。走吧。" }
+					{ "speaker": "旁白", "right": "emberhorn:neutral", "speaker_side": "right", "fx": "cry_emberhorn", "text": "啄錯鳥用喙指指前面：還有 repo 沒掃，走吧。" }
 				]
 			},
 			{
 				"if_flag": "adopted_tidecrest",
 				"pages": [
-					{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "fx": "cry_tidecrest", "text": "理木狸開心地拍了一下大尾巴，水珠灑了你一臉。清爽——就像剛重構完的模組。" }
+					{ "speaker": "旁白", "right": "tidecrest:happy", "speaker_side": "right", "fx": "cry_tidecrest", "text": "理木狸甩尾灑你一臉水。清爽——像剛重構完。" }
 				]
 			}
 		]
@@ -293,32 +293,32 @@
 			{
 				"if_flag": "chapter_done",
 				"pages": [
-					{ "speaker": "旁白", "text": "閘門開著。海風帶著鹽味——閘門外，是還沒有任何防護的舊程式碼海岸。" }
+					{ "speaker": "旁白", "text": "閘門開著。外面是還沒防護的舊程式碼海岸。" }
 				]
 			},
 			{
 				"if_flag": "crisis_started",
 				"pages": [
-					{ "speaker": "旁白", "text": "撞破的圍欄還沒修好。事件報告寫完了，大家都平安。" }
+					{ "speaker": "旁白", "text": "圍欄還沒修好。報告寫完了，大家都平安。" }
 				]
 			},
 			{
 				"if_flag": "travel_pack_taken",
 				"set_flag": "crisis_started",
 				"pages": [
-					{ "speaker": "旁白", "fx": "crash", "text": "嗶——嗶——嗶——！身後警報大作，木頭碎裂的巨響跟著炸開！" },
-					{ "speaker": "安姐", "left": "kui:concerned", "speaker_side": "left", "text": "馱庫龜！那個跑了十年的老服務——它的金鑰外洩了！警報把它嚇得撞破圍欄衝進院子了！" },
-					{ "speaker": "旁白", "left": "player:surprised", "speaker_side": "left", "text": "它馱著十年舊程式庫的背殼上，卡著外洩的 token，眼睛因驚慌睜得很大。它不是壞掉了——它只是被外洩的事嚇壞了。安姐抱起小獸往屋裡退。" },
-					{ "speaker": "旁白", "text": "你的夥伴回頭看了你一眼。" }
+					{ "speaker": "旁白", "fx": "crash", "text": "嗶——嗶——嗶——！警報大作，圍欄應聲碎裂！" },
+					{ "speaker": "安姐", "left": "kui:concerned", "speaker_side": "left", "text": "馱庫龜！那個跑十年的老服務——金鑰外洩，它嚇瘋了！" },
+					{ "speaker": "旁白", "left": "player:surprised", "speaker_side": "left", "text": "背殼上卡著外洩的 token，眼睛瞪得老大。它不是壞了——是嚇壞了。" },
+					{ "speaker": "旁白", "text": "你的夥伴回頭看你。" }
 				],
 				"choice": {
-					"prompt": "第一次事件應變。它在等你的決定。",
+					"prompt": "它在等你。",
 					"options": [
 						{
-							"text": "（點頭）我們一起處理。",
+							"text": "（點頭）一起處理。",
 							"action": "start_crisis",
 							"pages_after": [
-								{ "speaker": "旁白", "left": "player:determined", "speaker_side": "left", "text": "夥伴主動站到你身前。記住安姐教的：先降級事件，不咎責，最後修復它。" }
+								{ "speaker": "旁白", "left": "player:determined", "speaker_side": "left", "text": "記住安姐教的：先降級、不咎責、最後修復。" }
 							]
 						}
 					]
@@ -327,12 +327,12 @@
 			{
 				"if_flag": "starter_chosen",
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:neutral", "speaker_side": "left", "text": "先來我這裡拿導入工具包，再出發也不遲。" }
+					{ "speaker": "安姐", "left": "kui:neutral", "speaker_side": "left", "text": "先來拿導入工具包再走。" }
 				]
 			},
 			{
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:observing", "speaker_side": "left", "text": "急什麼？先去看看那三隻。試點需要先選一個功能。" }
+					{ "speaker": "安姐", "left": "kui:observing", "speaker_side": "left", "text": "急什麼？先去看看那三隻。" }
 				]
 			}
 		]
@@ -340,9 +340,9 @@
 
 	"ending_calm": {
 		"pages": [
-			{ "speaker": "旁白", "text": "馱庫龜的呼吸慢慢平了下來。警報一級一級降下去，它縮緊的背殼，一點一點鬆開。" },
-			{ "speaker": "安姐", "left": "kui:concerned", "speaker_side": "left", "text": "背殼上卡著外洩的 token——難怪它慌成這樣。……好了，撤銷、輪替、換新的了。" },
-			{ "speaker": "旁白", "left": "player:happy", "speaker_side": "left", "text": "馱庫龜朝你們低了低頭，馱著它的十年，慢慢走回機房的方向。服務恢復正常。沒有人被責怪——被修好的是問題本身。" }
+			{ "speaker": "旁白", "text": "呼吸慢慢平了。警報一級一級降下去，背殼鬆開了。" },
+			{ "speaker": "安姐", "left": "kui:concerned", "speaker_side": "left", "text": "殼上卡著外洩的 token——難怪。撤銷、輪替，換新的了。" },
+			{ "speaker": "旁白", "left": "player:happy", "speaker_side": "left", "text": "馱庫龜低低頭，馱著它的十年走回機房。沒有人被責怪——修好的是問題。" }
 		]
 	},
 
@@ -351,19 +351,19 @@
 			{
 				"if_flag": "adopted_sproutwing",
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:relieved", "right": "sproutwing:happy", "speaker_side": "left", "text": "處理得很好。要是當初它在那個老服務上，token 根本推不出去——這就是事前攔阻的價值。" }
+					{ "speaker": "安姐", "left": "kui:relieved", "right": "sproutwing:happy", "speaker_side": "left", "text": "處理得漂亮。它要是早在那服務上，token 根本推不出去。這就是事前攔阻。" }
 				]
 			},
 			{
 				"if_flag": "adopted_emberhorn",
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:relieved", "right": "emberhorn:happy", "speaker_side": "left", "text": "處理得很好。看它得意的，紅冠到現在都還亮著——掃描報告大概又列了一排要修的。" }
+					{ "speaker": "安姐", "left": "kui:relieved", "right": "emberhorn:happy", "speaker_side": "left", "text": "處理得漂亮。看它紅冠還亮著——大概又列了一排要修的。" }
 				]
 			},
 			{
 				"if_flag": "adopted_tidecrest",
 				"pages": [
-					{ "speaker": "安姐", "left": "kui:relieved", "right": "tidecrest:happy", "speaker_side": "left", "text": "處理得很好。它還在你腳邊繞圈——大概已經在盤算怎麼把那個老服務的程式碼理乾淨了。" }
+					{ "speaker": "安姐", "left": "kui:relieved", "right": "tidecrest:happy", "speaker_side": "left", "text": "處理得漂亮。它繞著你轉——已經在想怎麼把那服務理乾淨了吧。" }
 				]
 			}
 		]
@@ -372,8 +372,8 @@
 	"ending_farewell": {
 		"grant_items": { "blank_tag": 3 },
 		"pages": [
-			{ "speaker": "安姐", "left": "kui:neutral", "speaker_side": "left", "text": "試點證明、平台的 repo 地圖。閘門我開了，海岸邊全是還沒防護的舊程式碼。" },
-			{ "speaker": "安姐", "left": "kui:observing", "speaker_side": "left", "text": "再給你三張空白啟用標籤——三個 repo 的啟用名額。席次有成本，用在刀口上。遇到願意被守護的 repo，就替它登記。" },
+			{ "speaker": "安姐", "left": "kui:neutral", "speaker_side": "left", "text": "試點證明、repo 地圖。閘門開了。" },
+			{ "speaker": "安姐", "left": "kui:observing", "speaker_side": "left", "text": "三張空白啟用標籤。席次有成本，用在刀口上。" },
 			{ "speaker": "安姐", "left": "kui:smiling", "speaker_side": "left", "text": "去吧。它會跟著你。" }
 		]
 	},
@@ -387,13 +387,13 @@
 
 	"route_locked": {
 		"pages": [
-			{ "speaker": "旁白", "text": "往舊程式碼海岸的閘門。安姐說：先辦完今天的試點再出發。" }
+			{ "speaker": "旁白", "text": "往海岸的閘門。安姐說：先辦完今天的試點。" }
 		]
 	},
 
 	"sign_route_end": {
 		"pages": [
-			{ "speaker": "路牌", "text": "潮風小徑東端──往下一個部門的渡口。（航線建置中──第二章待續）" }
+			{ "speaker": "路牌", "text": "潮風小徑東端──往下一個部門的渡口。（第二章待續）" }
 		]
 	},
 
@@ -402,28 +402,28 @@
 			{
 				"if_flag": "rival_beaten",
 				"pages": [
-					{ "speaker": "老桑", "text": "哼，今天算你們默契好。……反正舊的都要退役了，我回去挑一個 repo 把新的開開看。只開一個喔！下一個部門見！" }
+					{ "speaker": "老桑", "text": "哼，算你們默契好。……反正舊的要退役了，我回去挑個 repo 開開看。只開一個喔！" }
 				]
 			},
 			{
 				"pages": [
-					{ "speaker": "老桑", "text": "站住！你就是今天在前哨站試點的那個吧？我是老桑——隔壁組的。SonarQube 我用了十年，儀表板都摸出手感了，好好的幹嘛換？" },
-					{ "speaker": "老桑", "text": "新工具再炫，比不上老手的直覺。正好，讓你見識一下什麼叫經驗。" }
+					{ "speaker": "老桑", "text": "站住！今天試點的就是你吧？我老桑，隔壁組的。SonarQube 我用十年，好好的幹嘛換？" },
+					{ "speaker": "老桑", "text": "新工具再炫，比不上老手直覺。來，見識一下。" }
 				],
 				"choice": {
-					"prompt": "接受老桑的較勁嗎？",
+					"prompt": "接受老桑的較勁？",
 					"options": [
 						{
 							"text": "接受較勁",
 							"action": "rival_battle",
 							"pages_after": [
-								{ "speaker": "老桑", "text": "上吧！讓你看看十年經驗的差距！" }
+								{ "speaker": "老桑", "text": "上吧！" }
 							]
 						},
 						{
 							"text": "還沒準備好",
 							"pages_after": [
-								{ "speaker": "老桑", "text": "切，就這點信心？我就在這裡等，隨時奉陪。" }
+								{ "speaker": "老桑", "text": "切。我就在這等，隨時奉陪。" }
 							]
 						}
 					]
@@ -437,13 +437,13 @@
 			{
 				"if_flag": "chapter_done",
 				"pages": [
-					{ "speaker": "公告板", "text": "【尋】影子系統通緝——一個從未登記造冊的神祕 repo，沒人知道它跑在哪裡。目擊描述被雨水暈開，只看得清一雙不同顏色的眼睛。" }
+					{ "speaker": "公告板", "text": "【尋】影子系統——沒登記造冊的神祕 repo。目擊照被雨暈開，只看得清一雙不同顏色的眼睛。" }
 				]
 			},
 			{
 				"pages": [
-					{ "speaker": "公告板", "text": "【退役公告】Checkmarx・SonarQube・Mend 將分階段退役。三套工具守了多年，功成身退——防線交接給 GHAS。" },
-					{ "speaker": "公告板", "text": "【平台公告】GHAS 已開放各部門申請試點：Secret Protection・Code Security・Code Quality。洽 A00A 導入前哨站。" }
+					{ "speaker": "公告板", "text": "【退役公告】Checkmarx・SonarQube・Mend 分階段退役。功成身退——防線交給 GHAS。" },
+					{ "speaker": "公告板", "text": "【平台公告】GHAS 開放試點：Secret Protection・Code Security・Code Quality。洽 A00A 前哨站。" }
 				]
 			}
 		]
